@@ -23,6 +23,8 @@ import {
   getPublicKeyFromSecret,
   parseTransactionHash,
   buildTransactionLink,
+  diagnoseAccount,
+  type AccountDiagnostic,
 } from "@anchorkit/stellar-kit";
 import type {
   StellarKeypair,
@@ -45,6 +47,8 @@ export default function AccountsPage() {
 
   const [lastGen, setLastGen] = useState<LastGen | null>(null);
 
+  const [lookupDiag, setLookupDiag] = useState<AccountDiagnostic | null>(null);
+
   const [txHashInput, setTxHashInput] = useState("");
   const txParse = txHashInput.trim() ? parseTransactionHash(txHashInput.trim(), "testnet") : null;
 
@@ -59,16 +63,19 @@ export default function AccountsPage() {
     if (!isPublicKeyValid(lookupKey)) {
       setLookupInfo(null);
       setLookupStatus("unknown");
+      setLookupDiag(null);
       return;
     }
     setLookupLoading(true);
     try {
-      const info = await loadAccount(lookupKey, { networkConfig: undefined });
-      setLookupInfo(info);
-      setLookupStatus(info.status);
+      const diag = await diagnoseAccount(lookupKey, { network: "testnet" });
+      setLookupDiag(diag);
+      setLookupInfo(diag.account);
+      setLookupStatus(diag.state === "invalid" ? "unknown" : (diag.state as AccountStatus));
     } catch {
       setLookupInfo(null);
       setLookupStatus("error");
+      setLookupDiag(null);
     } finally {
       setLookupLoading(false);
     }
@@ -331,6 +338,28 @@ export default function AccountsPage() {
               )}
               {lookupInfo.error && (
                 <DataRow label="Error" value={<span className="text-red-600 dark:text-red-400">{lookupInfo.error}</span>} />
+              )}
+              {lookupDiag && lookupDiag.reserve && (
+                <DataRow
+                  label="Reserve (min balance)"
+                  value={
+                    <span title={lookupDiag.reserve.explanation}>
+                      {lookupDiag.reserve.minimumBalanceXlm} XLM
+                    </span>
+                  }
+                />
+              )}
+              {lookupDiag?.state === "invalid" && (
+                <DataRow
+                  label="Diagnostic"
+                  value={<span className="text-red-600 dark:text-red-400">Invalid public key — cannot diagnose.</span>}
+                />
+              )}
+              {lookupDiag?.state === "unavailable" && (
+                <DataRow
+                  label="Diagnostic"
+                  value={<span className="text-amber-600 dark:text-amber-400">Account diagnostics unavailable (network error).</span>}
+                />
               )}
               <div className="flex flex-wrap gap-2 pt-2">
                 {expertUrl && (

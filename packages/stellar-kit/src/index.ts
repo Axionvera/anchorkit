@@ -8,4 +8,5 @@ export * from "./transactions";
 export * from "./escrowEvents";
 export * from "./logging";
 export * from "./explorer";
+export * from "./diagnostics";
 export type { StellarKeypair } from "@anchorkit/types";
