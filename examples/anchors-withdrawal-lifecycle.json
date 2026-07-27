@@ -10,7 +10,9 @@
     "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
     "externalTransactionId": "ACH-OUT-8812",
     "userActionRequired": true,
-    "message": "Confirm the destination bank account in the anchor portal."
+    "message": "Confirm the destination bank account in the anchor portal.",
+    "startedAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z"
   },
   {
     "id": "with_step_2",
@@ -23,7 +25,9 @@
     "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
     "stellarTransactionId": "deadbeefcafebabedeadbeefcafebabedeadbeefcafebabedeadbeefcafebabe",
     "externalTransactionId": "ACH-OUT-8812",
-    "message": "User USDC locked; waiting for Stellar ledger confirmation before ACH send."
+    "message": "User USDC locked; waiting for Stellar ledger confirmation before ACH send.",
+    "startedAt": "2026-01-01T02:00:00Z",
+    "updatedAt": "2026-01-01T02:00:00Z"
   },
   {
     "id": "with_step_3",
@@ -36,7 +40,9 @@
     "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
     "stellarTransactionId": "deadbeefcafebabedeadbeefcafebabedeadbeefcafebabedeadbeefcafebabe",
     "externalTransactionId": "ACH-OUT-8812",
-    "message": "Anchor submitting ACH to partner bank."
+    "message": "Anchor submitting ACH to partner bank.",
+    "startedAt": "2026-01-01T04:00:00Z",
+    "updatedAt": "2026-01-01T04:00:00Z"
   },
   {
     "id": "with_step_4",
@@ -49,7 +55,10 @@
     "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
     "stellarTransactionId": "deadbeefcafebabedeadbeefcafebabedeadbeefcafebabedeadbeefcafebabe",
     "externalTransactionId": "ACH-OUT-8812",
-    "message": "External ACH transfer was rejected by the receiving bank."
+    "message": "External ACH transfer was rejected by the receiving bank.",
+    "startedAt": "2026-01-01T06:00:00Z",
+    "updatedAt": "2026-01-01T06:00:00Z",
+    "completedAt": "2026-01-01T06:00:00Z"
   },
   {
     "id": "with_step_5",
@@ -58,11 +67,14 @@
     "assetCode": "USDC",
     "amountIn": "250.75",
     "amountOut": "250.75",
-    "feeAmount": "0.00",
+    "feeAmount": "2.00",
     "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
     "stellarTransactionId": "cafebabedeadbeefcafebabedeadbeefcafebabedeadbeefcafebabedeadbeef",
     "externalTransactionId": "ACH-OUT-8812",
     "refunded": true,
-    "message": "USDC has been refunded to the originating Stellar account, including the anchor fee."
+    "message": "USDC has been refunded to the originating Stellar account, including the anchor fee.",
+    "startedAt": "2026-01-01T08:00:00Z",
+    "updatedAt": "2026-01-01T08:00:00Z",
+    "completedAt": "2026-01-01T08:00:00Z"
   }
 ]

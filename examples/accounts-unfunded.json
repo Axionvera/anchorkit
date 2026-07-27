@@ -7,14 +7,14 @@
   },
   {
     "description": "Second unfunded demo account used for payment destination tests.",
-    "publicKey": "GBMPZIE564A3X2Z56M47T5T4U7U4Y3V2M5L5W6Z5H4E3R2I3T5B2FZS",
+    "publicKey": "GAAEOTAZHHSUFTB4E5XM56WQH2SHPDLOXEM3G57QRD453EF2FKY33JXE",
     "status": "unfunded",
-    "friendbotUrl": "https://horizon-testnet.stellar.org/friendbot?addr=GBMPZIE564A3X2Z56M47T5T4U7U4Y3V2M5L5W6Z5H4E3R2I3T5B2FZS"
+    "friendbotUrl": "https://horizon-testnet.stellar.org/friendbot?addr=GAAEOTAZHHSUFTB4E5XM56WQH2SHPDLOXEM3G57QRD453EF2FKY33JXE"
   },
   {
     "description": "Unfunded account used for anchor-utils withdrawal demos.",
-    "publicKey": "GCYK7H7J7I6Y5G5F6D4V5K3G4H6T8R4Q3F5M2J1N5Z7Y2W5E6B3R4Z8L",
+    "publicKey": "GCUWNYFZVZ4JQMWULZ5ZAO5YHVTTZKRSB7FJKWEFC4KTNGVGNWQS5HTP",
     "status": "unfunded",
-    "friendbotUrl": "https://horizon-testnet.stellar.org/friendbot?addr=GCYK7H7J7I6Y5G5F6D4V5K3G4H6T8R4Q3F5M2J1N5Z7Y2W5E6B3R4Z8L"
+    "friendbotUrl": "https://horizon-testnet.stellar.org/friendbot?addr=GCUWNYFZVZ4JQMWULZ5ZAO5YHVTTZKRSB7FJKWEFC4KTNGVGNWQS5HTP"
   }
 ]

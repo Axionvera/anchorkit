@@ -18,6 +18,7 @@
     "test:watch": "turbo run test:watch",
     "format": "prettier --write \"**/*.{ts,tsx,md,json,rs}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json,rs}\"",
+    "check:examples": "tsx scripts/check-examples.mts",
     "clean": "turbo run clean && rm -rf node_modules && rm -rf .turbo",
     "contract:test": "cd contracts/treasury-escrow && cargo test",
     "contract:build": "cd contracts/treasury-escrow && cargo build --target wasm32-unknown-unknown --release",
