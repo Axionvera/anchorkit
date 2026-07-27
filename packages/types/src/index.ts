@@ -271,3 +271,6 @@ export interface StellarKitError extends Error {
   cause?: unknown;
   redacted: true;
 }
+
+// ─── Escrow events ──────────────────────────────────────────────────────────
+export * from "./escrowEvents";
