@@ -25,7 +25,9 @@ import {
   parseWithdrawalRequestMetadata,
   sampleDepositRequest,
   sampleWithdrawalRequest,
+  validateAnchorRequest,
 } from "@anchorkit/anchor-utils";
+import { validateCallbackUrl } from "@anchorkit/validators";
 import type {
   AnchorAssetConfig,
   AnchorTransactionKind,
@@ -360,7 +362,69 @@ export default function AnchorsPage() {
           </ol>
         </Card>
       </div>
+
+      <Card>
+        <h2 className="text-base font-semibold tracking-tight">Validation engine</h2>
+        <p className="mb-3 text-sm text-ink-500">
+          The shared anchor validation engine (<span className="text-mono-xs">
+            @anchorkit/validators
+          </span>) returns a uniform typed <span className="text-mono-xs">ValidationResult</span>{" "}
+          with user-safe errors, instead of raw schema output.
+        </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div>
+            <Label>Deposit amount</Label>
+            <Input value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
+          </div>
+          <div>
+            <Label>Withdrawal destination</Label>
+            <Input value={withdrawDest} onChange={(e) => setWithdrawDest(e.target.value)} />
+          </div>
+        </div>
+        <div className="mt-4 space-y-2">
+          <ValidationPanel
+            title="Deposit (engine)"
+            result={validateAnchorRequest("deposit", depositDraft)}
+          />
+          <ValidationPanel
+            title="Withdrawal (engine)"
+            result={validateAnchorRequest("withdrawal", withdrawDraft)}
+          />
+          <ValidationPanel
+            title="Callback URL (engine)"
+            result={validateCallbackUrl(cbUrl)}
+          />
+        </div>
+      </Card>
     </PageShell>
+  );
+}
+
+function ValidationPanel({
+  title,
+  result,
+}: {
+  title: string;
+  result: { ok: boolean; errors?: { code: string; message: string; field?: string }[] };
+}) {
+  if (result.ok) {
+    return (
+      <Alert tone="success" title={title}>
+        Validation passed.
+      </Alert>
+    );
+  }
+  return (
+    <Alert tone="error" title={`${title} — ${result.errors?.length ?? 0} issue(s)`}>
+      <ul className="list-disc pl-4">
+        {result.errors?.map((e, i) => (
+          <li key={i}>
+            <span className="text-mono-xs">[{e.code}]</span> {e.message}
+            {e.field ? ` (${e.field})` : ""}
+          </li>
+        ))}
+      </ul>
+    </Alert>
   );
 }
 

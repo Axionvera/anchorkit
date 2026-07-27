@@ -230,3 +230,37 @@ export function advanceAnchorTransactionStatus(
 }
 
 export * from "./fixtures";
+
+// ─── Validation engine re-export (issue #6) ─────────────────────────────────
+// Note: validateAnchorAssetConfig / validateCallbackUrl already exist in this
+// package (raw Zod safeparse); the engine versions are available via
+// @anchorkit/validators. We re-export the non-colliding engine helpers.
+export {
+  validateDepositRequest,
+  validateWithdrawalRequest,
+  validateAmount,
+  firstErrorMessage,
+} from "@anchorkit/validators";
+export type {
+  ValidationResult,
+  ValidationError,
+  AnchorValidationErrorCode,
+} from "@anchorkit/validators";
+
+import {
+  validateDepositRequest,
+  validateWithdrawalRequest,
+} from "@anchorkit/validators";
+
+/**
+ * Validate an anchor request by kind, returning a uniform `ValidationResult`.
+ * Convenience wrapper so callers don't branch on kind before validating.
+ */
+export function validateAnchorRequest(
+  kind: AnchorTransactionKind,
+  input: unknown,
+) {
+  return kind === "deposit"
+    ? validateDepositRequest(input)
+    : validateWithdrawalRequest(input);
+}

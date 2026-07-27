@@ -314,3 +314,6 @@ export const CallbackUrlSchema = z.string().url().superRefine((val, ctx) => {
 });
 
 export { z };
+
+// ─── Validation engine (issue #6) ───────────────────────────────────────────
+export * from "./validationEngine";
