@@ -21,6 +21,8 @@ import {
   loadAccount,
   getAccountStatus,
   getPublicKeyFromSecret,
+  parseTransactionHash,
+  buildTransactionLink,
 } from "@anchorkit/stellar-kit";
 import type {
   StellarKeypair,
@@ -42,6 +44,9 @@ export default function AccountsPage() {
   const [validateMode, setValidateMode] = useState<"public" | "secret">("public");
 
   const [lastGen, setLastGen] = useState<LastGen | null>(null);
+
+  const [txHashInput, setTxHashInput] = useState("");
+  const txParse = txHashInput.trim() ? parseTransactionHash(txHashInput.trim(), "testnet") : null;
 
   const expertUrl = isPublicKeyValid(lookupKey)
     ? getStellarExpertAccountUrl(lookupKey, "testnet")
@@ -351,6 +356,34 @@ export default function AccountsPage() {
               </div>
             </dl>
           </div>
+        )}
+      </Card>
+
+      <Card>
+        <h2 className="text-base font-semibold tracking-tight">Transaction lookup</h2>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">
+          Paste a transaction hash to build a Stellar Expert link. Invalid hashes are
+          rejected locally — no explorer URL is hardcoded.
+        </p>
+        <Input
+          className="mt-3"
+          placeholder="Transaction hash (64-char hex)"
+          value={txHashInput}
+          onChange={(e) => setTxHashInput(e.target.value)}
+          aria-label="Transaction hash"
+        />
+        {txHashInput.trim() && !txParse && (
+          <p className="mt-2 text-sm text-red-600">Enter a valid 64-character hex transaction hash.</p>
+        )}
+        {txParse && txParse.ok && (
+          <a
+            href={buildTransactionLink(txParse.value.hash, "testnet")}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-block rounded-md border border-ink-300 px-3 py-1.5 text-sm dark:border-ink-700"
+          >
+            Open transaction on Stellar Expert ↗
+          </a>
         )}
       </Card>
     </PageShell>
