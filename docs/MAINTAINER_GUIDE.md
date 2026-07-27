@@ -39,6 +39,11 @@ for transparency with GrantFox reviewers.
    reviewer. Maintainers flag issues that fully meet scope + quality with a short note at the
    end of the merge commit body.
 
+## Automation
+
+For issue creation, label sync, auto-merge, and batch recovery workflows, see
+[AUTOMATION_RUNBOOK.md](./AUTOMATION_RUNBOOK.md).
+
 ## Releases
 
 - Use semver for packages (`0.x` MVP stage).
