@@ -1,59 +1,824 @@
-# Architecture
+# AnchorKit Architecture Boundary Map
 
-## Guiding choices
+This document is the architecture reference for the AnchorKit monorepo.
 
-AnchorKit is intentionally small and modular. The TypeScript packages are pure libraries where
-possible (no runtime singletons, no DB, no secrets). They lean on Zod for validation and
-`@stellar/stellar-sdk` for keypair generation and Horizon interactions. The web app is a thin
-UI on top of those packages.
+It explains:
 
-## Package boundaries
+- which directory owns each responsibility;
+- how packages may depend on one another;
+- where new features should be implemented;
+- which boundaries are security-sensitive;
+- how the web app, TypeScript packages, examples, and Soroban contract integrate.
 
-| Package | Responsibilities | Dependencies inside the repo |
-| --- | --- | --- |
-| `@anchorkit/types` | Branded types: `StellarPublicKey`, `AnchorTransactionStatus`, `Milestone`, … | None |
-| `@anchorkit/config` | Testnet/mainnet Horizon URLs, passphrases, env defaults, mainnet gating. | `types` |
-| `@anchorkit/validators` | Zod schemas for all public API shapes. | `types`, `config` |
-| `@anchorkit/stellar-kit` | Keypair handling, account lookup, asset parsing, payment intents, memo validation, tx hash parsing, expert links, error mapping. | `types`, `config`, `validators` |
-| `@anchorkit/anchor-utils` | Deposit/withdrawal metadata parsing, anchor status-to-message mapping, callback URL validation, mock lifecycle fixtures. | `types`, `config`, `validators`, `stellar-kit` |
-| `@anchorkit/web` | Next.js dashboard pages. | all above packages |
+Contributors should review this document before implementing changes that affect more than one package.
 
-Rule of thumb: if a module only needs types, put it in `validators` or `config`; if it needs
-Horizon calls, live keypair generation, or event mapping, put it in `stellar-kit`; if it is
-about anchor metadata and fixtures that don’t call Horizon, put it in `anchor-utils`.
+## 1. Architecture principles
 
-## Soroban contract
+AnchorKit follows these principles:
 
-`contracts/treasury-escrow` uses `soroban-sdk = "21.x"` and targets `wasm32-unknown-unknown`.
-It is a **standalone crate** exposed to the monorepo via a shim `package.json` so Turborepo can
-run `cargo test`/`cargo build` as workspace tasks.
+1. **Each responsibility has one clear owner.**
+2. **Dependencies flow from higher-level consumers toward lower-level foundations.**
+3. **Untrusted data is validated before domain or network logic uses it.**
+4. **Shared logic belongs in packages, not in web pages.**
+5. **Consumers import packages through their public entry points.**
+6. **The Soroban contract is an independent execution and security boundary.**
+7. **Examples are executable documentation, not production runtime data.**
+8. **Secret handling, network selection, callbacks, transactions, and escrow release logic require security review.**
 
-Contract responsibilities are strictly limited to treasury escrow lifecycle: milestones,
-evidence, approval, dispute, ready-for-release, release. Transfer of Stellar assets to/from
-the escrow contract address is intentionally out of scope for the MVP.
+## 2. Repository boundary map
 
-## Data model notes
-
-- All public key / secret key / transaction hash strings are **branded** in TypeScript via
-  `Zod.brand`. This catches mixing them up at the type level.
-- Amounts are strings throughout (not `number` / `bigint`) to match how Stellar Horizon and
-  the classic SEP APIs usually serialise them.
-- Anchor transaction records are plain objects with ISO8601 strings — suitable for persisting
-  to JSON, Postgres JSONB, or a SEP transaction table later.
-
-## Dependency direction
-
+```text
+AnchorKit/
+├── apps/
+│   └── web/
+│       ├── app/                         Next.js routes and feature pages
+│       ├── components/                  Shared web presentation components
+│       └── lib/                         Web-only adapters and sample display data
+│
+├── packages/
+│   ├── types/                           Shared TypeScript contracts
+│   ├── config/                          Network and environment configuration
+│   ├── validators/                      Runtime validation schemas
+│   ├── stellar-kit/                     Stellar network and transaction utilities
+│   └── anchor-utils/                    Anchor lifecycle and metadata utilities
+│
+├── contracts/
+│   └── treasury-escrow/
+│       └── src/                         Soroban contract and Rust tests
+│
+├── examples/
+│   ├── registry.ts                      Fixture-to-schema registry
+│   └── *.json                           Valid and invalid example payloads
+│
+├── scripts/                             Repository automation
+├── docs/                                Architecture and feature documentation
+├── package.json                         Root scripts and workspace orchestration
+├── pnpm-workspace.yaml                  Workspace membership
+├── turbo.json                           Task dependency configuration
+└── tsconfig.base.json                   Shared TypeScript configuration
 ```
-web → anchor-utils → stellar-kit → validators → config → types
-                             ↘                  ↗
-                               (validators uses types+config)
+
+## 3. Dependency direction
+
+The intended dependency direction is:
+
+```text
+apps/web
+   │
+   ├──▶ anchor-utils
+   ├──▶ stellar-kit
+   ├──▶ validators
+   ├──▶ config
+   └──▶ types
+
+anchor-utils
+   ├──▶ stellar-kit, when Stellar-specific behaviour is required
+   ├──▶ validators
+   ├──▶ config
+   └──▶ types
+
+stellar-kit
+   ├──▶ validators
+   ├──▶ config
+   └──▶ types
+
+validators
+   ├──▶ config, when validation depends on supported environment settings
+   └──▶ types
+
+config
+   └──▶ types
+
+types
+   └──▶ no internal AnchorKit package
 ```
 
-No package should ever depend on `web`. Keep `stellar-kit` side-effect free except for
-outbound Horizon fetches.
+The dependency graph must not point upward.
 
-## Caching and Turborepo
+For example:
 
-Turborepo caches `build`, `lint`, `typecheck`, and `test` outputs. Tests are not cached by
-default (`cache: false`) to avoid staleness when fixtures or contract behaviour changes. If
-you add expensive contract compilation steps, cache them in `turbo.json` carefully.
+- `stellar-kit` must not import `anchor-utils`;
+- `validators` must not import `stellar-kit`;
+- `types` must not import any other AnchorKit package;
+- no reusable package may import from `apps/web`.
+
+A module should depend only on the lowest-level packages it actually needs.
+
+## 4. Responsibility matrix
+
+| Area                        | Primary responsibility                                                                                          | Permitted internal dependencies                              |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `packages/types`            | Shared contracts, branded types, enums, result shapes, and event models                                         | None                                                         |
+| `packages/config`           | Network presets, endpoints, environment defaults, and mainnet gating                                            | `types`                                                      |
+| `packages/validators`       | Zod schemas, runtime validation, and safe validation errors                                                     | `types`, selected `config` values                            |
+| `packages/stellar-kit`      | Stellar keys, accounts, assets, payments, transactions, diagnostics, logging, explorer links, and event parsing | `types`, `config`, `validators`                              |
+| `packages/anchor-utils`     | Anchor requests, lifecycle transitions, status messages, badges, and fixtures                                   | `types`, `validators`, `config`, `stellar-kit` when required |
+| `apps/web`                  | Routes, forms, React state, page composition, and rendering                                                     | All public packages                                          |
+| `examples`                  | Supported and intentionally invalid sample payloads                                                             | Public schemas through tests and scripts                     |
+| `contracts/treasury-escrow` | On-chain escrow state and authorisation                                                                         | Soroban Rust dependencies                                    |
+| `scripts`                   | Repository checks and automation                                                                                | Public packages where appropriate                            |
+| `docs`                      | Architecture, security, usage, and contributor guidance                                                         | Repository source as reference                               |
+
+## 5. Package boundaries
+
+### 5.1 `@anchorkit/types`
+
+`packages/types` is the foundation of the TypeScript architecture.
+
+It owns shared definitions such as:
+
+- Stellar public and secret keys;
+- transaction hashes;
+- network names and configuration shapes;
+- native and issued assets;
+- payment intents;
+- account status and diagnostics;
+- anchor request metadata;
+- anchor transaction records and statuses;
+- milestone and escrow-event models;
+- shared error and result shapes.
+
+It must not contain:
+
+- network calls;
+- Zod parsing;
+- environment-variable reads;
+- React components;
+- browser storage;
+- UI messages;
+- anchor or Stellar runtime workflows.
+
+Correct:
+
+```typescript
+import type { PaymentIntent, StellarAsset, StellarPublicKey } from "@anchorkit/types";
+```
+
+Incorrect:
+
+```typescript
+import type { PaymentIntent } from "@anchorkit/types/src/index";
+```
+
+Consumers must not import private package source paths.
+
+### 5.2 `@anchorkit/config`
+
+`packages/config` owns shared network and environment configuration.
+
+It includes:
+
+- default network selection;
+- Horizon endpoints;
+- network passphrases;
+- environment-derived defaults;
+- testnet-first behaviour;
+- explicit mainnet permission;
+- network configuration lookup.
+
+It may depend on `types`.
+
+It must not perform:
+
+- Horizon requests;
+- transaction construction;
+- callback processing;
+- React rendering;
+- anchor lifecycle transitions.
+
+Changes affecting the following require security review:
+
+- mainnet enablement;
+- default network;
+- Horizon or Soroban endpoints;
+- network passphrases;
+- environment fallbacks;
+- configuration error behaviour.
+
+### 5.3 `@anchorkit/validators`
+
+`packages/validators` owns runtime validation of untrusted input.
+
+It includes schemas and validation helpers for:
+
+- Stellar public keys;
+- Stellar secret keys;
+- transaction hashes;
+- assets;
+- amounts;
+- memos;
+- payment intents;
+- anchor deposit metadata;
+- anchor withdrawal metadata;
+- callback URLs;
+- anchor asset configuration;
+- milestones and event payloads.
+
+Validators should:
+
+- accept untrusted values as `unknown`;
+- return deterministic results;
+- avoid network calls;
+- avoid leaking secret values in errors;
+- produce user-safe validation messages;
+- validate before third-party libraries receive data.
+
+Example:
+
+```typescript
+import { validateDepositRequest } from "@anchorkit/validators";
+
+const validation = validateDepositRequest(input);
+
+if (!validation.ok) {
+  return validation.errors;
+}
+
+const metadata = validation.value;
+```
+
+Validators must not depend on:
+
+- `stellar-kit`;
+- `anchor-utils`;
+- `apps/web`.
+
+### 5.4 `@anchorkit/stellar-kit`
+
+`packages/stellar-kit` owns reusable Stellar-specific runtime behaviour.
+
+| Module            | Responsibility                                     |
+| ----------------- | -------------------------------------------------- |
+| `accounts.ts`     | Account loading and funded-status mapping          |
+| `assets.ts`       | Native and issued-asset handling                   |
+| `diagnostics.ts`  | Account diagnostics                                |
+| `errors.ts`       | Typed Stellar errors                               |
+| `escrowEvents.ts` | Soroban escrow-event parsing                       |
+| `explorer.ts`     | Stellar Expert and Horizon links                   |
+| `intent.ts`       | Payment-intent construction and readiness          |
+| `keys.ts`         | Key generation, validation support, and derivation |
+| `logging.ts`      | Secret redaction and safe log values               |
+| `payments.ts`     | Amount and memo utilities                          |
+| `transactions.ts` | Transaction-hash and transaction utilities         |
+| `index.ts`        | Public package exports                             |
+
+It may depend on:
+
+- `types`;
+- `config`;
+- `validators`;
+- Stellar SDK dependencies.
+
+It must not depend on:
+
+- `anchor-utils`;
+- `apps/web`;
+- React components;
+- example fixtures as production data.
+
+Network behaviour should be explicit. A function that queries Horizon or another service should make that side effect clear through its name, parameters, documentation, and return type.
+
+Correct:
+
+```typescript
+import { buildPaymentIntent, checkTransactionReadiness } from "@anchorkit/stellar-kit";
+```
+
+Incorrect:
+
+```typescript
+import { buildPaymentIntent } from "../../packages/stellar-kit/src/intent";
+```
+
+### 5.5 `@anchorkit/anchor-utils`
+
+`packages/anchor-utils` owns anchor-specific domain behaviour.
+
+It includes:
+
+- deposit request parsing;
+- withdrawal request parsing;
+- anchor request validation;
+- anchor asset configuration helpers;
+- payment-rail configuration helpers;
+- callback URL helpers;
+- lifecycle transitions;
+- status-to-message mapping;
+- badge metadata;
+- mock anchor transaction records;
+- anchor lifecycle fixtures.
+
+It should depend mainly on `types` and `validators`.
+
+A dependency on `stellar-kit` is appropriate only where anchor functionality genuinely needs Stellar-specific behaviour, such as:
+
+- interpreting a Stellar transaction;
+- generating an explorer link;
+- handling a shared Stellar error;
+- consuming a parsed contract event.
+
+It must not contain:
+
+- React components;
+- Next.js routing;
+- browser storage;
+- page-level state;
+- duplicated generic Stellar utilities.
+
+Correct:
+
+```typescript
+import {
+  anchorStatusBadge,
+  anchorStatusToUserMessage,
+  validateAnchorRequest,
+} from "@anchorkit/anchor-utils";
+```
+
+The package should return plain data. The web app decides how to render it.
+
+## 6. Web application boundary
+
+`apps/web` is the presentation and composition layer.
+
+It owns:
+
+- routes;
+- forms;
+- React state;
+- page-level event handlers;
+- navigation;
+- Tailwind styling;
+- browser-only behaviour;
+- rendering package results;
+- testnet warnings;
+- developer-facing demonstrations.
+
+### Route responsibilities
+
+| Route        | Responsibility                                              | Main packages                         |
+| ------------ | ----------------------------------------------------------- | ------------------------------------- |
+| `/`          | Landing page and module navigation                          | Presentation only                     |
+| `/dashboard` | Toolkit overview                                            | Presentation only                     |
+| `/accounts`  | Key generation, key validation, account lookup, diagnostics | `stellar-kit`, `types`                |
+| `/payments`  | Payment-intent creation and readiness display               | `stellar-kit`, `config`, `types`      |
+| `/anchors`   | Anchor requests and lifecycle demonstration                 | `anchor-utils`, `validators`, `types` |
+| `/escrow`    | Escrow-event parsing and milestone display                  | `stellar-kit`, `types`                |
+| `/docs`      | Documentation index                                         | Documentation links                   |
+
+### Thin web rule
+
+Keep these concerns in `apps/web`:
+
+- JSX;
+- React state;
+- Tailwind classes;
+- click handlers;
+- form controls;
+- page routing;
+- browser-only APIs.
+
+Move these concerns into packages when reusable:
+
+- validation;
+- lifecycle transitions;
+- Stellar parsing;
+- network configuration;
+- error mapping;
+- shared types;
+- deterministic transformations.
+
+No package may depend on `apps/web`.
+
+## 7. Examples boundary
+
+The `examples` directory is executable documentation.
+
+It contains examples of:
+
+- valid payment intents;
+- invalid payment intents;
+- native XLM assets;
+- issued assets;
+- funded accounts;
+- unfunded accounts;
+- anchor deposit lifecycles;
+- anchor withdrawal lifecycles;
+- escrow milestones;
+- escrow events.
+
+`examples/registry.ts` maps fixtures to the schemas they must satisfy.
+
+```text
+JSON fixture
+   ↓
+examples/registry.ts
+   ↓
+scripts/check-examples.mts or Vitest
+   ↓
+@anchorkit/validators
+   ↓
+pass or expected failure
+```
+
+Examples must:
+
+- use synthetic or public testnet data;
+- contain no real secret keys;
+- match public schemas;
+- identify intentionally invalid payloads;
+- be registered when included in automated validation.
+
+Production packages must not use example fixtures as runtime configuration or business logic.
+
+## 8. Soroban contract boundary
+
+`contracts/treasury-escrow` is an independent Rust and Soroban execution boundary.
+
+It owns:
+
+- contract initialisation;
+- administrator authorisation;
+- milestone creation;
+- amount assignment;
+- evidence-hash submission;
+- approval;
+- disputes;
+- ready-for-release transitions;
+- release transitions;
+- duplicate-release prevention;
+- milestone reads;
+- summary reads;
+- Soroban event publication.
+
+The contract does not import TypeScript packages.
+
+TypeScript packages do not import Rust source files.
+
+Integration occurs through:
+
+1. deployed contract calls;
+2. encoded Soroban arguments and results;
+3. emitted contract events;
+4. matching conceptual types in `@anchorkit/types`;
+5. event parsing in `@anchorkit/stellar-kit`.
+
+```text
+External caller
+   ↓
+Soroban treasury-escrow contract
+   ↓
+contract state transition and event
+   ↓
+stellar-kit escrow-event parser
+   ↓
+typed event from @anchorkit/types
+   ↓
+apps/web escrow page
+```
+
+The web app must not independently reproduce raw Soroban event parsing.
+
+### Contract limitations
+
+The current contract:
+
+- uses a single administrator;
+- does not provide complete role-based access control;
+- records release as a milestone state transition;
+- does not implement full treasury custody;
+- does not include complete dispute resolution;
+- represents amounts as raw integers.
+
+Higher layers must not hide or misrepresent these limitations.
+
+## 9. Security-sensitive areas
+
+| Area                          | Main risk                                     | Required control                                 |
+| ----------------------------- | --------------------------------------------- | ------------------------------------------------ |
+| `stellar-kit/keys.ts`         | Secret-key exposure                           | Validate structurally; never log or persist      |
+| `stellar-kit/logging.ts`      | Secrets in logs and errors                    | Redact before logging                            |
+| `stellar-kit/payments.ts`     | Invalid amounts or memos                      | Validate format and limits                       |
+| `stellar-kit/intent.ts`       | Incorrect network or readiness assumptions    | Explicit network and typed readiness             |
+| `stellar-kit/transactions.ts` | Invalid hashes or misleading status           | Validate and return typed results                |
+| `stellar-kit/accounts.ts`     | Unsafe network calls                          | Use approved configuration and safe errors       |
+| `stellar-kit/escrowEvents.ts` | Untrusted contract events                     | Validate version and payload                     |
+| `validators`                  | Untrusted input                               | Validate before domain or network use            |
+| `config`                      | Accidental mainnet access                     | Testnet-first defaults and explicit override     |
+| `anchor-utils`                | Unsafe callbacks or invalid lifecycle changes | URL validation and deterministic transitions     |
+| `apps/web/accounts`           | Browser-visible secrets                       | One-time display, password inputs, and redaction |
+| `apps/web/payments`           | Confusing readiness with submission           | Clearly distinguish preparation from broadcast   |
+| `apps/web/anchors`            | Untrusted callback and action URLs            | Validate before navigation                       |
+| `treasury-escrow`             | Unauthorised or premature release             | Authentication and transition checks             |
+| `examples`                    | Credential leakage                            | Synthetic or public testnet values only          |
+
+Also review:
+
+- [Security Notes](./SECURITY_NOTES.md)
+- [Secret Key Handling](./SECRET_KEY_HANDLING.md)
+- [Maintainer Review Checklist](./MAINTAINER_REVIEW_CHECKLIST.md)
+- [Security Policy](../SECURITY.md)
+
+## 10. Feature flows
+
+### 10.1 Account diagnostics
+
+```text
+Web account form
+   ↓
+public-key validation
+   ↓
+stellar-kit account utility
+   ↓
+config network preset
+   ↓
+Stellar Horizon
+   ↓
+typed account result
+   ↓
+web account display
+```
+
+Responsibilities:
+
+- the web app collects input;
+- `validators` establishes that the key is structurally valid;
+- `config` supplies the network;
+- `stellar-kit` performs the request and maps the result;
+- `types` defines the shared output.
+
+### 10.2 Payment intent and readiness
+
+```text
+Payments form
+   ↓
+validators
+   ↓
+stellar-kit payment-intent builder
+   ↓
+config network setting
+   ↓
+typed readiness result
+   ↓
+web readiness display
+```
+
+A readiness result is not proof that a transaction was submitted or confirmed.
+
+### 10.3 Anchor request lifecycle
+
+```text
+Anchor form
+   ↓
+anchor-utils request wrapper
+   ↓
+validators
+   ↓
+typed anchor request
+   ↓
+anchor-utils lifecycle transition
+   ↓
+status message and badge data
+   ↓
+web rendering
+```
+
+Lifecycle rules belong in `anchor-utils`, not in React components.
+
+### 10.4 Escrow event flow
+
+```text
+Soroban contract event
+   ↓
+raw event payload
+   ↓
+stellar-kit escrow-event parser
+   ↓
+types event model
+   ↓
+deterministic summary
+   ↓
+web escrow page
+```
+
+### 10.5 Example validation
+
+```text
+examples/*.json
+   ↓
+examples/registry.ts
+   ↓
+check-examples script or test
+   ↓
+validators schema
+   ↓
+validation result
+```
+
+## 11. Correct cross-package integration
+
+### 11.1 Validate a payment intent
+
+```typescript
+import { DEFAULT_NETWORK } from "@anchorkit/config";
+import { PaymentIntentSchema } from "@anchorkit/validators";
+import { buildPaymentIntent } from "@anchorkit/stellar-kit";
+
+const parsed = PaymentIntentSchema.safeParse({
+  destination,
+  amount,
+  asset,
+  network: DEFAULT_NETWORK,
+});
+
+if (!parsed.success) {
+  return {
+    ok: false,
+    errors: parsed.error.issues,
+  };
+}
+
+const intent = buildPaymentIntent(parsed.data);
+```
+
+Ownership:
+
+- `config` supplies the network;
+- `validators` validates the input;
+- `stellar-kit` owns Stellar-domain composition;
+- the web app decides how errors are displayed.
+
+### 11.2 Render an anchor status
+
+```typescript
+import { anchorStatusBadge, anchorStatusToUserMessage } from "@anchorkit/anchor-utils";
+
+const message = anchorStatusToUserMessage(transaction.status, transaction.kind);
+
+const badge = anchorStatusBadge(transaction.status);
+```
+
+`anchor-utils` returns plain data. The web application renders that data.
+
+### 11.3 Parse escrow events
+
+```typescript
+import { parseEscrowEvents } from "@anchorkit/stellar-kit";
+import type { RawEscrowEvent } from "@anchorkit/types";
+
+const events = parseEscrowEvents(rawEvents as RawEscrowEvent[]);
+```
+
+The parsing logic belongs in `stellar-kit`, not in a web page.
+
+### 11.4 Use shared types without runtime coupling
+
+```typescript
+import type { AnchorTransactionRecord, Milestone } from "@anchorkit/types";
+
+interface EscrowViewModel {
+  transaction: AnchorTransactionRecord;
+  milestones: Milestone[];
+}
+```
+
+Use `import type` for type-only dependencies.
+
+## 12. Prohibited integration
+
+The following dependency directions are prohibited:
+
+```text
+types → config, validators, stellar-kit, anchor-utils, or web
+config → validators, stellar-kit, anchor-utils, or web
+validators → stellar-kit, anchor-utils, or web
+stellar-kit → anchor-utils or web
+anchor-utils → web
+packages → apps/web
+TypeScript packages → Rust source files
+production packages → examples fixtures
+```
+
+Also prohibited:
+
+- deep imports into another package’s `src` directory;
+- duplicating shared public types;
+- Horizon calls inside validators;
+- environment reads inside `types`;
+- lifecycle rules implemented only in React pages;
+- React components inside reusable packages;
+- storing secret keys in local storage, cookies, or IndexedDB;
+- placing secret keys in URLs, logs, or error messages;
+- treating sample transactions as confirmed network state.
+
+## 13. Public API rules
+
+Consumers must import from package roots.
+
+Supported:
+
+```typescript
+import type { PaymentIntent } from "@anchorkit/types";
+import { DEFAULT_NETWORK } from "@anchorkit/config";
+import { PaymentIntentSchema } from "@anchorkit/validators";
+import { buildPaymentIntent } from "@anchorkit/stellar-kit";
+import { validateAnchorRequest } from "@anchorkit/anchor-utils";
+```
+
+Unsupported:
+
+```typescript
+import { buildPaymentIntent } from "@anchorkit/stellar-kit/src/intent";
+import { PaymentIntentSchema } from "../../packages/validators/src";
+```
+
+New public APIs must be exported from the owning package’s `src/index.ts`.
+
+## 14. Adding a new feature
+
+Choose the owner using this guide.
+
+| Change                                                      | Correct owner               |
+| ----------------------------------------------------------- | --------------------------- |
+| Shared public type or event model                           | `types`                     |
+| Network endpoint or environment default                     | `config`                    |
+| Runtime schema or validation result                         | `validators`                |
+| Account, asset, payment, key, transaction, or event utility | `stellar-kit`               |
+| Anchor request, lifecycle, or status behaviour              | `anchor-utils`              |
+| React page, component, or browser state                     | `apps/web`                  |
+| On-chain escrow rule                                        | `contracts/treasury-escrow` |
+| Supported example payload                                   | `examples`                  |
+| Contributor or consumer guidance                            | `docs`                      |
+
+For a multi-layer feature, implement from the foundation upward:
+
+```text
+types
+   ↓
+config or validators
+   ↓
+stellar-kit or anchor-utils
+   ↓
+apps/web
+   ↓
+examples and documentation
+```
+
+Before adding an import:
+
+1. identify the owning package;
+2. confirm the dependency points downward;
+3. avoid creating a cycle;
+4. use the package’s public entry point;
+5. add tests in the owning package;
+6. update examples and documentation when public behaviour changes.
+
+## 15. Architecture review checklist
+
+Before approving a change, confirm:
+
+- [ ] The feature has one clear owner.
+- [ ] Imports follow the permitted dependency direction.
+- [ ] No package depends on `apps/web`.
+- [ ] No private package source paths are imported.
+- [ ] Shared types are not duplicated.
+- [ ] Untrusted input is validated before use.
+- [ ] Network operations remain in a runtime package.
+- [ ] React and Next.js logic remain in `apps/web`.
+- [ ] Contract enforcement remains in the Rust contract.
+- [ ] Contract events are parsed through `stellar-kit`.
+- [ ] Examples are not used as production runtime state.
+- [ ] Security-sensitive changes follow the security documentation.
+- [ ] Public APIs are exported through package roots.
+- [ ] Tests exist in the owning package or contract.
+- [ ] Documentation and examples are updated where needed.
+- [ ] No circular dependency is introduced.
+
+## 16. Architecture exceptions
+
+An exception to these boundaries requires:
+
+1. a clear technical reason;
+2. evidence that no circular dependency is introduced;
+3. maintainer approval;
+4. tests covering the new interaction;
+5. an update to this document.
+
+Convenience alone is not a sufficient reason to reverse dependency direction.
+
+## 17. Related documentation
+
+- [Project Overview](./PROJECT_OVERVIEW.md)
+- [Local Setup](./LOCAL_SETUP.md)
+- [Account Utilities](./ACCOUNT_UTILITIES.md)
+- [Payment Intent Utilities](./PAYMENT_INTENT_UTILITIES.md)
+- [Anchor Utilities](./ANCHOR_UTILITIES.md)
+- [Validation Engine](./validation-engine.md)
+- [Escrow Events](./escrow-events.md)
+- [Soroban Escrow Contract](./SOROBAN_ESCROW_CONTRACT.md)
+- [Examples](./examples.md)
+- [Security Notes](./SECURITY_NOTES.md)
+- [Secret Key Handling](./SECRET_KEY_HANDLING.md)
+- [Contributor Guide](./CONTRIBUTOR_GUIDE.md)
+- [Maintainer Guide](./MAINTAINER_GUIDE.md)
+- [Maintainer Review Checklist](./MAINTAINER_REVIEW_CHECKLIST.md)
