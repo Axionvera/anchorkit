@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Alert, Button, Card, DataRow, Input, Label, MilestoneStatusBadge } from "@/components/ui";
-import type { EscrowSummary, Milestone, MilestoneStatus } from "@anchorkit/types";
+import { parseEscrowEvents } from "@anchorkit/stellar-kit";
+import { escrowEventExample } from "@/lib/escrowEventExample";
+import type { EscrowEventV1, EscrowSummary, Milestone, MilestoneStatus } from "@anchorkit/types";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
 const LIFECYCLE: MilestoneStatus[] = [
@@ -26,6 +28,11 @@ export default function EscrowPage() {
   const [disputeReason, setDisputeReason] = useState("Evidence insufficient.");
 
   const now = new Date().toISOString();
+
+  const mappedEvents = useMemo(
+    () => parseEscrowEvents(escrowEventExample).events,
+    []
+  );
 
   const demoMilestone: Milestone = useMemo(() => {
     const status = LIFECYCLE[step] ?? "draft";
@@ -238,6 +245,70 @@ export default function EscrowPage() {
           </ul>
         </Card>
       </div>
+
+      <Card>
+        <h2 className="text-base font-semibold tracking-tight">
+          Mapped escrow events
+        </h2>
+        <p className="mb-3 text-sm text-ink-500">
+          Raw Soroban events from{" "}
+          <span className="text-mono-xs">examples/escrow-events-example.json</span>{" "}
+          decoded by <span className="text-mono-xs">parseEscrowEvents</span> from{" "}
+          <span className="text-mono-xs">@anchorkit/stellar-kit</span>. This is the
+          client-side bridge between contract emissions and the UI.
+        </p>
+        <EscrowEventLog events={mappedEvents} />
+      </Card>
     </PageShell>
+  );
+}
+
+function eventSummary(e: EscrowEventV1): string {
+  switch (e.type) {
+    case "milestone_created":
+      return `Milestone "${e.title}" created for ${e.amount} XLM`;
+    case "evidence_submitted":
+      return `Evidence submitted (${e.evidenceHash.slice(0, 10)}…)`;
+    case "approved":
+      return "Milestone approved";
+    case "disputed":
+      return `Disputed: ${e.disputeReason}`;
+    case "ready_for_release":
+      return `Marked ready for release (${e.amount} XLM)`;
+    case "released":
+      return `Released ${e.amount} XLM`;
+  }
+}
+
+function EscrowEventLog({ events }: { events: EscrowEventV1[] }) {
+  if (events.length === 0) {
+    return (
+      <div className="rounded-md border border-ink-200 p-3 text-sm text-ink-500 dark:border-ink-800">
+        No events parsed.
+      </div>
+    );
+  }
+  return (
+    <ol className="space-y-2">
+      {events.map((e, idx) => (
+        <li
+          key={`${e.type}-${e.milestoneId}-${idx}`}
+          className="rounded-md border border-ink-200 p-3 text-sm dark:border-ink-800"
+        >
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-stellar-700 dark:text-stellar-300">
+              {e.type.replaceAll("_", " ")}
+            </span>
+            <span className="text-mono-xs text-ink-500">milestone {e.milestoneId}</span>
+          </div>
+          <div className="mt-1 text-ink-600 dark:text-ink-300">
+            {eventSummary(e)}
+          </div>
+          <div className="mt-1 text-mono-xs text-ink-400">
+            {e.timestamp} · {e.caller.slice(0, 6)}… · contract {e.contractId.slice(0, 6)}…
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 }
