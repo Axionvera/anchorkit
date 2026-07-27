@@ -129,3 +129,38 @@ export function buildWithdrawalLifecycle(): AnchorTransactionRecord[] {
 
   return records;
 }
+
+// ─── Invalid fixtures (issue #6): used to exercise the validation engine ────
+
+/** Deposit metadata missing required `account` and with a non-positive amount. */
+export const invalidDepositRequest = {
+  assetCode: 'XLM',
+  amount: '0',
+  // account omitted
+  type: 'SEPA',
+} as unknown;
+
+/** Withdrawal metadata with an invalid destination and bad amount format. */
+export const invalidWithdrawalRequest = {
+  assetCode: 'USDC',
+  amount: 'not-a-number',
+  account: FRIENDBOT,
+  dest: '',
+  type: 'ACH',
+} as unknown;
+
+/** Asset config with mismatched issuer length and disabled-but-enabled flags. */
+export const invalidAnchorAssetConfig = {
+  code: 'USDC',
+  issuer: 'GTOOSHORT',
+  schema: 'stellar',
+  enabled: false,
+  depositEnabled: true,
+  withdrawalEnabled: false,
+} as unknown;
+
+/** Plaintext (non-HTTPS, non-localhost) callback URL. */
+export const invalidCallbackUrl = 'http://example.com/callback';
+
+/** Amount string that fails Stellar amount rules (too many decimals + zero). */
+export const invalidAmount = '0.0000000001';
