@@ -1,0 +1,24 @@
+{
+  "sourcePublicKey": "BAD-KEY-TOO-SHORT",
+  "destinationPublicKey": "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U",
+  "asset": {
+    "type": "issued",
+    "code": "",
+    "issuer": "NOT-A-VALID-PUBLIC-KEY"
+  },
+  "amount": "-42",
+  "memo": {
+    "type": "text",
+    "value": "This is a memo that is deliberately more than 28 bytes long so validation fails."
+  },
+  "network": "testnet",
+  "expectedReadiness": {
+    "ready": false,
+    "expectedWarningCodes": [
+      "SOURCE_INVALID",
+      "ASSET_INVALID",
+      "AMOUNT_INVALID",
+      "MEMO_INVALID"
+    ]
+  }
+}

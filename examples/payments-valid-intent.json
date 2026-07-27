@@ -1,0 +1,19 @@
+{
+  "sourcePublicKey": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+  "destinationPublicKey": "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U",
+  "asset": {
+    "type": "native",
+    "code": "XLM",
+    "issuer": null
+  },
+  "amount": "125.7500000",
+  "memo": {
+    "type": "text",
+    "value": "Invoice #42"
+  },
+  "network": "testnet",
+  "expectedReadiness": {
+    "ready": true,
+    "warningCount": 0
+  }
+}

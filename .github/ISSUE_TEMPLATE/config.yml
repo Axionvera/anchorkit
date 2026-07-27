@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Stellar developer documentation
+    url: https://developers.stellar.org/docs
+    about: Official Stellar docs for SDKs, SEPs, and Soroban.
+  - name: Stellar Expert explorer
+    url: https://stellar.expert/explorer/testnet
+    about: Inspect testnet accounts, transactions, and assets.

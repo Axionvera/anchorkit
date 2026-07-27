@@ -1,0 +1,54 @@
+[
+  {
+    "id": "dep_step_1",
+    "kind": "deposit",
+    "status": "pending_user",
+    "assetCode": "XLM",
+    "amountIn": "500.0000000",
+    "amountOut": "498.5000000",
+    "feeAmount": "1.5000000",
+    "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+    "externalTransactionId": "SEPA-REF-0001",
+    "userActionRequired": true,
+    "message": "Please confirm the bank transfer details in the anchor portal."
+  },
+  {
+    "id": "dep_step_2",
+    "kind": "deposit",
+    "status": "pending_anchor",
+    "assetCode": "XLM",
+    "amountIn": "500.0000000",
+    "amountOut": "498.5000000",
+    "feeAmount": "1.5000000",
+    "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+    "externalTransactionId": "SEPA-REF-0001",
+    "userActionRequired": false,
+    "message": "Anchor has received the bank transfer and is preparing the Stellar transaction."
+  },
+  {
+    "id": "dep_step_3",
+    "kind": "deposit",
+    "status": "pending_stellar",
+    "assetCode": "XLM",
+    "amountIn": "500.0000000",
+    "amountOut": "498.5000000",
+    "feeAmount": "1.5000000",
+    "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+    "stellarTransactionId": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+    "externalTransactionId": "SEPA-REF-0001",
+    "message": "Stellar transaction submitted. Awaiting ledger confirmation."
+  },
+  {
+    "id": "dep_step_4",
+    "kind": "deposit",
+    "status": "completed",
+    "assetCode": "XLM",
+    "amountIn": "500.0000000",
+    "amountOut": "498.5000000",
+    "feeAmount": "1.5000000",
+    "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+    "stellarTransactionId": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+    "externalTransactionId": "SEPA-REF-0001",
+    "message": "Deposit complete. XLM is now available in the Stellar account."
+  }
+]

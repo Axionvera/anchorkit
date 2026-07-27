@@ -1,0 +1,44 @@
+name: rust-contract-tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "contracts/treasury-escrow/**"
+      - ".github/workflows/rust-contract-tests.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "contracts/treasury-escrow/**"
+      - ".github/workflows/rust-contract-tests.yml"
+
+jobs:
+  contract-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.81.0"
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "contracts/treasury-escrow -> target"
+
+      - name: Contract tests
+        working-directory: contracts/treasury-escrow
+        run: cargo test --locked
+
+      - name: Contract clippy
+        working-directory: contracts/treasury-escrow
+        run: cargo clippy --locked -- -D warnings
+
+      - name: Release wasm build (sanity check)
+        working-directory: contracts/treasury-escrow
+        run: cargo build --target wasm32-unknown-unknown --release --locked

@@ -1,0 +1,76 @@
+# Default AnchorKit labels for GitHub + GrantFox OSS campaigns.
+#
+# Apply via GitHub CLI / Settings / Labels UI once on repo creation.
+# Columns: name, color, description
+
+- name: GrantFox OSS
+  color: 9443fb
+  description: Participates in GrantFox open source program.
+
+- name: Maybe Rewarded
+  color: f59e0b
+  description: Candidate for GrantFox reward if fully delivered and reviewed.
+
+- name: "Official Campaign | FWC26"
+  color: ec4899
+  description: Part of the FWC26 official campaign scope.
+
+- name: stellar
+  color: 2563eb
+  description: Relates to classic Stellar primitives (accounts, assets, payments, Horizon).
+
+- name: soroban
+  color: 7e22ce
+  description: Relates to Soroban smart contracts, SDK, or RPC.
+
+- name: anchor
+  color: 15803d
+  description: Relates to anchor-side flows (SEP-6/24/31-style metadata, rails, callbacks).
+
+- name: sep
+  color: 0ea5e9
+  description: Relates to a Stellar Ecosystem Proposal (SEP) compliance or helper.
+
+- name: wallet
+  color: 38bdf8
+  description: Relates to wallet-side integrations or UX for end-user accounts.
+
+- name: payments
+  color: f97316
+  description: Payment building, readiness, submission, or reconciliation logic.
+
+- name: escrow
+  color: 6366f1
+  description: Soroban treasury-escrow contract or its TypeScript client / UI.
+
+- name: security
+  color: dc2626
+  description: Security impact, secret handling, safe defaults, or vulnerability fix.
+
+- name: test
+  color: 0d9488
+  description: Adds or improves tests (Vitest, Rust contract tests, E2E).
+
+- name: documentation
+  color: a16207
+  description: Docs, examples, README, setup guides, contributor materials.
+
+- name: good first issue
+  color: 70cfff
+  description: Approachable for first-time contributors; scoped and well-explained.
+
+- name: expert
+  color: 475569
+  description: Requires Stellar/Soroban domain depth or security experience.
+
+- name: bug
+  color: b91c1c
+  description: Something is broken.
+
+- name: enhancement
+  color: a855f7
+  description: New feature or request.
+
+- name: needs-repro
+  color: fca5a5
+  description: Issue needs a reproducer from the reporter before triage.

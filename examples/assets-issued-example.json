@@ -1,0 +1,11 @@
+{
+  "type": "issued",
+  "code": "USDC",
+  "issuer": "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U",
+  "description": "Example demo USDC-like issued asset for AnchorKit testnet examples. NOT Circle's real USDC issuer.",
+  "decimals": 7,
+  "network": "testnet",
+  "homeDomain": "anchor.example.com",
+  "toml": "https://anchor.example.com/.well-known/stellar.toml",
+  "assetString": "USDC:GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U"
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "description": "Throwaway unfunded testnet identity generated for example purposes.",
+    "publicKey": "GA6V2F6Z2X73P4A3N4I4E433HNGKQ6QO7R6C77I65T4F63R3X2Y2QQQM",
+    "status": "unfunded",
+    "friendbotUrl": "https://horizon-testnet.stellar.org/friendbot?addr=GA6V2F6Z2X73P4A3N4I4E433HNGKQ6QO7R6C77I65T4F63R3X2Y2QQQM"
+  },
+  {
+    "description": "Second unfunded demo account used for payment destination tests.",
+    "publicKey": "GBMPZIE564A3X2Z56M47T5T4U7U4Y3V2M5L5W6Z5H4E3R2I3T5B2FZS",
+    "status": "unfunded",
+    "friendbotUrl": "https://horizon-testnet.stellar.org/friendbot?addr=GBMPZIE564A3X2Z56M47T5T4U7U4Y3V2M5L5W6Z5H4E3R2I3T5B2FZS"
+  },
+  {
+    "description": "Unfunded account used for anchor-utils withdrawal demos.",
+    "publicKey": "GCYK7H7J7I6Y5G5F6D4V5K3G4H6T8R4Q3F5M2J1N5Z7Y2W5E6B3R4Z8L",
+    "status": "unfunded",
+    "friendbotUrl": "https://horizon-testnet.stellar.org/friendbot?addr=GCYK7H7J7I6Y5G5F6D4V5K3G4H6T8R4Q3F5M2J1N5Z7Y2W5E6B3R4Z8L"
+  }
+]

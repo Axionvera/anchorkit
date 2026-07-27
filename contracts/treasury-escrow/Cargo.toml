@@ -1,0 +1,31 @@
+[package]
+name = "treasury-escrow"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.81"
+publish = false
+description = "AnchorKit example Soroban contract: community treasury escrow with milestones, evidence, approvals, disputes and release gate."
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+testutils = ["soroban-sdk/testutils"]
+default = []
+
+[dependencies]
+soroban-sdk = { version = "21.0.0", default-features = false }
+
+[dev_dependencies]
+soroban-sdk = { version = "21.0.0", features = ["testutils"] }
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true

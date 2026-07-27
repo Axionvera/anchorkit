@@ -1,0 +1,14 @@
+{
+  "name": "@anchorkit/treasury-escrow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AnchorKit Soroban Rust contract metadata for Turborepo pnpm workspace visibility.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "cargo build --target wasm32-unknown-unknown --release",
+    "test": "cargo test",
+    "lint": "cargo clippy -- -D warnings",
+    "typecheck": "cargo check",
+    "clean": "cargo clean"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "anchorkit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AnchorKit - Open-source Stellar developer toolkit for wallets, anchors, payment rails, SEP flows, and Soroban treasury logic.",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,rs}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json,rs}\"",
+    "clean": "turbo run clean && rm -rf node_modules && rm -rf .turbo",
+    "contract:test": "cd contracts/treasury-escrow && cargo test",
+    "contract:build": "cd contracts/treasury-escrow && cargo build --target wasm32-unknown-unknown --release",
+    "web:dev": "turbo run dev --filter=@anchorkit/web",
+    "web:build": "turbo run build --filter=@anchorkit/web"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.0",
+    "turbo": "^1.12.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  }
+}

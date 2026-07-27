@@ -1,0 +1,46 @@
+[
+  {
+    "description": "Public well-known testnet friendbot operator. Horizon will return a funded account with native XLM.",
+    "publicKey": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+    "status": "funded",
+    "balances": {
+      "native": "10000.0000000",
+      "assets": []
+    },
+    "horizonUrl": "https://horizon-testnet.stellar.org"
+  },
+  {
+    "description": "Synthetically derived testnet account marked funded for UI demos.",
+    "publicKey": "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U",
+    "status": "funded",
+    "balances": {
+      "native": "500.0000000",
+      "assets": [
+        {
+          "code": "USDC",
+          "issuer": "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U",
+          "balance": "1234.56",
+          "limit": "1000000"
+        }
+      ]
+    },
+    "horizonUrl": "https://horizon-testnet.stellar.org"
+  },
+  {
+    "description": "Anchor-style demo account holding a stablecoin issue.",
+    "publicKey": "GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7XB65PK5EV6U5E4FZTS",
+    "status": "funded",
+    "balances": {
+      "native": "120.1234567",
+      "assets": [
+        {
+          "code": "EURC",
+          "issuer": "GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7XB65PK5EV6U5E4FZTS",
+          "balance": "5000.00",
+          "limit": "5000000"
+        }
+      ]
+    },
+    "horizonUrl": "https://horizon-testnet.stellar.org"
+  }
+]

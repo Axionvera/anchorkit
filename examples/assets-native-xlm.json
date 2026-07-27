@@ -1,0 +1,8 @@
+{
+  "type": "native",
+  "code": "XLM",
+  "issuer": null,
+  "description": "Lumen — the native Stellar asset used for network fees, base reserves, and payments.",
+  "decimals": 7,
+  "network": "testnet"
+}
