@@ -231,6 +231,9 @@ export function advanceAnchorTransactionStatus(
 
 export * from "./fixtures";
 
+// ─── Lifecycle state machine (issue #5) ────────────────────────────────────
+export * from "./lifecycle";
+
 // ─── Validation engine re-export (issue #6) ─────────────────────────────────
 // Note: validateAnchorAssetConfig / validateCallbackUrl already exist in this
 // package (raw Zod safeparse); the engine versions are available via

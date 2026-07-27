@@ -26,6 +26,9 @@ import {
   sampleDepositRequest,
   sampleWithdrawalRequest,
   validateAnchorRequest,
+  transition,
+  isTransitionValid,
+  ALLOWED_TRANSITIONS,
 } from "@anchorkit/anchor-utils";
 import { validateCallbackUrl } from "@anchorkit/validators";
 import type {
@@ -78,6 +81,19 @@ export default function AnchorsPage() {
   const [mockStatus, setMockStatus] = useState<AnchorTransactionStatus>("pending_user");
 
   const [assetCfg, setAssetCfg] = useState<AnchorAssetConfig>(validSampleAsset());
+
+  const ALL_STATUSES: AnchorTransactionStatus[] = [
+    "pending_user",
+    "pending_anchor",
+    "pending_stellar",
+    "completed",
+    "failed",
+    "refunded",
+  ];
+  const [fromStatus, setFromStatus] = useState<AnchorTransactionStatus>("pending_user");
+  const [toStatus, setToStatus] = useState<AnchorTransactionStatus>("pending_anchor");
+  const transitionResult = transition(fromStatus, toStatus);
+
   const [cbUrl, setCbUrl] = useState("https://anchor.example.com/webhooks/sep6");
 
   const depositDraft: DepositRequestMetadata = {
@@ -394,6 +410,71 @@ export default function AnchorsPage() {
             title="Callback URL (engine)"
             result={validateCallbackUrl(cbUrl)}
           />
+        </div>
+      </Card>
+
+      <Card>
+        <h2 className="text-base font-semibold tracking-tight">Lifecycle transitions</h2>
+        <p className="mb-3 text-sm text-ink-500">
+          The SEP-style anchor lifecycle state machine (<span className="text-mono-xs">
+            @anchorkit/anchor-utils
+          </span>) rejects illegal status moves instead of silently wrapping.
+        </p>
+        <div className="grid gap-3 md:grid-cols-3">
+          <div>
+            <Label>From</Label>
+            <Select
+              value={fromStatus}
+              onChange={(e) => setFromStatus(e.target.value as AnchorTransactionStatus)}
+            >
+              {ALL_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label>To</Label>
+            <Select
+              value={toStatus}
+              onChange={(e) => setToStatus(e.target.value as AnchorTransactionStatus)}
+            >
+              {ALL_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex items-end">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                const allowed = ALLOWED_TRANSITIONS[fromStatus];
+                if (allowed.length) setToStatus(allowed[0]!);
+              }}
+            >
+              Use next valid
+            </Button>
+          </div>
+        </div>
+        <div className="mt-4">
+          {transitionResult.ok ? (
+            <Alert tone="success" title="Legal transition">
+              <code className="text-mono-xs">
+                {fromStatus} → {toStatus}
+              </code>{" "}
+              is allowed.
+            </Alert>
+          ) : (
+            <Alert tone="error" title="Illegal transition">
+              <code className="text-mono-xs">
+                {fromStatus} → {toStatus}
+              </code>{" "}
+              — {transitionResult.error}
+            </Alert>
+          )}
         </div>
       </Card>
     </PageShell>
