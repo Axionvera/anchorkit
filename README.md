@@ -179,6 +179,7 @@ All of these live under [`./docs/`](./docs/).
 | GrantFox contribution workflow | [`GRANTFOX_WORKFLOW.md`](./docs/GRANTFOX_WORKFLOW.md) |
 | Advanced issue standard | [`ISSUE_STANDARD.md`](./docs/ISSUE_STANDARD.md) |
 | Maintainer review checklist | [`MAINTAINER_REVIEW_CHECKLIST.md`](./docs/MAINTAINER_REVIEW_CHECKLIST.md) |
+| Automation runbook | [`AUTOMATION_RUNBOOK.md`](./docs/AUTOMATION_RUNBOOK.md) |
 | Roadmap | [`ROADMAP.md`](./docs/ROADMAP.md) |
 
 ## 🦊 GrantFox readiness
