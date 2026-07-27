@@ -6,4 +6,5 @@ export * from "./payments";
 export * from "./intent";
 export * from "./transactions";
 export * from "./escrowEvents";
+export * from "./logging";
 export type { StellarKeypair } from "@anchorkit/types";

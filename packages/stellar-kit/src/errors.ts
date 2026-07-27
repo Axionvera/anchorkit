@@ -37,9 +37,9 @@ function sanitizeCause(cause: unknown): unknown {
 const SECRET_PATTERNS = [
   /S[A-Z2-7]{55}/g,
   /SA[A-Z2-7]{54}/g,
-  /secret[_-]?key/i,
-  /private[_-]?key/i,
-  /seed[_-]?phrase/i,
+  /secret[\s_-]?key/i,
+  /private[\s_-]?key/i,
+  /seed[\s_-]?phrase/i,
 ];
 
 export function redactSecrets(input: string): string {
