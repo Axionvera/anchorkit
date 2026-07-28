@@ -174,6 +174,7 @@ All of these live under [`./docs/`](./docs/).
 | Payment intent utilities | [`PAYMENT_INTENT_UTILITIES.md`](./docs/PAYMENT_INTENT_UTILITIES.md) |
 | Anchor utilities | [`ANCHOR_UTILITIES.md`](./docs/ANCHOR_UTILITIES.md) |
 | Soroban treasury escrow contract | [`SOROBAN_ESCROW_CONTRACT.md`](./docs/SOROBAN_ESCROW_CONTRACT.md) |
+| Shared error taxonomy | [`ERROR_TAXONOMY.md`](./docs/ERROR_TAXONOMY.md) |
 | Escrow storage migration guide | [`ESCROW_MIGRATION.md`](./docs/ESCROW_MIGRATION.md) |
 | Contributor guide | [`CONTRIBUTOR_GUIDE.md`](./docs/CONTRIBUTOR_GUIDE.md) |
 | Maintainer guide | [`MAINTAINER_GUIDE.md`](./docs/MAINTAINER_GUIDE.md) |

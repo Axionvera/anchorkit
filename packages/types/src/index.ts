@@ -274,3 +274,7 @@ export interface StellarKitError extends Error {
 
 // ─── Escrow events ──────────────────────────────────────────────────────────
 export * from "./escrowEvents";
+
+// ─── Shared error taxonomy ──────────────────────────────────────────────────
+export * from "./errors";
+

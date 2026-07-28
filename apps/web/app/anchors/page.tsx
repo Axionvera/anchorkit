@@ -27,7 +27,6 @@ import {
   sampleWithdrawalRequest,
   validateAnchorRequest,
   transition,
-  isTransitionValid,
   ALLOWED_TRANSITIONS,
 } from "@anchorkit/anchor-utils";
 import { validateCallbackUrl } from "@anchorkit/validators";
@@ -300,11 +299,11 @@ export default function AnchorsPage() {
             <div>
               <Label>Preview a mock anchor record</Label>
               <div className="mt-2 flex flex-wrap gap-2">
-                <Select value={mockKind} onChange={(e) => setMockKind(e.target.value as any)}>
+                <Select value={mockKind} onChange={(e) => setMockKind(e.target.value as AnchorTransactionKind)}>
                   <option value="deposit">Deposit</option>
                   <option value="withdrawal">Withdrawal</option>
                 </Select>
-                <Select value={mockStatus} onChange={(e) => setMockStatus(e.target.value as any)}>
+                <Select value={mockStatus} onChange={(e) => setMockStatus(e.target.value as AnchorTransactionStatus)}>
                   {(
                     [
                       "pending_user",
