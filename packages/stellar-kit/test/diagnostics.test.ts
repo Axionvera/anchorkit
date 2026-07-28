@@ -28,13 +28,16 @@ const networkErrorInfo: AccountInfo = {
 describe("computeReserve", () => {
   it("computes minimum balance from subentry count", () => {
     const r = computeReserve(3);
-    // 2 + (3 + 2) * 0.5 = 4.5
-    expect(r.minimumBalanceXlm).toBe(4.5);
+    // Stellar's rule: (2 base entries + 3 subentries) * 0.5 XLM = 2.5
+    expect(r.minimumBalanceXlm).toBe(2.5);
     expect(r.subentryCount).toBe(3);
+    expect(r.entryCount).toBe(5);
+    expect(r.baseReserve).toBe(0.5);
   });
 
   it("handles undefined subentry count", () => {
-    expect(computeReserve(undefined).minimumBalanceXlm).toBe(3);
+    // A bare account owns only the 2 base entries: 2 * 0.5 = 1 XLM
+    expect(computeReserve(undefined).minimumBalanceXlm).toBe(1);
   });
 });
 
@@ -44,7 +47,7 @@ describe("diagnoseAccountInfo (sync)", () => {
     expect(d.state).toBe("funded");
     expect(d.isValidPublicKey).toBe(true);
     expect(d.expertUrl).toContain(fundedKey);
-    expect(d.reserve?.minimumBalanceXlm).toBe(4.5);
+    expect(d.reserve?.minimumBalanceXlm).toBe(2.5);
   });
 
   it("maps unfunded account without reserve", () => {

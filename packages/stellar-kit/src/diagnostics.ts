@@ -8,11 +8,27 @@
  * Stellar Expert link — without ever exposing secrets.
  */
 
-import type { AccountInfo, AccountStatus, NetworkConfig, StellarPublicKey } from "@anchorkit/types";
+import type {
+  AccountBalanceModel,
+  AccountInfo,
+  AccountStatus,
+  NetworkConfig,
+  StellarPublicKey,
+} from "@anchorkit/types";
 import { getNetworkConfig } from "@anchorkit/config";
 import { isPublicKeyValid } from "./keys";
 import { buildAccountLink } from "./explorer";
 import { loadAccount } from "./accounts";
+import { computeBalanceModel, computeReserve, unknownBalanceModel } from "./balances";
+import type { ReserveInfo } from "./balances";
+
+export {
+  BASE_ENTRY_COUNT,
+  STELLAR_BASE_RESERVE_XLM,
+  computeBalanceModel,
+  computeReserve,
+} from "./balances";
+export type { ReserveInfo } from "./balances";
 
 /** Diagnostic states — superset of the raw `AccountStatus`. */
 export type AccountDiagnosticState =
@@ -21,36 +37,6 @@ export type AccountDiagnosticState =
   | "invalid"
   | "unavailable"
   | "unknown";
-
-/** Stellar base reserve (in XLM) as of the current protocol. */
-export const BASE_RESERVE_XLM = 2;
-/** Per-subentry reserve increment (in XLM). */
-export const SUBENTRY_RESERVE_XLM = 0.5;
-
-export interface ReserveInfo {
-  /** Base reserve in XLM. */
-  baseReserve: number;
-  /** Number of subentries counted against the reserve. */
-  subentryCount: number;
-  /** Computed minimum balance (base + subentry increments + 2 base accounts). */
-  minimumBalanceXlm: number;
-  /** Human-readable explanation suitable for UI. */
-  explanation: string;
-}
-
-/** Reserve awareness derived from an account's subentry count. */
-export function computeReserve(subentryCount: number | undefined): ReserveInfo {
-  const subs = subentryCount ?? 0;
-  const minimumBalanceXlm = BASE_RESERVE_XLM + (subs + 2) * SUBENTRY_RESERVE_XLM;
-  return {
-    baseReserve: BASE_RESERVE_XLM,
-    subentryCount: subs,
-    minimumBalanceXlm,
-    explanation: `Minimum balance is ${minimumBalanceXlm} XLM: ${BASE_RESERVE_XLM} base reserve + ${
-      subs + 2
-    } entries × ${SUBENTRY_RESERVE_XLM} XLM (2 base entries + ${subs} subentries).`,
-  };
-}
 
 export interface AccountDiagnostic {
   /** The (possibly invalid) input the user supplied. */
@@ -63,6 +49,12 @@ export interface AccountDiagnostic {
   expertUrl: string | null;
   /** Reserve awareness (only meaningful for funded accounts). */
   reserve: ReserveInfo | null;
+  /**
+   * Total / reserve / spendable / unavailable breakdown of the native balance.
+   * Always present; carries `state: "unknown"` with null amounts when the
+   * account data does not support a trustworthy figure.
+   */
+  balances: AccountBalanceModel;
   /** Raw account info when available (never includes secrets). */
   account: AccountInfo | null;
   /** User-safe error message, if any. */
@@ -104,6 +96,7 @@ export function diagnoseAccountInfo(
     isValidPublicKey: valid,
     expertUrl: valid ? buildAccountLink(info.publicKey, network) : null,
     reserve,
+    balances: computeBalanceModel(info),
     account: info,
     error: info.error ?? null,
   };
@@ -128,6 +121,9 @@ export async function diagnoseAccount(
       isValidPublicKey: false,
       expertUrl: null,
       reserve: null,
+      balances: unknownBalanceModel(
+        "The public key is not valid, so no balance can be read for it."
+      ),
       account: null,
       error: "Not a valid Stellar public key (must be 56 characters, start with G).",
     };
@@ -146,6 +142,9 @@ export async function diagnoseAccount(
       isValidPublicKey: true,
       expertUrl: buildAccountLink(publicKey as StellarPublicKey, network),
       reserve: null,
+      balances: unknownBalanceModel(
+        "The account could not be loaded, so the spendable balance is unknown."
+      ),
       account: null,
       error: err instanceof Error ? err.message : "Account diagnostics unavailable.",
     };

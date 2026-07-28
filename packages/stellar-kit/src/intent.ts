@@ -1,4 +1,5 @@
 import type {
+  AccountBalanceModel,
   PaymentIntent,
   ReadinessWarning,
   StellarAsset,
@@ -17,9 +18,10 @@ import { PaymentIntentSchema } from "@anchorkit/validators";
 import type { SafeParseReturnType } from "zod";
 import { createStellarError } from "./errors";
 import { isPublicKeyValid } from "./keys";
-import { isAssetValid } from "./assets";
-import { isAmountValid, isMemoValid } from "./payments";
-import { getAccountStatus } from "./accounts";
+import { isAssetValid, isNativeAsset } from "./assets";
+import { compareAmounts, isAmountValid, isMemoValid } from "./payments";
+import { getAccountStatus, loadAccount } from "./accounts";
+import { computeBalanceModel } from "./balances";
 
 export function createPaymentIntent(input: {
   sourcePublicKey: string;
@@ -56,6 +58,11 @@ export function estimateTransactionReadinessSync(
     envConfig?: AnchorKitEnvConfig;
     sourceAccountFunded?: boolean;
     destAccountFunded?: boolean;
+    /**
+     * Spendable balance model for the source account. Opt-in: when omitted,
+     * readiness behaves exactly as before and makes no claim about funds.
+     */
+    sourceBalances?: AccountBalanceModel;
   } = {}
 ): TransactionReadiness {
   const warnings: ReadinessWarning[] = [];
@@ -140,6 +147,32 @@ export function estimateTransactionReadinessSync(
     });
   }
 
+  // Spendable-balance check. Only meaningful for native payments: the XLM
+  // minimum balance constrains how much XLM can leave the account, not how
+  // much of an issued asset can.
+  const sourceBalances = options.sourceBalances;
+  if (sourceBalances && isNativeAsset(intent.asset) && isAmountValid(intent.amount)) {
+    if (sourceBalances.state === "known" && sourceBalances.spendable !== null) {
+      if (compareAmounts(sourceBalances.spendable, intent.amount) < 0) {
+        warnings.push({
+          code: "INSUFFICIENT_FUNDS",
+          message:
+            `Spendable balance is ${sourceBalances.spendable} XLM, below the ` +
+            `${intent.amount} XLM payment. ${sourceBalances.explanation}`,
+          severity: "error",
+        });
+      }
+    } else {
+      // Deliberately carries no figure: an unavailable balance must not be
+      // presented as a number the user could act on.
+      warnings.push({
+        code: "SPENDABLE_UNKNOWN",
+        message: `Spendable balance could not be determined. ${sourceBalances.explanation}`,
+        severity: "info",
+      });
+    }
+  }
+
   const errorCount = warnings.filter((w) => w.severity === "error").length;
   const ready = errorCount === 0;
 
@@ -163,13 +196,19 @@ export async function estimateTransactionReadiness(
     assertNetworkAllowed(network, envConfig);
   }
 
-  const [sourceStatus, destStatus] = await Promise.allSettled([
-    getAccountStatus(intent.sourcePublicKey, { networkConfig, envConfig }),
+  // The source is loaded in full rather than status-only: `getAccountStatus`
+  // fetches the whole account and then discards the balances and subentry
+  // count, which are exactly what the spendable model needs. Reading them here
+  // costs no extra network call. The destination only needs its status.
+  const [sourceInfo, destStatus] = await Promise.allSettled([
+    loadAccount(intent.sourcePublicKey, { networkConfig, envConfig }),
     getAccountStatus(intent.destinationPublicKey, { networkConfig, envConfig }),
   ]);
 
   const sourceFunded =
-    sourceStatus.status === "fulfilled" ? sourceStatus.value === "funded" : undefined;
+    sourceInfo.status === "fulfilled" ? sourceInfo.value.status === "funded" : undefined;
+  const sourceBalances =
+    sourceInfo.status === "fulfilled" ? computeBalanceModel(sourceInfo.value) : undefined;
   const destFunded =
     destStatus.status === "fulfilled" ? destStatus.value === "funded" : undefined;
 
@@ -178,6 +217,7 @@ export async function estimateTransactionReadiness(
     envConfig,
     sourceAccountFunded: sourceFunded,
     destAccountFunded: destFunded,
+    sourceBalances,
   });
 }
 
