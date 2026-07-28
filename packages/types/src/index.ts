@@ -90,13 +90,44 @@ export interface ReadinessWarning {
   code: string;
   message: string;
   severity: "error" | "warning" | "info";
+  stage?: ReadinessStageId;
+}
+
+export type TransactionReadinessState =
+  | "valid"
+  | "invalid"
+  | "blocked"
+  | "warning"
+  | "unavailable";
+
+export type ReadinessStageId = "network" | "account" | "asset" | "amount" | "memo";
+
+export interface ReadinessStageResult {
+  stage: ReadinessStageId;
+  state: TransactionReadinessState;
+  message: string;
+  details?: Record<string, unknown>;
+}
+
+export interface ReadinessIssue {
+  code: string;
+  stage: ReadinessStageId;
+  severity: "error" | "warning" | "info";
+  message: string;
+  field?: string;
 }
 
 export interface TransactionReadiness {
+  state: TransactionReadinessState;
   ready: boolean;
+  stages: Record<ReadinessStageId, ReadinessStageResult>;
+  issues: ReadinessIssue[];
   warnings: ReadinessWarning[];
   summary: string;
+  sourceDiagnostic?: unknown;
+  destDiagnostic?: unknown;
 }
+
 
 export type AnchorTransactionStatus =
   | "pending_user"

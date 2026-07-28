@@ -50,6 +50,11 @@ export function isPaymentIntentValid(intent: unknown): boolean {
   return validatePaymentIntent(intent).success;
 }
 
+import {
+  evaluateTransactionReadinessSync,
+  evaluateTransactionReadiness,
+} from "./readiness";
+
 export function estimateTransactionReadinessSync(
   intent: PaymentIntent,
   options: {
@@ -59,94 +64,7 @@ export function estimateTransactionReadinessSync(
     destAccountFunded?: boolean;
   } = {}
 ): TransactionReadiness {
-  const warnings: ReadinessWarning[] = [];
-  const envConfig = options.envConfig ?? DEFAULT_ENV_CONFIG;
-  const network = options.network ?? envConfig.defaultNetwork;
-
-  if (!isPublicKeyValid(intent.sourcePublicKey)) {
-    warnings.push({
-      code: "SOURCE_INVALID",
-      message: "Source public key is invalid",
-      severity: "error",
-    });
-  }
-
-  if (!isPublicKeyValid(intent.destinationPublicKey)) {
-    warnings.push({
-      code: "DEST_INVALID",
-      message: "Destination public key is invalid",
-      severity: "error",
-    });
-  }
-
-  if (
-    isPublicKeyValid(intent.sourcePublicKey) &&
-    isPublicKeyValid(intent.destinationPublicKey) &&
-    intent.sourcePublicKey === intent.destinationPublicKey
-  ) {
-    warnings.push({
-      code: "SAME_SOURCE_DEST",
-      message: "Source and destination accounts are the same",
-      severity: "warning",
-    });
-  }
-
-  if (!isAssetValid(intent.asset)) {
-    warnings.push({
-      code: "ASSET_INVALID",
-      message: "Asset configuration is invalid",
-      severity: "error",
-    });
-  }
-
-  if (!isAmountValid(intent.amount)) {
-    warnings.push({
-      code: "AMOUNT_INVALID",
-      message: "Payment amount is invalid or outside allowed range",
-      severity: "error",
-    });
-  }
-
-  if (intent.memo && !isMemoValid(intent.memo)) {
-    warnings.push({
-      code: "MEMO_INVALID",
-      message: "Memo value is invalid for the selected memo type",
-      severity: "error",
-    });
-  }
-
-  if (network === STELLAR_NETWORKS.MAINNET && !isMainnetAllowed(envConfig)) {
-    warnings.push({
-      code: "MAINNET_DISABLED",
-      message:
-        "Mainnet mode is disabled by default. Review security notes and explicitly enable mainnet if needed.",
-      severity: "error",
-    });
-  }
-
-  if (options.sourceAccountFunded === false) {
-    warnings.push({
-      code: "SOURCE_UNFUNDED",
-      message: "Source account is not funded on the network",
-      severity: "warning",
-    });
-  }
-
-  if (options.destAccountFunded === false) {
-    warnings.push({
-      code: "DEST_UNFUNDED",
-      message:
-        "Destination account is not funded. Issued asset payments require the destination to have a trustline.",
-      severity: "warning",
-    });
-  }
-
-  const errorCount = warnings.filter((w) => w.severity === "error").length;
-  const ready = errorCount === 0;
-
-  const summary = buildReadinessSummary(ready, warnings);
-
-  return { ready, warnings, summary };
+  return evaluateTransactionReadinessSync(intent, options);
 }
 
 export async function estimateTransactionReadiness(
@@ -156,39 +74,6 @@ export async function estimateTransactionReadiness(
     envConfig?: AnchorKitEnvConfig;
   } = {}
 ): Promise<TransactionReadiness> {
-  const envConfig = options.envConfig ?? DEFAULT_ENV_CONFIG;
-  const network = options.network ?? envConfig.defaultNetwork;
-  const networkConfig = getNetworkConfig(network);
-
-  if (network === STELLAR_NETWORKS.MAINNET) {
-    assertNetworkAllowed(network, envConfig);
-  }
-
-  const [sourceStatus, destStatus] = await Promise.allSettled([
-    getAccountStatus(intent.sourcePublicKey, { networkConfig, envConfig }),
-    getAccountStatus(intent.destinationPublicKey, { networkConfig, envConfig }),
-  ]);
-
-  const sourceFunded =
-    sourceStatus.status === "fulfilled" ? sourceStatus.value === "funded" : undefined;
-  const destFunded =
-    destStatus.status === "fulfilled" ? destStatus.value === "funded" : undefined;
-
-  return estimateTransactionReadinessSync(intent, {
-    network,
-    envConfig,
-    sourceAccountFunded: sourceFunded,
-    destAccountFunded: destFunded,
-  });
+  return evaluateTransactionReadiness(intent, options);
 }
 
-function buildReadinessSummary(ready: boolean, warnings: ReadinessWarning[]): string {
-  if (ready && warnings.length === 0) {
-    return "Payment intent is fully ready. Review warnings above for optional checks.";
-  }
-  if (ready && warnings.length > 0) {
-    return `Payment intent is ready with ${warnings.length} warning(s). Resolve warnings before signing.`;
-  }
-  const errors = warnings.filter((w) => w.severity === "error").length;
-  return `Payment intent has ${errors} blocker(s) and ${warnings.length - errors} warning(s). Fix blockers before building the transaction.`;
-}

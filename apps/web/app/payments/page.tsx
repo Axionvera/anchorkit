@@ -2,22 +2,33 @@
 
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
-import { Alert, Button, Card, Input, Label, Select, DataRow } from "@/components/ui";
+import { Alert, Button, Card, Input, Label, Select } from "@/components/ui";
 import {
   createPaymentIntent,
-  estimateTransactionReadinessSync,
+  evaluateTransactionReadinessSync,
   getStellarExpertAccountUrl,
   isPublicKeyValid,
 } from "@anchorkit/stellar-kit";
-import type { MemoType, PaymentIntent, StellarAsset, TransactionReadiness } from "@anchorkit/types";
-import { DEFAULT_NETWORK } from "@anchorkit/config";
+import type {
+  AssetCode,
+  MemoType,
+  PaymentIntent,
+  StellarAsset,
+  StellarNetwork,
+  StellarPublicKey,
+  TransactionReadiness,
+  TransactionReadinessState,
+} from "@anchorkit/types";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
 const DEMO_DEST = "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U";
 
+type SimulationStatus = "funded" | "unfunded" | "unknown";
+
 export default function PaymentsPage() {
   const [source, setSource] = useState(FRIENDBOT);
   const [dest, setDest] = useState(DEMO_DEST);
+  const [network, setNetwork] = useState<StellarNetwork>("testnet");
   const [assetMode, setAssetMode] = useState<"native" | "issued">("native");
   const [assetCode, setAssetCode] = useState("USDC");
   const [assetIssuer, setAssetIssuer] = useState(
@@ -27,8 +38,9 @@ export default function PaymentsPage() {
   const [memoType, setMemoType] = useState<MemoType>("text");
   const [memoValue, setMemoValue] = useState("Invoice #42");
 
-  const [simulateSource, setSimulateSource] = useState<"funded" | "unfunded" | "unknown">("funded");
-  const [simulateDest, setSimulateDest] = useState<"funded" | "unfunded" | "unknown">("funded");
+  const [simulateSource, setSimulateSource] = useState<SimulationStatus>("funded");
+  const [simulateDest, setSimulateDest] = useState<SimulationStatus>("funded");
+  const [sourceBalance, setSourceBalance] = useState("1000.0000000");
 
   const asset: StellarAsset = useMemo(() => {
     if (assetMode === "native") {
@@ -36,18 +48,17 @@ export default function PaymentsPage() {
     }
     return {
       type: "issued",
-      code: assetCode as any,
-      issuer: assetIssuer as any,
+      code: assetCode as AssetCode,
+      issuer: assetIssuer as StellarPublicKey,
     };
   }, [assetMode, assetCode, assetIssuer]);
 
-  const memo = memoType === "none" ? undefined : { type: memoType, value: memoValue };
-
   const intent: PaymentIntent | null = useMemo(() => {
+    const memo = memoType === "none" ? undefined : { type: memoType, value: memoValue };
     try {
       return createPaymentIntent({
-        sourcePublicKey: source as any,
-        destinationPublicKey: dest as any,
+        sourcePublicKey: source as StellarPublicKey,
+        destinationPublicKey: dest as StellarPublicKey,
         asset,
         amount,
         memo,
@@ -55,12 +66,12 @@ export default function PaymentsPage() {
     } catch {
       return null;
     }
-  }, [source, dest, asset, amount, memo]);
+  }, [source, dest, asset, amount, memoType, memoValue]);
 
   const readiness: TransactionReadiness | null = useMemo(() => {
     if (!intent) return null;
-    return estimateTransactionReadinessSync(intent, {
-      network: DEFAULT_NETWORK,
+    return evaluateTransactionReadinessSync(intent, {
+      network,
       sourceAccountFunded:
         simulateSource === "funded"
           ? true
@@ -73,19 +84,51 @@ export default function PaymentsPage() {
           : simulateDest === "unfunded"
             ? false
             : undefined,
+      sourceBalanceXlm: sourceBalance,
     });
-  }, [intent, simulateSource, simulateDest]);
+  }, [intent, network, simulateSource, simulateDest, sourceBalance]);
+
+  const getStateBadgeStyle = (state: TransactionReadinessState) => {
+    switch (state) {
+      case "valid":
+        return "bg-green-100 text-green-800 border-green-300 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800";
+      case "warning":
+        return "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800";
+      case "blocked":
+        return "bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800";
+      case "invalid":
+        return "bg-red-100 text-red-800 border-red-300 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800";
+      case "unavailable":
+        return "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800";
+    }
+  };
 
   return (
     <PageShell
       eyebrow="Payments"
-      title="Payment intent builder & readiness"
-      subtitle="Compose a basic payment intent, validate each field, and inspect typed readiness warnings before any network call is made."
-      warning="The MVP does not submit real Stellar transactions. Readiness checks use simulated account statuses by default. A testnet-only mock submit toggle can be wired in by contributors."
+      title="Payment intent builder & transaction readiness pipeline"
+      subtitle="Compose a Stellar payment intent, validate input stages, and inspect typed transaction readiness states across the monorepo pipeline."
+      warning="AnchorKit operates testnet-first and does not submit real payments. Readiness checks use the shared readiness pipeline."
     >
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3 space-y-4">
-          <h2 className="text-base font-semibold tracking-tight">Intent fields</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold tracking-tight">Intent fields</h2>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="net">Network</Label>
+              <Select
+                id="net"
+                value={network}
+                onChange={(e) => setNetwork(e.target.value as StellarNetwork)}
+                className="py-1 text-xs"
+              >
+                <option value="testnet">Testnet (default)</option>
+                <option value="mainnet">Mainnet (disabled by default)</option>
+                <option value="futurenet">Futurenet</option>
+              </Select>
+            </div>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="src" required>Source public key</Label>
@@ -95,17 +138,27 @@ export default function PaymentsPage() {
                 onChange={(e) => setSource(e.target.value.trim())}
                 placeholder="G…"
               />
-              <div className="mt-1 flex items-center justify-between text-mono-xs text-ink-500 dark:text-ink-400">
-                <span>{isPublicKeyValid(source) ? "Format OK" : "Invalid format"}</span>
-                <Select
-                  value={simulateSource}
-                  onChange={(e) => setSimulateSource(e.target.value as any)}
-                  className="mt-1"
-                >
-                  <option value="funded">Simulate: funded</option>
-                  <option value="unfunded">Simulate: unfunded</option>
-                  <option value="unknown">Simulate: unknown</option>
-                </Select>
+              <div className="mt-1 flex flex-col gap-1 text-mono-xs text-ink-500 dark:text-ink-400">
+                <div className="flex items-center justify-between">
+                  <span>{isPublicKeyValid(source) ? "Format OK" : "Invalid format"}</span>
+                  <Select
+                    value={simulateSource}
+                    onChange={(e) => setSimulateSource(e.target.value as SimulationStatus)}
+                  >
+                    <option value="funded">Simulate: funded</option>
+                    <option value="unfunded">Simulate: unfunded</option>
+                    <option value="unknown">Simulate: unknown</option>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Simulated XLM balance:</span>
+                  <Input
+                    value={sourceBalance}
+                    onChange={(e) => setSourceBalance(e.target.value)}
+                    className="w-32 py-0.5 text-xs"
+                    placeholder="XLM Balance"
+                  />
+                </div>
               </div>
             </div>
             <div>
@@ -120,7 +173,7 @@ export default function PaymentsPage() {
                 <span>{isPublicKeyValid(dest) ? "Format OK" : "Invalid format"}</span>
                 <Select
                   value={simulateDest}
-                  onChange={(e) => setSimulateDest(e.target.value as any)}
+                  onChange={(e) => setSimulateDest(e.target.value as SimulationStatus)}
                   className="mt-1"
                 >
                   <option value="funded">Simulate: funded</option>
@@ -210,47 +263,71 @@ export default function PaymentsPage() {
         </Card>
 
         <Card className="lg:col-span-2 space-y-4">
-          <h2 className="text-base font-semibold tracking-tight">Readiness result</h2>
+          <h2 className="text-base font-semibold tracking-tight">Readiness pipeline result</h2>
           {!readiness ? (
-            <Alert tone="warning" title="No intent yet">
+            <Alert tone="warning" title="No valid intent">
               Fix the invalid fields above to generate a typed readiness report.
             </Alert>
           ) : (
             <>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-ink-500 dark:text-ink-400">Overall</span>
+                <span className="text-sm text-ink-500 dark:text-ink-400">Overall State</span>
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-mono-xs font-medium ${
-                    readiness.ready
-                      ? "bg-green-100 text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900"
-                      : "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900"
-                  }`}
+                  className={`rounded-full border px-3 py-1 text-mono-xs font-semibold uppercase tracking-wider ${getStateBadgeStyle(
+                    readiness.state
+                  )}`}
                 >
-                  {readiness.ready ? "Ready" : "Not ready"}
+                  {readiness.state} {readiness.ready ? "· Ready" : "· Not Ready"}
                 </span>
               </div>
-              <p className="text-sm">{readiness.summary}</p>
+              <p className="text-sm font-medium">{readiness.summary}</p>
+
+              {/* 5-Stage Pipeline Breakdown */}
+              <div className="space-y-2">
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-500">
+                  Validation Stages
+                </div>
+                <div className="grid gap-2">
+                  {Object.values(readiness.stages).map((stg) => (
+                    <div
+                      key={stg.stage}
+                      className="flex items-center justify-between rounded-md border border-ink-200 p-2 text-xs dark:border-ink-800"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold uppercase">{stg.stage}</span>
+                        <span className="text-ink-600 dark:text-ink-300">{stg.message}</span>
+                      </div>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-mono-xs uppercase ${getStateBadgeStyle(
+                          stg.state
+                        )}`}
+                      >
+                        {stg.state}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div>
-                <div className="mb-1 text-sm font-medium">Warnings ({readiness.warnings.length})</div>
-                {readiness.warnings.length === 0 ? (
+                <div className="mb-1 text-sm font-medium">Issues & Warnings ({readiness.issues.length})</div>
+                {readiness.issues.length === 0 ? (
                   <p className="text-sm text-ink-500 dark:text-ink-400">
-                    No warnings. Intent structure looks good.
+                    No warnings or blockers. Intent structure is fully valid.
                   </p>
                 ) : (
                   <ul className="space-y-1.5">
-                    {readiness.warnings.map((w) => (
+                    {readiness.issues.map((w) => (
                       <li
                         key={w.code}
                         className={`rounded-md border px-3 py-2 text-sm ${
                           w.severity === "error"
                             ? "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200"
-                            : w.severity === "warning"
-                              ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200"
-                              : "border-ink-200 bg-ink-50 text-ink-700 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-200"
+                            : "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200"
                         }`}
                       >
                         <span className="font-semibold text-mono-xs uppercase tracking-wider">
-                          {w.severity} · {w.code}
+                          [{w.stage}] {w.severity} · {w.code}
                         </span>
                         <div className="mt-0.5">{w.message}</div>
                       </li>
@@ -258,12 +335,13 @@ export default function PaymentsPage() {
                   </ul>
                 )}
               </div>
+
               <div className="rounded-lg border border-ink-200 p-3 text-sm dark:border-ink-800">
-                <div className="mb-2 font-medium">Review links (testnet)</div>
+                <div className="mb-2 font-medium">Review links ({network})</div>
                 <div className="flex flex-wrap gap-2 text-mono-xs">
                   {isPublicKeyValid(source) && (
                     <a
-                      href={getStellarExpertAccountUrl(source, "testnet") ?? "#"}
+                      href={getStellarExpertAccountUrl(source, network) ?? "#"}
                       target="_blank"
                       rel="noreferrer"
                       className="underline"
@@ -273,7 +351,7 @@ export default function PaymentsPage() {
                   )}
                   {isPublicKeyValid(dest) && (
                     <a
-                      href={getStellarExpertAccountUrl(dest, "testnet") ?? "#"}
+                      href={getStellarExpertAccountUrl(dest, network) ?? "#"}
                       target="_blank"
                       rel="noreferrer"
                       className="underline"
@@ -293,7 +371,7 @@ export default function PaymentsPage() {
               </div>
               <p className="text-mono-xs text-ink-500 dark:text-ink-400">
                 Note: mainnet mode is explicitly disabled by default. Override only in advanced
-                config and after reviewing the security notes.
+                config and after reviewing security notes.
               </p>
             </>
           )}
@@ -302,3 +380,4 @@ export default function PaymentsPage() {
     </PageShell>
   );
 }
+
