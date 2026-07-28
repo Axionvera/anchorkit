@@ -1,11 +1,15 @@
 import type { StellarErrorCode, StellarKitError } from "@anchorkit/types";
+import { redactSecrets } from "./redaction";
+
+export { redactSecrets } from "./redaction";
 
 export function createStellarError(
   code: StellarErrorCode,
   message: string,
   cause?: unknown
 ): StellarKitError {
-  const error = new Error(message) as StellarKitError;
+  const redactedMessage = redactSecrets(message);
+  const error = new Error(redactedMessage) as StellarKitError;
   error.code = code;
   error.name = "StellarKitError";
   error.redacted = true;
@@ -45,27 +49,6 @@ function sanitizeCause(cause: unknown): unknown {
     return cause;
   }
   return cause;
-}
-
-const SECRET_PATTERNS = [
-  /S[A-Z2-7]{55}/g,
-  /SA[A-Z2-7]{54}/g,
-  /secret[\s_-]?key/i,
-  /private[\s_-]?key/i,
-  /seed[\s_-]?phrase/i,
-];
-
-export function redactSecrets(input: string): string {
-  let result = input;
-  for (const pattern of SECRET_PATTERNS) {
-    result = result.replace(pattern, (match) => {
-      if (match.startsWith("S") && match.length === 56) {
-        return match.slice(0, 4) + "[REDACTED]" + match.slice(-4);
-      }
-      return "[REDACTED]";
-    });
-  }
-  return result;
 }
 
 export function mapHorizonError(
@@ -110,7 +93,13 @@ export function mapHorizonError(
         message: "Network error when connecting to Stellar Horizon API",
       };
     }
+
+    return {
+      code: "UNKNOWN",
+      message: redactSecrets(error.message),
+    };
   }
 
-  return { code: "UNKNOWN", message: "An unexpected error occurred" };
+  return { code: "UNKNOWN", message: redactSecrets(String(error)) };
 }
+

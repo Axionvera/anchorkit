@@ -14,6 +14,7 @@ import { DEFAULT_ENV_CONFIG, getFeatureFlagDefinitions, getNetworkConfig, isFeat
 import { isPublicKeyValid } from "./keys";
 import { buildAccountLink } from "./explorer";
 import { loadAccount } from "./accounts";
+import { redactSecrets } from "./redaction";
 
 /** Diagnostic states — superset of the raw `AccountStatus`. */
 export type AccountDiagnosticState =
@@ -116,13 +117,13 @@ export function diagnoseAccountInfo(
   const reserve = state === "funded" ? computeReserve(info.subentryCount) : null;
 
   return {
-    input: info.publicKey,
+    input: valid ? info.publicKey : redactSecrets(info.publicKey),
     state,
     isValidPublicKey: valid,
     expertUrl: valid ? buildAccountLink(info.publicKey, network) : null,
     reserve,
     account: info,
-    error: info.error ?? null,
+    error: info.error ? redactSecrets(info.error) : null,
   };
 }
 
@@ -164,7 +165,7 @@ export async function diagnoseAccount(
 
   if (!isPublicKeyValid(publicKey)) {
     return {
-      input: publicKey,
+      input: redactSecrets(publicKey),
       state: "invalid",
       isValidPublicKey: false,
       expertUrl: null,
@@ -182,15 +183,16 @@ export async function diagnoseAccount(
     return diagnoseAccountInfo(info, { network });
   } catch (err) {
     return {
-      input: publicKey,
+      input: redactSecrets(publicKey),
       state: "unavailable",
       isValidPublicKey: true,
       expertUrl: buildAccountLink(publicKey as StellarPublicKey, network),
       reserve: null,
       account: null,
-      error: err instanceof Error ? err.message : "Account diagnostics unavailable.",
+      error: err instanceof Error ? redactSecrets(err.message) : "Account diagnostics unavailable.",
     };
   }
 }
+
 
 

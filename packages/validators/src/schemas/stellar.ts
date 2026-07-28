@@ -71,7 +71,7 @@ export const MemoTypeSchema = z.enum(["none", "text", "id", "hash", "return"]);
 export const MemoInputSchema = z
   .object({
     type: MemoTypeSchema,
-    value: z.string().max(28, "Memo value exceeds 28 byte limit for text memo"),
+    value: z.string(),
   })
   .superRefine((data, ctx) => {
     if (data.type === "text") {
@@ -107,6 +107,7 @@ export const MemoInputSchema = z
       }
     }
   });
+
 
 export const AssetCodeSchema = z
   .string()

@@ -1,3 +1,4 @@
+export * from "./redaction";
 export * from "./errors";
 export * from "./keys";
 export * from "./accounts";
@@ -12,3 +13,4 @@ export * from "./diagnostics";
 export * from "./soroban";
 export * from "./vault";
 export type { StellarKeypair } from "@anchorkit/types";
+
