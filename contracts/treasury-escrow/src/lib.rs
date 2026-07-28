@@ -74,6 +74,12 @@ pub enum EscrowError {
 const ADMIN_KEY: Symbol = symbol_short!("admin");
 const MILESTONE_COUNT: Symbol = symbol_short!("ms_cnt");
 const MILESTONE_PREFIX: Symbol = symbol_short!("ms");
+const VERSION_KEY: Symbol = symbol_short!("ver");
+
+/// Current storage layout version. Increment when the on-chain struct layout
+/// changes (new fields, renamed fields, reordered enums, etc.). Read helpers
+/// and migration code branch on this value.
+pub const CURRENT_STORAGE_VERSION: u32 = 1;
 
 #[contract]
 pub struct TreasuryEscrowContract;
@@ -86,9 +92,12 @@ impl TreasuryEscrowContract {
         }
         env.storage().instance().set(&ADMIN_KEY, &admin);
         env.storage().instance().set(&MILESTONE_COUNT, &0u32);
+        env.storage()
+            .instance()
+            .set(&VERSION_KEY, &CURRENT_STORAGE_VERSION);
         env.events().publish(
             (symbol_short!("escrow"), symbol_short!("init")),
-            admin.clone(),
+            (admin.clone(), CURRENT_STORAGE_VERSION),
         );
         Ok(())
     }
@@ -101,6 +110,15 @@ impl TreasuryEscrowContract {
             .ok_or(EscrowError::NotInitialized)?;
         admin.require_auth();
         Ok(admin)
+    }
+
+    /// Returns the storage layout version that was set at initialization time.
+    /// If the contract has not been initialized, returns 0.
+    pub fn storage_version(env: Env) -> u32 {
+        env.storage()
+            .instance()
+            .get(&VERSION_KEY)
+            .unwrap_or(0)
     }
 
     fn milestone_storage_key(id: u32) -> (Symbol, MilestoneKey) {
