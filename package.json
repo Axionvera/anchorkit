@@ -22,6 +22,8 @@
     "check:boundaries": "tsx scripts/check-package-boundaries.mts",
     "validate:issues": "tsx scripts/validate-issue-batch.mts",
     "validate:issue-files": "tsx scripts/validate-issues.mts",
+    "verify": "tsx scripts/verify.mts",
+    "verify:full": "tsx scripts/verify.mts --full",
     "clean": "turbo run clean && rm -rf node_modules && rm -rf .turbo",
     "contract:test": "cd contracts/treasury-escrow && cargo test",
     "contract:build": "cd contracts/treasury-escrow && cargo build --target wasm32-unknown-unknown --release",

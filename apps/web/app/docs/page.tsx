@@ -10,6 +10,7 @@ const docsNav = [
     items: [
       { title: "Project overview", file: "PROJECT_OVERVIEW.md" },
       { title: "Local setup", file: "LOCAL_SETUP.md" },
+      { title: "Local verification", file: "LOCAL_VERIFICATION.md" },
       { title: "Architecture", file: "ARCHITECTURE.md" },
       { title: "Roadmap", file: "ROADMAP.md" },
     ],

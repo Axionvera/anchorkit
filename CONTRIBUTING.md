@@ -34,12 +34,12 @@ git checkout -b feat/my-feature
 Run lint, typecheck, tests, and format before pushing:
 
 ```bash
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm contract:test
-pnpm format
+pnpm verify
 ```
+
+That single command runs format check, lint, typecheck, tests, and build.
+See [docs/LOCAL_VERIFICATION.md](./docs/LOCAL_VERIFICATION.md). If you touched
+`contracts/`, also run `pnpm contract:test` (or use `pnpm verify:full`).
 
 Start the web dashboard during development:
 

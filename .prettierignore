@@ -5,3 +5,6 @@ dist
 coverage
 pnpm-lock.yaml
 target
+.pnpm-store
+*.rs
+contracts
