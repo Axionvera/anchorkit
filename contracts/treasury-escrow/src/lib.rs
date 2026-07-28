@@ -51,6 +51,51 @@ pub struct EscrowSummary {
     pub completed_count: u32,
 }
 
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MilestoneCreatedEvent {
+    pub title: SorobanString,
+    pub amount: i128,
+    pub caller: Address,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct EvidenceSubmittedEvent {
+    pub evidence_hash: BytesN<32>,
+    pub caller: Address,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ApprovedEvent {
+    pub evidence_hash: Option<BytesN<32>>,
+    pub caller: Address,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DisputedEvent {
+    pub dispute_reason: SorobanString,
+    pub evidence_hash: Option<BytesN<32>>,
+    pub caller: Address,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ReadyForReleaseEvent {
+    pub amount: i128,
+    pub caller: Address,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ReleasedEvent {
+    pub amount: i128,
+    pub caller: Address,
+}
+
+
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
@@ -113,7 +158,7 @@ impl TreasuryEscrowContract {
         title: SorobanString,
         amount: i128,
     ) -> Result<u32, EscrowError> {
-        Self::require_admin(&env)?;
+        let admin = Self::require_admin(&env)?;
         if amount <= 0 {
             return Err(EscrowError::InvalidAmount);
         }
@@ -146,8 +191,12 @@ impl TreasuryEscrowContract {
         env.storage().instance().set(&MILESTONE_COUNT, &count);
 
         env.events().publish(
-            (symbol_short!("milestone"), symbol_short!("created")),
-            (id, title, amount),
+            (Symbol::new(&env, "milestone_created"), id),
+            MilestoneCreatedEvent {
+                title,
+                amount,
+                caller: admin,
+            },
         );
         Ok(id)
     }
@@ -176,8 +225,10 @@ impl TreasuryEscrowContract {
     pub fn submit_evidence(
         env: Env,
         id: u32,
+        caller: Address,
         evidence_hash: BytesN<32>,
     ) -> Result<(), EscrowError> {
+        caller.require_auth();
         let key = Self::milestone_storage_key(id);
         let mut ms: Milestone = env
             .storage()
@@ -195,14 +246,18 @@ impl TreasuryEscrowContract {
         env.storage().persistent().set(&key, &ms);
 
         env.events().publish(
-            (symbol_short!("milestone"), symbol_short!("evidence")),
-            (id, evidence_hash),
+            (Symbol::new(&env, "evidence_submitted"), id),
+            EvidenceSubmittedEvent {
+                evidence_hash,
+                caller,
+            },
         );
         Ok(())
     }
 
+
     pub fn approve_milestone(env: Env, id: u32) -> Result<(), EscrowError> {
-        Self::require_admin(&env)?;
+        let admin = Self::require_admin(&env)?;
         let key = Self::milestone_storage_key(id);
         let mut ms: Milestone = env
             .storage()
@@ -224,8 +279,11 @@ impl TreasuryEscrowContract {
         env.storage().persistent().set(&key, &ms);
 
         env.events().publish(
-            (symbol_short!("milestone"), symbol_short!("approved")),
-            id,
+            (Symbol::new(&env, "approved"), id),
+            ApprovedEvent {
+                evidence_hash: ms.evidence_hash.clone(),
+                caller: admin,
+            },
         );
         Ok(())
     }
@@ -235,7 +293,7 @@ impl TreasuryEscrowContract {
         id: u32,
         reason: SorobanString,
     ) -> Result<(), EscrowError> {
-        Self::require_admin(&env)?;
+        let admin = Self::require_admin(&env)?;
         let key = Self::milestone_storage_key(id);
         let mut ms: Milestone = env
             .storage()
@@ -255,14 +313,18 @@ impl TreasuryEscrowContract {
         env.storage().persistent().set(&key, &ms);
 
         env.events().publish(
-            (symbol_short!("milestone"), symbol_short!("disputed")),
-            (id, reason),
+            (Symbol::new(&env, "disputed"), id),
+            DisputedEvent {
+                dispute_reason: reason,
+                evidence_hash: ms.evidence_hash.clone(),
+                caller: admin,
+            },
         );
         Ok(())
     }
 
     pub fn mark_ready_for_release(env: Env, id: u32) -> Result<(), EscrowError> {
-        Self::require_admin(&env)?;
+        let admin = Self::require_admin(&env)?;
         let key = Self::milestone_storage_key(id);
         let mut ms: Milestone = env
             .storage()
@@ -277,14 +339,17 @@ impl TreasuryEscrowContract {
         env.storage().persistent().set(&key, &ms);
 
         env.events().publish(
-            (symbol_short!("milestone"), symbol_short!("ready")),
-            id,
+            (Symbol::new(&env, "ready_for_release"), id),
+            ReadyForReleaseEvent {
+                amount: ms.amount,
+                caller: admin,
+            },
         );
         Ok(())
     }
 
     pub fn release_milestone(env: Env, id: u32) -> Result<(), EscrowError> {
-        Self::require_admin(&env)?;
+        let admin = Self::require_admin(&env)?;
         let key = Self::milestone_storage_key(id);
         let mut ms: Milestone = env
             .storage()
@@ -303,11 +368,15 @@ impl TreasuryEscrowContract {
         env.storage().persistent().set(&key, &ms);
 
         env.events().publish(
-            (symbol_short!("milestone"), symbol_short!("released")),
-            (id, ms.amount),
+            (Symbol::new(&env, "released"), id),
+            ReleasedEvent {
+                amount: ms.amount,
+                caller: admin,
+            },
         );
         Ok(())
     }
+
 
     pub fn read_milestone(env: Env, id: u32) -> Result<Milestone, EscrowError> {
         let key = Self::milestone_storage_key(id);

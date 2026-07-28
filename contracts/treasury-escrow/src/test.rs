@@ -234,3 +234,36 @@ fn escrow_summary_tallies_multiple_milestones() {
     assert_eq!(s.disputed_count, 1);
     assert_eq!(s.completed_count, 1);
 }
+
+#[test]
+fn events_published_during_milestone_lifecycle() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let (_, client) = setup_contract(&env);
+
+    // Initial state has 1 init event
+    assert_eq!(env.events().all().len(), 1);
+
+    let title = SorobanString::from_str(&env, "Milestone for events test");
+    let id = client.create_milestone(&1u32, &title, &1_000i128);
+    // +1 milestone_created event
+    assert_eq!(env.events().all().len(), 2);
+
+    let ev: [u8; 32] = [0x55u8; 32];
+    client.submit_evidence(&id, &ev.into());
+    // +1 evidence_submitted event
+    assert_eq!(env.events().all().len(), 3);
+
+    client.approve_milestone(&id);
+    // +1 approved event
+    assert_eq!(env.events().all().len(), 4);
+
+    client.mark_ready_for_release(&id);
+    // +1 ready_for_release event
+    assert_eq!(env.events().all().len(), 5);
+
+    client.release_milestone(&id);
+    // +1 released event
+    assert_eq!(env.events().all().len(), 6);
+}
+
