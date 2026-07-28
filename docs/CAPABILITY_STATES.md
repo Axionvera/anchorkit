@@ -1,56 +1,101 @@
-Capability states
-Every module shown on the dashboard has a state describing the readiness of
-that dashboard surface. No module should silently appear more complete than
-its backing integration.
+# Capability States & Exports
 
-For the repository-wide matrix, MVP limitations, unsupported features, testnet
-assumptions, and planned work, read the
-public roadmap and capability disclaimer.
+Every module shown on the dashboard has a state describing the readiness of that dashboard surface. No module should silently appear more complete than its backing integration.
 
-States
-implemented — The specifically described capability is present and
-tested. This does not by itself mean independently audited, hosted, or ready
-for production/mainnet use.
-mock — The UI or data shape exists, but the end-to-end flow is backed by
-local state, simulation, or fixtures rather than a real integration.
-testnet-only — The scoped capability works against Stellar testnet; it
-is not supported for mainnet.
-experimental — Preview code exists but may change or break without
-notice and can be disabled by default.
-unavailable — The dashboard module is not built. Its card is disabled
-rather than linked to a missing route.
-A module can contain lower-level utilities with a different scope. For example,
-account diagnostic helpers exist in @anchorkit/stellar-kit, while a standalone
-Diagnostics dashboard page is unavailable. Likewise, the Rust escrow contract
-exists separately from the mock-only Escrow web page.
+For the repository-wide matrix, MVP limitations, unsupported features, testnet assumptions, and planned work, read the public roadmap and capability disclaimer.
 
-Where the dashboard state lives
-Type definitions: packages/types/src/index.ts (CapabilityState,
-CAPABILITY_STATES, and ModuleCapability).
-Registry: packages/config/src/capabilities.ts
-(MODULE_CAPABILITIES).
-Dashboard rendering: apps/web/app/dashboard/page.tsx, using
-CapabilityBadge from apps/web/components/ui.tsx.
-Current dashboard module states
-Module	State	Description	Docs
-Accounts	testnet-only	Creates disposable testnet keys, validates keys locally, and reads testnet Horizon account data.	Roadmap: capability matrix
-Payments	mock	Builds and validates payment intents and simulates readiness; it does not construct, sign, or submit transactions.	Roadmap: capability matrix
-Anchors	mock	Demonstrates local deposit/withdrawal metadata and fixture-backed SEP-style lifecycles; it is not an SEP server.	Roadmap: capability matrix
-Escrow	mock	Steps through an in-memory milestone and fixture events; it does not connect to or deploy the separate Rust contract.	Roadmap: capability matrix
-Diagnostics	unavailable	No standalone dashboard route exists; scoped account diagnostics remain available on the Accounts page.	Roadmap: capability matrix
-Network configuration	unavailable	Network presets exist in the config package, but no standalone dashboard route or switching workflow exists.	Roadmap: capability matrix
-The registry in packages/config/src/capabilities.ts is authoritative for
-dashboard cards. The roadmap is authoritative for broader package, contract,
-support, and future-delivery boundaries.
+## Capability States
 
-Updating a module
-Add a new module id to CapabilityModuleId in
-packages/types/src/index.ts, if needed.
-Add or update its MODULE_CAPABILITIES entry in
-packages/config/src/capabilities.ts.
-Add or update assertions in
-packages/config/test/capabilities.test.ts.
-Update the table above and the broader matrix in
-ROADMAP.md.
-Verify that mock/unavailable modules cannot link to a missing or live-looking
-workflow and run lint, typecheck, tests, and build.
+- **`implemented`** — The specifically described capability is present and tested. This does not by itself mean independently audited, hosted, or ready for production/mainnet use.
+- **`mock`** — The UI or data shape exists, but the end-to-end flow is backed by local state, simulation, or fixtures rather than a real integration.
+- **`testnet-only`** — The scoped capability works against Stellar testnet; it is not supported for mainnet.
+- **`experimental`** — Preview code exists but may change or break without notice and can be disabled by default.
+- **`unavailable`** — The dashboard module is not built. Its card is disabled rather than linked to a missing route.
+
+A module can contain lower-level utilities with a different scope. For example, account diagnostic helpers exist in `@anchorkit/stellar-kit`, while a standalone Diagnostics dashboard page is unavailable. Likewise, the Rust escrow contract exists separately from the mock-only Escrow web page.
+
+---
+
+## Where the Capability Metadata Lives
+
+- **Type definitions**: [`packages/types/src/index.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/types/src/index.ts) (`CapabilityState`, `CAPABILITY_STATES`, `ModuleCapability`, `PackageCapability`).
+- **Dashboard module registry**: [`packages/config/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/config/src/capabilities.ts) (`MODULE_CAPABILITIES`).
+- **Package capability metadata**:
+  - `@anchorkit/stellar-kit` -> [`packages/stellar-kit/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/stellar-kit/src/capabilities.ts) (`STELLAR_KIT_CAPABILITIES`)
+  - `@anchorkit/anchor-utils` -> [`packages/anchor-utils/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/anchor-utils/src/capabilities.ts) (`ANCHOR_UTILS_CAPABILITIES`)
+  - `@anchorkit/config` -> [`packages/config/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/config/src/capabilities.ts) (`CONFIG_PACKAGE_CAPABILITIES`)
+- **Dashboard rendering**: [`apps/web/app/dashboard/page.tsx`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/apps/web/app/dashboard/page.tsx) uses `CapabilityHealthSummary` and `CapabilityBadge` from [`apps/web/components/ui.tsx`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/apps/web/components/ui.tsx).
+
+---
+
+## Dashboard Module States
+
+| Module | State | Description | Docs |
+| :--- | :--- | :--- | :--- |
+| Accounts | `testnet-only` | Creates disposable testnet keys, validates keys locally, and reads testnet Horizon account data. | Roadmap: capability matrix |
+| Payments | `mock` | Builds and validates payment intents and simulates readiness; it does not construct, sign, or submit transactions. | Roadmap: capability matrix |
+| Anchors | `mock` | Demonstrates local deposit/withdrawal metadata and fixture-backed SEP-style lifecycles; it is not an SEP server. | Roadmap: capability matrix |
+| Escrow | `mock` | Steps through an in-memory milestone and fixture events; it does not connect to or deploy the separate Rust contract. | Roadmap: capability matrix |
+| Diagnostics | `unavailable` | No standalone dashboard route exists; scoped account diagnostics remain available on the Accounts page. | Roadmap: capability matrix |
+| Network configuration | `unavailable` | Network presets exist in the config package, but no standalone dashboard route or switching workflow exists. | Roadmap: capability matrix |
+
+---
+
+## Package-Level Capability Exports
+
+AnchorKit packages self-describe their capability readiness. Each major package exports a `PackageCapability` object mapping capabilities to explicit states:
+
+| Package | Overall State | Key Features |
+| :--- | :--- | :--- |
+| `@anchorkit/stellar-kit` | `testnet-only` | Keypair management, account loading, spendable balance parsing, payment intent validation, readiness engine, severity mapping, secret redaction, Soroban smart contract RPC client, vault manager. |
+| `@anchorkit/anchor-utils` | `implemented` | Zod validators for anchor deposit/withdrawal, payment rail configuration, callback URL validation, lifecycle state transitions, mock record generation, and fixtures. |
+| `@anchorkit/config` | `implemented` | Network configs (testnet, mainnet, futurenet), feature flag definitions and gates, environment configuration resolution. |
+
+---
+
+## Package-Level Capability Types
+
+The package-level capabilities are governed by the following interfaces:
+
+```ts
+export type PackageName =
+  | "stellar-kit"
+  | "anchor-utils"
+  | "config"
+  | "types"
+  | "validators"
+  | "fixtures";
+
+export interface PackageFeatureCapability {
+  id: string;
+  label: string;
+  state: CapabilityState;
+  description: string;
+}
+
+export interface PackageCapability {
+  packageName: PackageName;
+  overallState: CapabilityState;
+  features: PackageFeatureCapability[];
+  docsHref?: string;
+}
+```
+
+---
+
+## Update Procedure
+
+### Adding/Updating a Dashboard Module
+1. Add the new module ID to `CapabilityModuleId` in `packages/types/src/index.ts` if it is new.
+2. Add or update the corresponding entry in `MODULE_CAPABILITIES` in `packages/config/src/capabilities.ts`.
+3. Add/update assertions in `packages/config/test/capabilities.test.ts`.
+4. Update the **Dashboard Module States** table in this document and the matrix in `ROADMAP.md`.
+5. Run lint, typecheck, tests, and build.
+
+### Adding/Updating Package Capabilities
+1. Create or edit `src/capabilities.ts` in the target package.
+2. Export `[PACKAGE_NAME]_CAPABILITIES` as a `PackageCapability` object.
+3. Export it in the package's primary entrypoint `src/index.ts`.
+4. Add a test suite verifying its structure under `test/capabilities.test.ts`.
+5. Update the **Package-Level Capability Exports** table in this document.
+6. Verify that it builds and passes all tests.
