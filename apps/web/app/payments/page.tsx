@@ -2,13 +2,22 @@
 
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
-import { Alert, Button, Card, Input, Label, Select } from "@/components/ui";
+import {
+  Button,
+  Card,
+  Input,
+  Label,
+  Select,
+  ValidationStateAlert,
+  ValidationStateBadge,
+} from "@/components/ui";
 import {
   createPaymentIntent,
   createMockTransactionReceipt,
   evaluateTransactionReadinessSync,
   getStellarExpertAccountUrl,
   isPublicKeyValid,
+  transactionReadinessStateToUiState,
 } from "@anchorkit/stellar-kit";
 import type { TransactionReadinessPipeline } from "@anchorkit/stellar-kit";
 import type {
@@ -18,11 +27,11 @@ import type {
   StellarAsset,
   StellarNetwork,
   StellarPublicKey,
-  TransactionReadinessState,
   TransactionReceiptStatus,
 } from "@anchorkit/types";
 import { DEFAULT_NETWORK } from "@anchorkit/config";
 import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
+import { useDebouncedLoading } from "@/lib/useDebouncedLoading";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
 const DEMO_DEST = "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U";
@@ -91,20 +100,7 @@ export default function PaymentsPage() {
     });
   }, [intent, network, simulateSource, simulateDest]);
 
-  const getStateBadgeStyle = (state: TransactionReadinessState) => {
-    switch (state) {
-      case "valid":
-        return "bg-green-100 text-green-800 border-green-300 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800";
-      case "warning":
-        return "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800";
-      case "blocked":
-        return "bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800";
-      case "invalid":
-        return "bg-red-100 text-red-800 border-red-300 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800";
-      case "unavailable":
-        return "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800";
-    }
-  };
+  const readinessLoading = useDebouncedLoading(intent);
 
   return (
     <PageShell
@@ -280,20 +276,16 @@ export default function PaymentsPage() {
         <Card className="lg:col-span-2 space-y-4">
           <h2 className="text-base font-semibold tracking-tight">Readiness pipeline result</h2>
           {!readiness ? (
-            <Alert tone="warning" title="No valid intent">
+            <ValidationStateAlert state="invalid" title="No valid intent">
               Fix the invalid fields above to generate a typed readiness report.
-            </Alert>
+            </ValidationStateAlert>
           ) : (
             <>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-ink-500 dark:text-ink-400">Overall State</span>
-                <span
-                  className={`rounded-full border px-2.5 py-0.5 text-mono-xs font-medium ${getStateBadgeStyle(
-                    readiness.state
-                  )}`}
-                >
-                  {readiness.state.replaceAll("_", " ")}
-                </span>
+                <ValidationStateBadge
+                  state={readinessLoading ? "loading" : transactionReadinessStateToUiState(readiness.state)}
+                />
               </div>
               <p className="text-sm font-medium">{readiness.summary}</p>
 
@@ -312,13 +304,9 @@ export default function PaymentsPage() {
                         <span className="font-mono font-bold uppercase">{stg.stage}</span>
                         <span className="text-ink-600 dark:text-ink-300">{stg.message}</span>
                       </div>
-                      <span
-                        className={`rounded-full border px-2 py-0.5 text-mono-xs uppercase ${getStateBadgeStyle(
-                          stg.state
-                        )}`}
-                      >
-                        {stg.state}
-                      </span>
+                      <ValidationStateBadge
+                        state={readinessLoading ? "loading" : transactionReadinessStateToUiState(stg.state)}
+                      />
                     </div>
                   ))}
                 </div>
