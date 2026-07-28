@@ -159,6 +159,59 @@ export interface TransactionReadiness {
   summary: string;
 }
 
+/**
+ * Normalized post-submit transaction outcome for cross-surface UI.
+ *
+ * Distinct from `AnchorTransactionStatus` (SEP lifecycle) and `ReadinessState`
+ * (pre-submit validation). Use this when displaying confirmed, pending, failed,
+ * rejected, or unknown outcomes consistently across payment, anchor, and escrow
+ * screens.
+ */
+export type TransactionReceiptStatus =
+  | "confirmed"
+  | "pending"
+  | "failed"
+  | "rejected"
+  | "unknown";
+
+export const TRANSACTION_RECEIPT_STATUSES: readonly TransactionReceiptStatus[] = [
+  "confirmed",
+  "pending",
+  "failed",
+  "rejected",
+  "unknown",
+] as const;
+
+/** Where a receipt was derived from. */
+export type TransactionReceiptSource = "payment" | "anchor" | "escrow" | "other";
+
+export interface TransactionReceipt {
+  /** Stable receipt id (anchor tx id, mock id, etc.). */
+  id: string;
+  /** Normalized outcome status for cross-surface UI. */
+  status: TransactionReceiptStatus;
+  /** Network the transaction was submitted on. */
+  network: StellarNetwork;
+  /** Human-readable headline for UI. */
+  headline: string;
+  /** Optional longer detail message. */
+  detail?: string;
+  /** Where this receipt originated. */
+  source: TransactionReceiptSource;
+  /** On-chain Stellar transaction hash, when known. */
+  transactionHash?: StellarTransactionHash;
+  /** Network-aware Stellar Expert link, when `transactionHash` is present. */
+  explorerUrl?: string;
+  /** ISO-8601 timestamps. */
+  submittedAt?: string;
+  finalizedAt?: string;
+  /** Error classification when status is failed or rejected. */
+  errorCode?: string;
+  errorMessage?: string;
+  /** Additional context (anchor id, milestone id, etc.). */
+  metadata?: Record<string, unknown>;
+}
+
 export type AnchorTransactionStatus =
   | "pending_user"
   | "pending_anchor"
