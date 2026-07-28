@@ -1,0 +1,11 @@
+{
+  "assetCode": "USDC",
+  "amount": "250.75",
+  "account": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+  "memo": "WITHDRAW-99",
+  "memoType": "text",
+  "railId": "ach_us_bank",
+  "dest": "US123456789012",
+  "destExtra": "ACCT-4421",
+  "type": "ACH"
+}

@@ -14,7 +14,9 @@ import type { StellarAsset, StellarNetwork } from "@anchorkit/types";
 const NETWORKS: StellarNetwork[] = ["testnet", "mainnet", "futurenet"];
 
 export default function AssetsPage() {
-  const [input, setInput] = useState("USDC:GC5HTWCIAUD72MGI7AHMJEF5ZJRKXS7II2PYVYOJEYKN4UYH6QTPCPZV");
+  const [input, setInput] = useState(
+    "USDC:GC5HTWCIAUD72MGI7AHMJEF5ZJRKXS7II2PYVYOJEYKN4UYH6QTPCPZV"
+  );
   const [network, setNetwork] = useState<StellarNetwork>("testnet");
   const [result, setResult] = useState<ReturnType<typeof checkAssetOnNetwork> | null>(null);
 
@@ -60,7 +62,9 @@ export default function AssetsPage() {
               <Select
                 id="network-select"
                 value={network}
-                onChange={(e: { target: { value: string } }) => setNetwork(e.target.value as StellarNetwork)}
+                onChange={(e: { target: { value: string } }) =>
+                  setNetwork(e.target.value as StellarNetwork)
+                }
               >
                 {NETWORKS.map((n) => (
                   <option key={n} value={n}>
@@ -85,7 +89,9 @@ export default function AssetsPage() {
         </Card>
 
         <Card>
-          <h2 className="text-base font-semibold tracking-tight">Registered assets (testnet MVP)</h2>
+          <h2 className="text-base font-semibold tracking-tight">
+            Registered assets (testnet MVP)
+          </h2>
           <ul className="mt-3 divide-y divide-ink-200 dark:divide-ink-800">
             {registryAssets.map((a) => {
               const key = a.type === "native" ? "XLM" : `${a.code}:${a.issuer}`;

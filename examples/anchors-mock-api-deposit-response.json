@@ -1,0 +1,22 @@
+{
+  "transaction": {
+    "id": "dep_mock_12345",
+    "kind": "deposit",
+    "status": "pending_user",
+    "assetCode": "XLM",
+    "amountIn": "500.0000000",
+    "amountOut": "498.5000000",
+    "feeAmount": "1.5000000",
+    "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+    "externalTransactionId": "SEPA-REF-0001",
+    "userActionRequired": true,
+    "message": "Please confirm the bank transfer details in the anchor portal.",
+    "startedAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "metadata": {
+      "rail": "SEPA"
+    }
+  },
+  "userActionUrl": "https://anchor.example.com/portal/deposit?id=dep_mock_12345",
+  "instructions": "Initiate a SEPA transfer of 500 EUR using reference code SEPA-REF-0001."
+}

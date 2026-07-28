@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  CAPABILITY_BADGE_STYLES,
-  CAPABILITY_BADGE_LABELS,
-} from "../components/ui";
+import { CAPABILITY_BADGE_STYLES, CAPABILITY_BADGE_LABELS } from "../components/ui";
 import { CAPABILITY_STATES } from "@anchorkit/types";
 
 describe("CapabilityBadge style/label maps", () => {

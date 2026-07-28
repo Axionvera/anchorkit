@@ -16,6 +16,14 @@ import {
   MilestoneSchema,
   StellarPublicKeySchema,
   TransactionReceiptSchema,
+  AnchorMockDepositRequestSchema,
+  AnchorMockDepositResponseSchema,
+  AnchorMockWithdrawalRequestSchema,
+  AnchorMockWithdrawalResponseSchema,
+  AnchorMockStatusResponseSchema,
+  AnchorMockUpdateRequestSchema,
+  AnchorMockUpdateResponseSchema,
+  AnchorMockErrorResponseSchema,
 } from "../src/index";
 import { EXAMPLE_REGISTRY } from "../../../examples/registry";
 
@@ -26,6 +34,14 @@ const SCHEMA_MAP = {
   Milestone: MilestoneSchema,
   StellarPublicKeyArray: StellarPublicKeySchema,
   TransactionReceipt: TransactionReceiptSchema,
+  AnchorMockDepositRequest: AnchorMockDepositRequestSchema,
+  AnchorMockDepositResponse: AnchorMockDepositResponseSchema,
+  AnchorMockWithdrawalRequest: AnchorMockWithdrawalRequestSchema,
+  AnchorMockWithdrawalResponse: AnchorMockWithdrawalResponseSchema,
+  AnchorMockStatusResponse: AnchorMockStatusResponseSchema,
+  AnchorMockUpdateRequest: AnchorMockUpdateRequestSchema,
+  AnchorMockUpdateResponse: AnchorMockUpdateResponseSchema,
+  AnchorMockErrorResponse: AnchorMockErrorResponseSchema,
 } as const;
 
 const ROOT = resolve(import.meta.dirname, "../../..");
@@ -51,7 +67,10 @@ describe.each(EXAMPLE_REGISTRY)("$id", (entry) => {
     let failures = 0;
     for (const item of items) {
       // Accounts fixtures are objects with a `publicKey` field, not bare keys.
-      const target = entry.schema === "StellarPublicKeyArray" ? (item as { publicKey?: string }).publicKey : item;
+      const target =
+        entry.schema === "StellarPublicKeyArray"
+          ? (item as { publicKey?: string }).publicKey
+          : item;
       if (!schema.safeParse(target).success) failures++;
     }
 

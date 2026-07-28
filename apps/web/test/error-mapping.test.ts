@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  createAnchorKitError,
-  mapErrorToUserSafeMessage,
-} from "@anchorkit/types";
+import { createAnchorKitError, mapErrorToUserSafeMessage } from "@anchorkit/types";
 
 describe("Web UI Error Mapping Integration", () => {
   it("maps AnchorKitError to safe UI title and message", () => {

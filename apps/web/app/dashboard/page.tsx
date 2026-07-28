@@ -82,9 +82,9 @@ export default function DashboardPage() {
               unless you explicitly wire one.
             </li>
             <li>
-              <span className="font-medium text-amber-700 dark:text-amber-300">4.</span> Secret
-              keys generated here are ephemeral by default — copy them to a secure place if you
-              want to reuse a test identity.
+              <span className="font-medium text-amber-700 dark:text-amber-300">4.</span> Secret keys
+              generated here are ephemeral by default — copy them to a secure place if you want to
+              reuse a test identity.
             </li>
           </ul>
         </Card>

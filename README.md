@@ -29,7 +29,6 @@ Read the public roadmap and full capability disclaimer
 for the current capability table, mock and experimental areas, unsupported
 features, MVP limitations, testnet assumptions, and planned work.
 
-<<<<<<< HEAD
 ✨ Features shipped in MVP
 @anchorkit/stellar-kit
 Keypair generation for testnet
@@ -184,7 +183,6 @@ Run all TypeScript unit tests:
 
 Bash
 
-<<<<<<< HEAD
 pnpm test
 Run lint, typecheck, and build the full monorepo:
 Run the single local verification command (format, lint, typecheck, test, build):
@@ -212,7 +210,6 @@ pnpm contract:test
 🛡️ Important safety defaults
 AnchorKit is testnet-first and secret-safe by design:
 
-<<<<<<< HEAD
 No mainnet by default. DEFAULT_ENV_CONFIG.allowMainnet = false. Any
 attempt to reach mainnet Horizon — via loadAccount, getAccountStatus,
 diagnoseAccount, or payment-readiness checks — without an explicit
@@ -248,34 +245,34 @@ transaction to the network out of the box.
 📚 Docs index
 All of these live under ./docs/.
 
-Topic	File
-Project overview	PROJECT_OVERVIEW.md
-End-to-end developer journey	DEVELOPER_JOURNEY.md
-Local setup	LOCAL_SETUP.md
-Local verification (pnpm verify)	LOCAL_VERIFICATION.md
-Architecture / package boundaries	ARCHITECTURE.md
-Stellar testnet usage	STELLAR_TESTNET_USAGE.md
-Security notes	SECURITY_NOTES.md
-Security threat model	SECURITY_THREAT_MODEL.md
-Security & architecture readiness review	SECURITY_ARCHITECTURE_REVIEW.md
-Secret key handling rules R0–R6	SECRET_KEY_HANDLING.md
-Account utilities	ACCOUNT_UTILITIES.md
-Payment intent utilities	PAYMENT_INTENT_UTILITIES.md
-Anchor utilities	ANCHOR_UTILITIES.md
-Soroban treasury escrow contract	SOROBAN_ESCROW_CONTRACT.md
-Shared error taxonomy	ERROR_TAXONOMY.md
-Escrow storage migration guide	ESCROW_MIGRATION.md
-Shared test fixtures	FIXTURE_FRAMEWORK.md
-Status severity mapping	STATUS_SEVERITY_MAPPING.md
-Contributor guide	CONTRIBUTOR_GUIDE.md
-Maintainer guide	MAINTAINER_GUIDE.md
-Issue writing guide	ISSUE_WRITING_GUIDE.md
-GrantFox contribution workflow	GRANTFOX_WORKFLOW.md
-Advanced issue standard	ISSUE_STANDARD.md
-Maintainer review checklist	MAINTAINER_REVIEW_CHECKLIST.md
-Automation runbook	AUTOMATION_RUNBOOK.md
-Roadmap	ROADMAP.md
-Escrow compatibility matrix	ESCROW_COMPATIBILITY_MATRIX.md
+Topic File
+Project overview PROJECT_OVERVIEW.md
+End-to-end developer journey DEVELOPER_JOURNEY.md
+Local setup LOCAL_SETUP.md
+Local verification (pnpm verify) LOCAL_VERIFICATION.md
+Architecture / package boundaries ARCHITECTURE.md
+Stellar testnet usage STELLAR_TESTNET_USAGE.md
+Security notes SECURITY_NOTES.md
+Security threat model SECURITY_THREAT_MODEL.md
+Security & architecture readiness review SECURITY_ARCHITECTURE_REVIEW.md
+Secret key handling rules R0–R6 SECRET_KEY_HANDLING.md
+Account utilities ACCOUNT_UTILITIES.md
+Payment intent utilities PAYMENT_INTENT_UTILITIES.md
+Anchor utilities ANCHOR_UTILITIES.md
+Soroban treasury escrow contract SOROBAN_ESCROW_CONTRACT.md
+Shared error taxonomy ERROR_TAXONOMY.md
+Escrow storage migration guide ESCROW_MIGRATION.md
+Shared test fixtures FIXTURE_FRAMEWORK.md
+Status severity mapping STATUS_SEVERITY_MAPPING.md
+Contributor guide CONTRIBUTOR_GUIDE.md
+Maintainer guide MAINTAINER_GUIDE.md
+Issue writing guide ISSUE_WRITING_GUIDE.md
+GrantFox contribution workflow GRANTFOX_WORKFLOW.md
+Advanced issue standard ISSUE_STANDARD.md
+Maintainer review checklist MAINTAINER_REVIEW_CHECKLIST.md
+Automation runbook AUTOMATION_RUNBOOK.md
+Roadmap ROADMAP.md
+Escrow compatibility matrix ESCROW_COMPATIBILITY_MATRIX.md
 🦊 GrantFox readiness
 upstream/main
 
