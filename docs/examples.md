@@ -48,3 +48,11 @@ The web dashboard reuses the same fixtures (e.g. anchor lifecycle demos build
 records that mirror `examples/anchors-*-lifecycle.json`). Because both the demos
 and the examples are validated by the shared schemas, a schema change is caught
 in one place.
+
+## Relationship to `@anchorkit/fixtures`
+
+`examples/*.json` are JSON files used for schema-drift checking
+(`pnpm check:examples`). `@anchorkit/fixtures` is a TypeScript package that
+exports the same (or closely mirrored) sample data as importable values for
+package test suites — see [Fixtures](./fixtures.md) for the full breakdown
+and the "no real secrets" rule that applies to both.

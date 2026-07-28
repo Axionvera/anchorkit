@@ -1,0 +1,24 @@
+{
+  "network": "testnet",
+  "entries": [
+    {
+      "asset": {
+        "type": "native",
+        "code": "XLM",
+        "issuer": null
+      },
+      "networks": ["testnet", "mainnet", "futurenet"],
+      "note": "Native lumens — supported on every network."
+    },
+    {
+      "asset": {
+        "type": "issued",
+        "code": "USDC",
+        "issuer": "GC5HTWCIAUD72MGI7AHMJEF5ZJRKXS7II2PYVYOJEYKN4UYH6QTPCPZV"
+      },
+      "networks": ["testnet"],
+      "testnetOnly": true,
+      "note": "Demo testnet USDC (issuer is a generated testnet account)."
+    }
+  ]
+}

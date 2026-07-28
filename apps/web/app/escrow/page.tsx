@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Alert, Button, Card, DataRow, Input, Label, MilestoneStatusBadge } from "@/components/ui";
-import { parseEscrowEvents } from "@anchorkit/stellar-kit";
+import { parseEscrowEvents, escrowReleaseToReceipt } from "@anchorkit/stellar-kit";
 import { escrowEventExample } from "@/lib/escrowEventExample";
+import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
 import type { EscrowEventV1, EscrowSummary, Milestone, MilestoneStatus } from "@anchorkit/types";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
@@ -33,6 +34,11 @@ export default function EscrowPage() {
     () => parseEscrowEvents(escrowEventExample).events,
     []
   );
+
+  const releaseReceipt = useMemo(() => {
+    const released = mappedEvents.find((e) => e.type === "released");
+    return released ? escrowReleaseToReceipt(released, "testnet") : null;
+  }, [mappedEvents]);
 
   const demoMilestone: Milestone = useMemo(() => {
     const status = LIFECYCLE[step] ?? "draft";
@@ -214,6 +220,8 @@ export default function EscrowPage() {
             </dl>
           </div>
         </Card>
+
+        <TransactionReceiptPanel receipt={releaseReceipt} title="Escrow release receipt" />
 
         <Card>
           <h2 className="text-base font-semibold tracking-tight">Contract quick-links</h2>

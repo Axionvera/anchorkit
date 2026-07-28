@@ -147,7 +147,7 @@ export function parseEscrowEvent(raw: RawEscrowEvent): EscrowEventParseResult {
         return { ok: true, event };
       }
       default:
-        return { ok: false, error: `unhandled event type: ${type}`, raw };
+        return { ok: false, error: "unhandled event type", raw };
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'failed to decode event';

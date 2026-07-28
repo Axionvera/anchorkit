@@ -15,6 +15,23 @@ technical, constructive, and respectful.
 - `GrantFox OSS` + `Maybe Rewarded` + `Official Campaign | FWC26` are issues participating in
   the GrantFox campaign. See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md).
 
+Start with the [DEVELOPER_JOURNEY.md](./DEVELOPER_JOURNEY.md) walkthrough to understand how the
+monorepo modules fit together before diving into an issue.
+
+## GrantFox campaign contributors
+
+If you are contributing through a GrantFox campaign, read
+[GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) **before** applying for an issue. Key rules:
+
+1. **Apply before working.** Comment on the issue with your experience, approach, and timeline.
+2. **Wait for assignment.** Do not open a PR until a maintainer assigns you.
+3. **One issue at a time.** Focus on the assigned issue; apply for more after completing it.
+4. **PR must reference the issue.** Use `Closes #NNN` in the PR body.
+5. **Merge does not guarantee reward.** The campaign reviewer evaluates reward-readiness
+   post-merge against scope, quality, and security standards.
+
+See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
+
 ## Quick contribution loop
 
 1. Find an issue, or open a new one following the [ISSUE_STANDARD.md](./ISSUE_STANDARD.md).
@@ -31,6 +48,9 @@ technical, constructive, and respectful.
 - Keep commits small and rebased on `main`. One PR should close one issue scope when possible.
 - PR title should summarise the change; the body should reference the issue, explain design
   choices, and list any risks.
+- For GrantFox issues, paste the
+  [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) self-check into your
+  PR description.
 
 ## Tests are expected
 
@@ -46,8 +66,8 @@ technical, constructive, and respectful.
 
 ## How to get help
 
-- GitHub Discussions (if enabled) for questions.
-- Comments on the issue you are assigned to for implementation questions.
+- GitHub issue threads for implementation questions on your assigned issue.
+- PR review comments for feedback on your implementation.
+- Maintainers will try to respond within 3 working days.
 
-Maintainers will try to respond within 3 working days. We prioritise assigned contributors over
-drive-by PRs that have no linked issue.
+We prioritise assigned contributors over drive-by PRs that have no linked issue.

@@ -15,6 +15,7 @@ ever held real value.
 | `anchors-deposit-lifecycle.json` | Array of 4 deposit status records (pending_user → completed) |
 | `anchors-withdrawal-lifecycle.json` | Array of 5 withdrawal records (incl. failed, refunded) |
 | `escrow-milestone-lifecycle.json` | Treasury escrow milestones across the full state DAG |
+| `escrow-events-example.json` | Raw Soroban-style escrow contract events, one per event type |
 
 Do not commit a secret key (S…) that has ever held mainnet funds to this directory. All
 synthetic secrets used here are only valid structurally and are derived at runtime in tests.

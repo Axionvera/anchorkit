@@ -38,6 +38,7 @@ AnchorKit/
 ├── packages/
 │   ├── types/                           Shared TypeScript contracts
 │   ├── config/                          Network and environment configuration
+│   ├── fixtures/                        Shared deterministic test fixtures (no real secrets)
 │   ├── validators/                      Runtime validation schemas
 │   ├── stellar-kit/                     Stellar network and transaction utilities
 │   └── anchor-utils/                    Anchor lifecycle and metadata utilities
@@ -73,6 +74,7 @@ apps/web
 
 anchor-utils
    ├──▶ stellar-kit, when Stellar-specific behaviour is required
+   ├──▶ fixtures, for backward-compatible re-exported mock/lifecycle fixtures
    ├──▶ validators
    ├──▶ config
    └──▶ types
@@ -80,6 +82,9 @@ anchor-utils
 stellar-kit
    ├──▶ validators
    ├──▶ config
+   └──▶ types
+
+fixtures
    └──▶ types
 
 validators
@@ -93,6 +98,10 @@ types
    └──▶ no internal AnchorKit package
 ```
 
+`fixtures` is also used as a **test-only** dependency by `validators` and
+`stellar-kit` (never from their `src/`) to avoid duplicating sample data
+across test suites.
+
 The dependency graph must not point upward.
 
 For example:
@@ -100,6 +109,7 @@ For example:
 - `stellar-kit` must not import `anchor-utils`;
 - `validators` must not import `stellar-kit`;
 - `types` must not import any other AnchorKit package;
+- `fixtures` must not import any other AnchorKit package except `types`;
 - no reusable package may import from `apps/web`.
 
 A module should depend only on the lowest-level packages it actually needs.
@@ -110,6 +120,7 @@ A module should depend only on the lowest-level packages it actually needs.
 | --------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | `packages/types`            | Shared contracts, branded types, enums, result shapes, and event models                                         | None                                                         |
 | `packages/config`           | Network presets, endpoints, environment defaults, and mainnet gating                                            | `types`                                                      |
+| `packages/fixtures`         | Shared, deterministic test fixtures (accounts, payments, anchors, escrow, diagnostics, invalid examples)        | `types`                                                      |
 | `packages/validators`       | Zod schemas, runtime validation, and safe validation errors                                                     | `types`, selected `config` values                            |
 | `packages/stellar-kit`      | Stellar keys, accounts, assets, payments, transactions, diagnostics, logging, explorer links, and event parsing | `types`, `config`, `validators`                              |
 | `packages/anchor-utils`     | Anchor requests, lifecycle transitions, status messages, badges, and fixtures                                   | `types`, `validators`, `config`, `stellar-kit` when required |
@@ -195,7 +206,34 @@ Changes affecting the following require security review:
 - environment fallbacks;
 - configuration error behaviour.
 
-### 5.3 `@anchorkit/validators`
+### 5.3 `@anchorkit/fixtures`
+
+`packages/fixtures` owns shared, deterministic test fixtures used across
+packages instead of each package hand-rolling its own sample data.
+
+It includes:
+
+- funded/unfunded Stellar account fixtures (`accounts.ts`);
+- native/issued asset fixtures (`assets.ts`);
+- payment intent fixtures, valid and invalid (`payments.ts`);
+- anchor deposit/withdrawal request and lifecycle fixtures (`anchors.ts`);
+- escrow event and milestone fixtures (`escrow.ts`);
+- deterministic `AccountInfo` fixtures for diagnostics tests (`diagnostics.ts`);
+- deliberately invalid fixtures for exercising validators (`invalid.ts`).
+
+Fixtures must:
+
+- contain no real secret keys or real user data;
+- use fixed, deterministic values (no `Date.now()`, no `Math.random()`);
+- mirror the shapes documented in `examples/*.json` where applicable.
+
+It may depend only on `types`. It must not depend on `config`, `validators`,
+`stellar-kit`, or `anchor-utils` — this keeps it importable by any package's
+test suite without creating cycles.
+
+See [Fixtures](./fixtures.md) for the full module reference.
+
+### 5.4 `@anchorkit/validators`
 
 `packages/validators` owns runtime validation of untrusted input.
 
@@ -243,7 +281,7 @@ Validators must not depend on:
 - `anchor-utils`;
 - `apps/web`.
 
-### 5.4 `@anchorkit/stellar-kit`
+### 5.5 `@anchorkit/stellar-kit`
 
 `packages/stellar-kit` owns reusable Stellar-specific runtime behaviour.
 
@@ -290,7 +328,7 @@ Incorrect:
 import { buildPaymentIntent } from "../../packages/stellar-kit/src/intent";
 ```
 
-### 5.5 `@anchorkit/anchor-utils`
+### 5.6 `@anchorkit/anchor-utils`
 
 `packages/anchor-utils` owns anchor-specific domain behaviour.
 
@@ -316,6 +354,11 @@ A dependency on `stellar-kit` is appropriate only where anchor functionality gen
 - generating an explorer link;
 - handling a shared Stellar error;
 - consuming a parsed contract event.
+
+`anchor-utils` re-exports its lifecycle fixtures and invalid-input fixtures
+from `@anchorkit/fixtures` for backward compatibility with existing consumers
+(e.g. the `apps/web` anchors page). New fixture data should be added to
+`@anchorkit/fixtures` directly rather than to `anchor-utils`.
 
 It must not contain:
 
@@ -689,7 +732,8 @@ Use `import type` for type-only dependencies.
 The following dependency directions are prohibited:
 
 ```text
-types → config, validators, stellar-kit, anchor-utils, or web
+types → config, validators, stellar-kit, anchor-utils, fixtures, or web
+fixtures → config, validators, stellar-kit, anchor-utils, or web
 config → validators, stellar-kit, anchor-utils, or web
 validators → stellar-kit, anchor-utils, or web
 stellar-kit → anchor-utils or web
@@ -742,6 +786,7 @@ Choose the owner using this guide.
 | ----------------------------------------------------------- | --------------------------- |
 | Shared public type or event model                           | `types`                     |
 | Network endpoint or environment default                     | `config`                    |
+| Shared deterministic test fixture                            | `fixtures`                  |
 | Runtime schema or validation result                         | `validators`                |
 | Account, asset, payment, key, transaction, or event utility | `stellar-kit`               |
 | Anchor request, lifecycle, or status behaviour              | `anchor-utils`              |
@@ -773,7 +818,56 @@ Before adding an import:
 5. add tests in the owning package;
 6. update examples and documentation when public behaviour changes.
 
-## 15. Architecture review checklist
+## 15. Breaking-change expectations
+
+A change to a package's public surface — anything reachable from its
+`@anchorkit/x` root export, per §13 — is **breaking** if it does any of the
+following to code that only imports through that public entry point:
+
+- removes or renames an exported function, class, type, or constant;
+- changes a function's required parameters (adding a required parameter,
+  removing one, or changing a parameter's type incompatibly);
+- changes a return type incompatibly (narrowing a union, removing a field
+  from a returned object, changing a success/failure shape);
+- changes validated-input behaviour so a previously-valid value is now
+  rejected, or a previously-rejected value is now accepted;
+- changes a previously-thrown error's `code` (see `docs/error-standard.md`)
+  for the same failure condition, since callers match on `code`;
+- changes default values for `config` (network defaults, endpoints,
+  mainnet gating) in a way that alters behaviour for callers who didn't
+  override them.
+
+**Not breaking**, even though the diff touches a package:
+
+- adding a new exported function, type, or optional parameter;
+- widening an accepted input type or a returned union;
+- fixing a validator that incorrectly accepted invalid input, as long as
+  it's documented as a bugfix in the changelog (see below) rather than
+  shipped silently — a security- or correctness-motivated tightening is
+  still a behaviour change callers should be able to find in the log;
+  performance improvements that don't change any public signature or
+  observable output;
+  internal refactors confined to a package's `src/` that never touch its
+  `index.ts` re-exports.
+
+Every breaking change must, before merge:
+
+1. bump the affected package's version per semver (`docs/MAINTAINER_GUIDE.md`
+   §Releases — this repo is pre-1.0, so a breaking change bumps the minor
+   version, per the `0.x` convention);
+2. add a changelog entry describing what changed and why;
+3. update any example in `examples/` or code sample in `docs/` that used the
+   changed surface, so `pnpm check:examples` and `pnpm typecheck` both stay
+   green;
+4. call out the change explicitly in the PR description — don't rely on a
+   reviewer noticing it in a diff.
+
+A change confined to a package's internal modules (anything not re-exported
+from its `src/index.ts`) is never breaking for consumers by definition,
+since §13 already establishes that only the public entry point is a
+supported integration surface.
+
+## 16. Architecture review checklist
 
 Before approving a change, confirm:
 
@@ -793,8 +887,12 @@ Before approving a change, confirm:
 - [ ] Tests exist in the owning package or contract.
 - [ ] Documentation and examples are updated where needed.
 - [ ] No circular dependency is introduced.
+- [ ] `pnpm check:boundaries` passes.
+- [ ] If the change touches a public export, §15's breaking-change criteria
+      have been checked and, if breaking, the version/changelog/PR
+      description steps there are done.
 
-## 16. Architecture exceptions
+## 17. Architecture exceptions
 
 An exception to these boundaries requires:
 
@@ -806,9 +904,10 @@ An exception to these boundaries requires:
 
 Convenience alone is not a sufficient reason to reverse dependency direction.
 
-## 17. Related documentation
+## 18. Related documentation
 
 - [Project Overview](./PROJECT_OVERVIEW.md)
+- [End-to-End Developer Journey](./DEVELOPER_JOURNEY.md)
 - [Local Setup](./LOCAL_SETUP.md)
 - [Account Utilities](./ACCOUNT_UTILITIES.md)
 - [Payment Intent Utilities](./PAYMENT_INTENT_UTILITIES.md)
@@ -817,6 +916,7 @@ Convenience alone is not a sufficient reason to reverse dependency direction.
 - [Escrow Events](./escrow-events.md)
 - [Soroban Escrow Contract](./SOROBAN_ESCROW_CONTRACT.md)
 - [Examples](./examples.md)
+- [Fixtures](./fixtures.md)
 - [Security Notes](./SECURITY_NOTES.md)
 - [Secret Key Handling](./SECRET_KEY_HANDLING.md)
 - [Contributor Guide](./CONTRIBUTOR_GUIDE.md)

@@ -69,11 +69,20 @@ pub enum EscrowError {
     DisputeResolutionRequired = 12,
     MilestoneAlreadyExists = 13,
     DisputeWithoutEvidence = 14,
+    /// Evidence is write-once. Replacing a hash that is already recorded would
+    /// let a later submission silently redefine what an approval attested to.
+    EvidenceAlreadySubmitted = 15,
 }
 
 const ADMIN_KEY: Symbol = symbol_short!("admin");
 const MILESTONE_COUNT: Symbol = symbol_short!("ms_cnt");
 const MILESTONE_PREFIX: Symbol = symbol_short!("ms");
+const VERSION_KEY: Symbol = symbol_short!("ver");
+
+/// Current storage layout version. Increment when the on-chain struct layout
+/// changes (new fields, renamed fields, reordered enums, etc.). Read helpers
+/// and migration code branch on this value.
+pub const CURRENT_STORAGE_VERSION: u32 = 1;
 
 #[contract]
 pub struct TreasuryEscrowContract;
@@ -86,9 +95,12 @@ impl TreasuryEscrowContract {
         }
         env.storage().instance().set(&ADMIN_KEY, &admin);
         env.storage().instance().set(&MILESTONE_COUNT, &0u32);
+        env.storage()
+            .instance()
+            .set(&VERSION_KEY, &CURRENT_STORAGE_VERSION);
         env.events().publish(
             (symbol_short!("escrow"), symbol_short!("init")),
-            admin.clone(),
+            (admin.clone(), CURRENT_STORAGE_VERSION),
         );
         Ok(())
     }
@@ -101,6 +113,15 @@ impl TreasuryEscrowContract {
             .ok_or(EscrowError::NotInitialized)?;
         admin.require_auth();
         Ok(admin)
+    }
+
+    /// Returns the storage layout version that was set at initialization time.
+    /// If the contract has not been initialized, returns 0.
+    pub fn storage_version(env: Env) -> u32 {
+        env.storage()
+            .instance()
+            .get(&VERSION_KEY)
+            .unwrap_or(0)
     }
 
     fn milestone_storage_key(id: u32) -> (Symbol, MilestoneKey) {
@@ -173,11 +194,23 @@ impl TreasuryEscrowContract {
         Ok(())
     }
 
+    /// Records the evidence hash backing a milestone.
+    ///
+    /// Authorised: admin only. This is the entry point that unlocks both
+    /// `approve_milestone` (which requires evidence to exist) and
+    /// `dispute_milestone` (which requires status >= EvidenceSubmitted), so an
+    /// unauthenticated caller here could drive another account's milestone
+    /// through the approval gate.
+    ///
+    /// Evidence is write-once: once a hash is recorded it cannot be replaced,
+    /// only disputed. Otherwise evidence could be swapped after the admin
+    /// reviewed it but before release.
     pub fn submit_evidence(
         env: Env,
         id: u32,
         evidence_hash: BytesN<32>,
     ) -> Result<(), EscrowError> {
+        Self::require_admin(&env)?;
         let key = Self::milestone_storage_key(id);
         let mut ms: Milestone = env
             .storage()
@@ -186,6 +219,9 @@ impl TreasuryEscrowContract {
             .ok_or(EscrowError::MilestoneNotFound)?;
         if ms.status >= MilestoneStatus::Released as u32 {
             return Err(EscrowError::InvalidMilestoneStatus);
+        }
+        if ms.evidence_hash.is_some() {
+            return Err(EscrowError::EvidenceAlreadySubmitted);
         }
         ms.evidence_hash = Option::Some(evidence_hash.clone());
         ms.updated_at = env.ledger().timestamp();
