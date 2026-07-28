@@ -12,11 +12,20 @@ import type {
   AccountBalanceModel,
   AccountInfo,
   AccountStatus,
+  ConfigSourceMetadata,
   NetworkConfig,
   StellarPublicKey,
 } from "@anchorkit/types";
-import { getNetworkConfig } from "@anchorkit/config";
+import type { AnchorKitEnvConfig } from "@anchorkit/config";
+import {
+  DEFAULT_ENV_CONFIG,
+  getFeatureFlagDefinitions,
+  getNetworkConfig,
+  isFeatureEnabled,
+  resolveConfigSourceMetadata,
+} from "@anchorkit/config";
 import { isPublicKeyValid } from "./keys";
+import { redactSecrets } from "./redaction";
 import { buildAccountLink } from "./explorer";
 import { loadAccount } from "./accounts";
 import { computeBalanceModel, computeReserve, unknownBalanceModel } from "./balances";
@@ -31,12 +40,7 @@ export {
 export type { ReserveInfo } from "./balances";
 
 /** Diagnostic states — superset of the raw `AccountStatus`. */
-export type AccountDiagnosticState =
-  | "funded"
-  | "unfunded"
-  | "invalid"
-  | "unavailable"
-  | "unknown";
+export type AccountDiagnosticState = "funded" | "unfunded" | "invalid" | "unavailable" | "unknown";
 
 export interface AccountDiagnostic {
   /** The (possibly invalid) input the user supplied. */
@@ -124,9 +128,7 @@ export function diagnoseAccountInfo(
  * Network/parse failures degrade gracefully into `invalid` / `unavailable`
  * states instead of throwing.
  */
-export function diagnoseConfig(
-  env: AnchorKitEnvConfig = DEFAULT_ENV_CONFIG
-): ConfigDiagnostic {
+export function diagnoseConfig(env: AnchorKitEnvConfig = DEFAULT_ENV_CONFIG): ConfigDiagnostic {
   const configSources = resolveConfigSourceMetadata(env);
   const definitions = getFeatureFlagDefinitions();
   const featureFlags = definitions.map((def) => ({
@@ -150,7 +152,10 @@ export function diagnoseConfig(
 
 export async function diagnoseAccount(
   publicKey: string,
-  options: { network?: NetworkConfig["network"]; loadAccount?: (pk: string) => Promise<AccountInfo> } = {}
+  options: {
+    network?: NetworkConfig["network"];
+    loadAccount?: (pk: string) => Promise<AccountInfo>;
+  } = {}
 ): Promise<AccountDiagnostic> {
   const network = options.network ?? "testnet";
 
@@ -190,6 +195,3 @@ export async function diagnoseAccount(
     };
   }
 }
-
-
-

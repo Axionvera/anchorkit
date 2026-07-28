@@ -35,6 +35,19 @@ describe("MODULE_CAPABILITIES", () => {
     }
   });
 
+  it("does not present mock or missing dashboard integrations as live", () => {
+    const states = Object.fromEntries(MODULE_CAPABILITIES.map(({ id, state }) => [id, state]));
+
+    expect(states).toMatchObject({
+      accounts: "testnet-only",
+      payments: "mock",
+      anchors: "mock",
+      escrow: "mock",
+      diagnostics: "unavailable",
+      "network-config": "unavailable",
+    });
+  });
+
   it("gives every entry a non-empty label", () => {
     for (const entry of MODULE_CAPABILITIES) {
       expect(entry.label.trim().length).toBeGreaterThan(0);

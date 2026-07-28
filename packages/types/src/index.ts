@@ -127,12 +127,7 @@ export interface ReadinessWarning {
   stage?: ReadinessStageId;
 }
 
-export type TransactionReadinessState =
-  | "valid"
-  | "invalid"
-  | "blocked"
-  | "warning"
-  | "unavailable";
+export type TransactionReadinessState = "valid" | "invalid" | "blocked" | "warning" | "unavailable";
 
 export type ReadinessStageId = "network" | "account" | "asset" | "amount" | "memo";
 
@@ -194,12 +189,7 @@ export interface TransactionReadiness {
  * rejected, or unknown outcomes consistently across payment, anchor, and escrow
  * screens.
  */
-export type TransactionReceiptStatus =
-  | "confirmed"
-  | "pending"
-  | "failed"
-  | "rejected"
-  | "unknown";
+export type TransactionReceiptStatus = "confirmed" | "pending" | "failed" | "rejected" | "unknown";
 
 export const TRANSACTION_RECEIPT_STATUSES: readonly TransactionReceiptStatus[] = [
   "confirmed",
@@ -400,7 +390,7 @@ export type FeatureFlagId =
   | "experimental_vault"
   | "mainnet_access"
   | "advanced_diagnostics"
-  | (string & {});
+  | (string & Record<never, never>);
 
 export interface FeatureFlagDefinition {
   id: FeatureFlagId;
@@ -497,7 +487,6 @@ export * from "./escrowEvents";
 
 // ─── Shared error taxonomy ──────────────────────────────────────────────────
 export * from "./errors";
-
 
 // ─── Capability states ──────────────────────────────────────────────────────
 export type CapabilityState =

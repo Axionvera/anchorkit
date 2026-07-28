@@ -12,7 +12,8 @@ const docsNav = [
       { title: "Local setup", file: "LOCAL_SETUP.md" },
       { title: "Local verification", file: "LOCAL_VERIFICATION.md" },
       { title: "Architecture", file: "ARCHITECTURE.md" },
-      { title: "Roadmap", file: "ROADMAP.md" },
+      { title: "Capability states", file: "CAPABILITY_STATES.md" },
+      { title: "Roadmap & capability disclaimer", file: "ROADMAP.md" },
     ],
   },
   {
@@ -94,13 +95,13 @@ export default function DocsPage() {
           </li>
           <li>
             <span className="font-medium">3. </span>
-            Read SECURITY_NOTES.md and SECRET_KEY_HANDLING.md before wiring any live
-            transaction submission or wallet integrations.
+            Read SECURITY_NOTES.md and SECRET_KEY_HANDLING.md before wiring any live transaction
+            submission or wallet integrations.
           </li>
           <li>
             <span className="font-medium">4. </span>
-            If you are contributing via GrantFox, read GRANTFOX_WORKFLOW.md, ISSUE_STANDARD.md,
-            and MAINTAINER_REVIEW_CHECKLIST.md before opening your first PR.
+            If you are contributing via GrantFox, read GRANTFOX_WORKFLOW.md, ISSUE_STANDARD.md, and
+            MAINTAINER_REVIEW_CHECKLIST.md before opening your first PR.
           </li>
         </ol>
       </Card>

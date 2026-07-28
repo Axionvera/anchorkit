@@ -8,7 +8,7 @@ import type {
 import { StellarPublicKeySchema, StellarSecretKeySchema } from "@anchorkit/validators";
 import type { SafeParseReturnType } from "zod";
 import { createStellarError } from "./errors";
-import { formatRedactedSecret, redactSecrets } from "./redaction";
+import { formatRedactedSecret } from "./redaction";
 
 export { formatRedactedSecret } from "./redaction";
 
@@ -24,7 +24,9 @@ export function generateTestnetKeypair(): StellarKeypair {
   }
 }
 
-export function validatePublicKey(publicKey: string): SafeParseReturnType<string, StellarPublicKey> {
+export function validatePublicKey(
+  publicKey: string
+): SafeParseReturnType<string, StellarPublicKey> {
   return StellarPublicKeySchema.safeParse(publicKey);
 }
 
@@ -43,7 +45,9 @@ export function assertPublicKeyValid(publicKey: string): asserts publicKey is St
   }
 }
 
-export function validateSecretKey(secretKey: string): SafeParseReturnType<string, StellarSecretKey> {
+export function validateSecretKey(
+  secretKey: string
+): SafeParseReturnType<string, StellarSecretKey> {
   return StellarSecretKeySchema.safeParse(secretKey);
 }
 
@@ -107,5 +111,3 @@ export function secretKeyToRedactedString(secretKey: string): string {
   }
   return formatRedactedSecret(redactSecretKey(secretKey));
 }
-
-

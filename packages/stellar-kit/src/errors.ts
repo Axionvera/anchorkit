@@ -1,7 +1,13 @@
-import type { StellarErrorCode, StellarKitError, AnchorKitErrorCategory, AnchorKitErrorCode } from "@anchorkit/types";
+import type {
+  AnchorKitErrorCategory,
+  AnchorKitErrorCode,
+  FeatureFlagId,
+  FeatureStability,
+  StellarErrorCode,
+  StellarKitError,
+} from "@anchorkit/types";
 import { AnchorKitError } from "@anchorkit/types";
-
-export { redactSecrets } from "@anchorkit/types";
+import { redactSecrets } from "./redaction";
 
 export function createStellarError(
   code: StellarErrorCode,
@@ -21,6 +27,17 @@ export function createStellarError(
   return error;
 }
 
+export function createFeatureDisabledError(
+  flagId: FeatureFlagId,
+  featureName: string,
+  stability: FeatureStability
+): StellarKitError {
+  return createStellarError(
+    "FEATURE_DISABLED",
+    `Feature '${featureName}' (${flagId}) is disabled. Feature stability: ${stability}.`
+  );
+}
+
 function mapStellarErrorCodeToCategory(code: StellarErrorCode): AnchorKitErrorCategory {
   switch (code) {
     case "SECRET_KEY_INVALID":
@@ -38,6 +55,7 @@ function mapStellarErrorCodeToCategory(code: StellarErrorCode): AnchorKitErrorCa
     case "MEMO_INVALID":
       return "PAYMENT";
     case "MAINNET_DISABLED":
+    case "FEATURE_DISABLED":
       return "CONFIG";
     case "UNKNOWN":
     default:
@@ -45,9 +63,7 @@ function mapStellarErrorCodeToCategory(code: StellarErrorCode): AnchorKitErrorCa
   }
 }
 
-export function mapHorizonError(
-  error: unknown
-): { code: StellarErrorCode; message: string } {
+export function mapHorizonError(error: unknown): { code: StellarErrorCode; message: string } {
   if (error === null || error === undefined) {
     return { code: "UNKNOWN", message: "Unknown error occurred" };
   }
@@ -96,4 +112,3 @@ export function mapHorizonError(
 
   return { code: "UNKNOWN", message: redactSecrets(String(error)) };
 }
-

@@ -6,24 +6,23 @@
  */
 
 import type {
+  AccountInfo,
   PaymentIntent,
   ReadinessIssue,
   ReadinessStageId,
   ReadinessStageResult,
   ReadinessWarning,
   StellarNetwork,
-  TransactionReadiness,
   TransactionReadinessState,
 } from "@anchorkit/types";
 import { STELLAR_NETWORKS } from "@anchorkit/types";
 import type { AnchorKitEnvConfig } from "@anchorkit/config";
-import { DEFAULT_ENV_CONFIG, getNetworkConfig, isMainnetAllowed } from "@anchorkit/config";
+import { DEFAULT_ENV_CONFIG, isMainnetAllowed } from "@anchorkit/config";
 import { isPublicKeyValid } from "./keys";
 import { isAssetValid } from "./assets";
 import { isAmountValid, isMemoValid } from "./payments";
 import type { AccountDiagnostic } from "./diagnostics";
-import { diagnoseAccount, diagnoseAccountInfo } from "./diagnostics";
-
+import { diagnoseAccount } from "./diagnostics";
 
 export interface ReadinessOptionsSync {
   network?: StellarNetwork;
@@ -38,13 +37,25 @@ export interface ReadinessOptionsSync {
 export interface ReadinessOptionsAsync {
   network?: StellarNetwork;
   envConfig?: AnchorKitEnvConfig;
-  loadAccount?: (pk: string) => Promise<any>;
+  loadAccount?: (pk: string) => Promise<AccountInfo>;
+}
+
+/** Result shape for the five-stage diagnostics-oriented readiness pipeline. */
+export interface TransactionReadinessPipeline {
+  state: TransactionReadinessState;
+  ready: boolean;
+  stages: Record<ReadinessStageId, ReadinessStageResult>;
+  issues: ReadinessIssue[];
+  warnings: ReadinessWarning[];
+  summary: string;
+  sourceDiagnostic?: AccountDiagnostic;
+  destDiagnostic?: AccountDiagnostic;
 }
 
 export function evaluateTransactionReadinessSync(
   intent: PaymentIntent,
   options: ReadinessOptionsSync = {}
-): TransactionReadiness {
+): TransactionReadinessPipeline {
   const envConfig = options.envConfig ?? DEFAULT_ENV_CONFIG;
   const network = options.network ?? envConfig.defaultNetwork;
   const issues: ReadinessIssue[] = [];
@@ -106,10 +117,8 @@ export function evaluateTransactionReadinessSync(
   const sourceDiag = options.sourceDiagnostic;
   const destDiag = options.destDiagnostic;
 
-  const sourceFunded =
-    sourceDiag ? sourceDiag.state === "funded" : options.sourceAccountFunded;
-  const destFunded =
-    destDiag ? destDiag.state === "funded" : options.destAccountFunded;
+  const sourceFunded = sourceDiag ? sourceDiag.state === "funded" : options.sourceAccountFunded;
+  const destFunded = destDiag ? destDiag.state === "funded" : options.destAccountFunded;
 
   if (sourceDiag && sourceDiag.state === "unavailable") {
     accountState = "unavailable";
@@ -155,16 +164,18 @@ export function evaluateTransactionReadinessSync(
         code: "DEST_UNFUNDED",
         stage: "account",
         severity: "warning",
-        message:
-          "Destination account is unfunded. Payment will create and fund the account.",
+        message: "Destination account is unfunded. Payment will create and fund the account.",
       });
     }
   }
 
   // Check reserve & balance requirement if source balance is available
-  const sourceNativeBal =
-    options.sourceBalanceXlm ?? sourceDiag?.account?.balances?.native;
-  if (sourceNativeBal !== undefined && intent.asset.type === "native" && isAmountValid(intent.amount)) {
+  const sourceNativeBal = options.sourceBalanceXlm ?? sourceDiag?.account?.balances?.native;
+  if (
+    sourceNativeBal !== undefined &&
+    intent.asset.type === "native" &&
+    isAmountValid(intent.amount)
+  ) {
     const numBal = Number(sourceNativeBal);
     const numAmt = Number(intent.amount);
     const minReserve = sourceDiag?.reserve?.minimumBalanceXlm ?? 2.5;
@@ -259,7 +270,7 @@ export function evaluateTransactionReadinessSync(
     memo: { stage: "memo", state: memoState, message: memoMsg },
   };
 
-  const overallState = deriveOverallState(stages, issues);
+  const overallState = deriveOverallState(stages);
   const ready = overallState === "valid" || overallState === "warning";
 
   const warnings: ReadinessWarning[] = issues.map((i) => ({
@@ -286,7 +297,7 @@ export function evaluateTransactionReadinessSync(
 export async function evaluateTransactionReadiness(
   intent: PaymentIntent,
   options: ReadinessOptionsAsync = {}
-): Promise<TransactionReadiness> {
+): Promise<TransactionReadinessPipeline> {
   const envConfig = options.envConfig ?? DEFAULT_ENV_CONFIG;
   const network = options.network ?? envConfig.defaultNetwork;
 
@@ -304,8 +315,7 @@ export async function evaluateTransactionReadiness(
 }
 
 function deriveOverallState(
-  stages: Record<ReadinessStageId, ReadinessStageResult>,
-  issues: ReadinessIssue[]
+  stages: Record<ReadinessStageId, ReadinessStageResult>
 ): TransactionReadinessState {
   const stageValues = Object.values(stages).map((s) => s.state);
   if (stageValues.includes("invalid")) return "invalid";

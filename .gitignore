@@ -42,6 +42,7 @@ pnpm-debug.log*
 # Rust / Soroban
 target
 Cargo.lock
+!contracts/treasury-escrow/Cargo.lock
 test_snapshots
 
 # Misc
