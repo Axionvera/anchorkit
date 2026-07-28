@@ -156,6 +156,28 @@ export interface ReadinessIssue {
  */
 export type ReadinessState = "ready" | "warnings" | "unsafe-network" | "blocked";
 
+/**
+ * Generic, domain-agnostic UI validation lifecycle state for forms (e.g. the
+ * payment intent builder and anchor deposit/withdrawal forms).
+ *
+ * Unlike {@link TransactionReadinessState} and {@link ReadinessState} (which
+ * describe the outcome of a specific readiness pipeline), `ValidationUIState`
+ * is the shared vocabulary a form's UI renders against. Domain pipelines map
+ * their own outcomes onto this state rather than being replaced by it:
+ *
+ * - "loading"  — validation/derivation is in flight; no outcome yet.
+ * - "invalid"  — the input is structurally wrong and must be corrected.
+ * - "warning"  — the input is valid but has a non-blocking issue to review.
+ * - "ready"    — validation passed with no issues; safe to submit.
+ * - "blocked"  — valid input, but an external/policy condition (e.g.
+ *                mainnet safety, an unavailable diagnostic) prevents
+ *                proceeding right now.
+ */
+/** All {@link ValidationUIState} values, in priority order (highest first). */
+export const VALIDATION_UI_STATES = ["loading", "invalid", "blocked", "warning", "ready"] as const;
+
+export type ValidationUIState = (typeof VALIDATION_UI_STATES)[number];
+
 /** A single validation stage of the readiness engine. */
 export interface ReadinessStage {
   /** Stable stage id, e.g. "account-source". */

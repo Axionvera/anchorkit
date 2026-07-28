@@ -9,3 +9,6 @@ export * from "./schemas/receipt";
 // ─── Validation engine (issue #6) ───────────────────────────────────────────
 export * from "./validationEngine";
 
+// ─── UI validation state ────────────────────────────────────────────────────
+export * from "./uiState";
+

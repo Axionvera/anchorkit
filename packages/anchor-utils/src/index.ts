@@ -268,5 +268,32 @@ export function validateAnchorRequest(
     : validateWithdrawalRequest(input);
 }
 
+// ─── Validation UI state ────────────────────────────────────────────────────
+
+import type { ValidationUIState } from "@anchorkit/types";
+import type { ValidationResult } from "@anchorkit/validators";
+import { deriveValidationUiState } from "@anchorkit/stellar-kit";
+
+/**
+ * Convenience wrapper deriving the shared {@link ValidationUIState} for an
+ * anchor deposit/withdrawal/callback validation result, so forms don't need
+ * to call `deriveValidationUiState` directly for the common case.
+ *
+ * `blocked` should be set when the request is well-formed but the anchor
+ * asset config disallows the operation (e.g. deposits disabled for this
+ * asset) — a policy condition distinct from a structural validation error.
+ */
+export function anchorValidationUiState(
+  result: ValidationResult<unknown>,
+  opts?: { loading?: boolean; blocked?: boolean; hasWarnings?: boolean },
+): ValidationUIState {
+  return deriveValidationUiState({
+    loading: opts?.loading,
+    result,
+    blocked: opts?.blocked,
+    hasWarnings: opts?.hasWarnings,
+  });
+}
+
 export * from "./capabilities";
 

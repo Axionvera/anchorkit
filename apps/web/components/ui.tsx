@@ -1,5 +1,12 @@
 import clsx from "clsx";
-import type { AnchorTransactionStatus, MilestoneStatus, TransactionReceiptStatus, CapabilityState } from "@anchorkit/types";
+import type {
+  AnchorTransactionStatus,
+  MilestoneStatus,
+  SeverityLevel,
+  TransactionReceiptStatus,
+  CapabilityState,
+  ValidationUIState,
+} from "@anchorkit/types";
 import {
   badgeClasses,
   alertClasses,
@@ -7,6 +14,7 @@ import {
   getMilestoneSeverity,
   getReceiptSeverity,
   getAccountSeverity,
+  getValidationUiStateSeverity,
 } from "@anchorkit/stellar-kit";
 
 /**
@@ -80,12 +88,62 @@ export function AccountStatusBadge({ status }: { status: "funded" | "unfunded" |
   );
 }
 
+/**
+ * Renders a generic {@link ValidationUIState} badge using the shared
+ * {@link getValidationUiStateSeverity} mapping from `@anchorkit/stellar-kit`.
+ * Used by the payments and anchors forms so both share one status vocabulary
+ * instead of each page reimplementing its own badge styling.
+ */
+export function ValidationStateBadge({ state }: { state: ValidationUIState }) {
+  const { label, tone } = getValidationUiStateSeverity(state);
+
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
+        badgeClasses(tone),
+      )}
+    >
+      <span
+        className={clsx(
+          "mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80",
+          state === "loading" && "animate-pulse",
+        )}
+      />
+      {label}
+    </span>
+  );
+}
+
+/**
+ * Renders a generic {@link ValidationUIState} alert, defaulting its title
+ * and body to the shared severity mapping's headline/detail so callers only
+ * need to override them for state-specific copy.
+ */
+export function ValidationStateAlert({
+  state,
+  title,
+  children,
+}: {
+  state: ValidationUIState;
+  title?: string;
+  children?: React.ReactNode;
+}) {
+  const severity = getValidationUiStateSeverity(state);
+
+  return (
+    <Alert tone={severity.level} title={title ?? severity.headline}>
+      {children ?? severity.detail}
+    </Alert>
+  );
+}
+
 export function Alert({
   tone = "info",
   title,
   children,
 }: {
-  tone?: "info" | "warning" | "error" | "success";
+  tone?: SeverityLevel;
   title?: string;
   children: React.ReactNode;
 }) {
