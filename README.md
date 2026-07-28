@@ -61,7 +61,8 @@ mvp:  0.1.x (testnet-only by default)
 - **GitHub / CI**
   - Workflows: install, lint, typecheck, test, build, rust-contract-tests
   - Issue templates: Bug Report, Feature/Enhancement, GrantFox Campaign Issue, Documentation
-  - PR template with self-check review checklist
+  - PR template covering issue reference, affected packages/apps, testing performed,
+    screenshots, security impact, documentation impact, and a maintainer self-check checklist
   - Labels manifest including GrantFox OSS, Maybe Rewarded, Official Campaign | FWC26, stellar, soroban, anchor, sep, wallet, payments, escrow, security, test, documentation, good first issue, expert
   - Seed `examples/` fixtures and helper `scripts/`
 

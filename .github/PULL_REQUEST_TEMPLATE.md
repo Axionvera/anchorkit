@@ -12,6 +12,50 @@ Copy the Acceptance Criteria checkboxes from the issue and check off each delive
 - [ ] …
 - [ ] …
 
+## Affected packages / apps
+
+Check every workspace this PR touches (helps reviewers scope the diff and route it to the right
+maintainer):
+
+- [ ] `apps/web`
+- [ ] `packages/types`
+- [ ] `packages/config`
+- [ ] `packages/fixtures`
+- [ ] `packages/validators`
+- [ ] `packages/stellar-kit`
+- [ ] `packages/anchor-utils`
+- [ ] `contracts/treasury-escrow`
+- [ ] `docs/`
+- [ ] Other (list):
+
+## Testing performed
+
+Describe what you ran and how you verified the change (commands run, manual steps in the
+dashboard, contract test output, etc.). This is required even when the checklist below is filled
+in — the checklist confirms *that* something was tested, this explains *how*.
+
+## Screenshots / recordings
+
+Required for any `apps/web` UI change. Mark N/A otherwise.
+
+| Before | After |
+| --- | --- |
+|  |  |
+
+## Security impact
+
+- [ ] This PR touches secret handling, callback URLs, network selection, or contract
+      admin/authorization logic (see Secret leakage / Mainnet safety checklist below).
+- [ ] No security-relevant surface touched.
+
+If checked, summarise the impact and mitigation here.
+
+## Documentation impact
+
+- [ ] Docs under `/docs` updated for this change.
+- [ ] README updated (new package, script, or workflow).
+- [ ] No user-facing behaviour changed — no docs update needed.
+
 ## Maintainer Review Checklist (self-check)
 
 Paste the [MAINTAINER_REVIEW_CHECKLIST.md](./docs/MAINTAINER_REVIEW_CHECKLIST.md) **Phase 1** into

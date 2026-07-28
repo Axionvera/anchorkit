@@ -58,6 +58,15 @@ pnpm web:dev
 - **Docs are required** for any new public function or change in user-facing
   behaviour. Pick the right file under `/docs/`.
 
+## Pull request template
+
+Every PR is pre-filled from
+[.github/PULL_REQUEST_TEMPLATE.md](./.github/PULL_REQUEST_TEMPLATE.md). Fill in **every**
+section before requesting review — issue reference, affected packages/apps, testing performed,
+screenshots (for `apps/web` UI changes), security impact, documentation impact, and the
+maintainer review self-check. PRs with unfilled or deleted sections will be sent back for
+completion before review starts.
+
 ## GrantFox contribution flow
 
 1. Comment on an issue that carries the `GrantFox OSS` + `Maybe Rewarded` +
