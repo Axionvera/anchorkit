@@ -519,3 +519,26 @@ export interface ModuleCapability {
   description: string;
   docsHref?: string;
 }
+
+export type PackageName =
+  | "stellar-kit"
+  | "anchor-utils"
+  | "config"
+  | "types"
+  | "validators"
+  | "fixtures";
+
+export interface PackageFeatureCapability {
+  id: string;
+  label: string;
+  state: CapabilityState;
+  description: string;
+}
+
+export interface PackageCapability {
+  packageName: PackageName;
+  overallState: CapabilityState;
+  features: PackageFeatureCapability[];
+  docsHref?: string;
+}
+

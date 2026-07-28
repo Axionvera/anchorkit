@@ -1,4 +1,4 @@
-import type { ModuleCapability } from "@anchorkit/types";
+import type { ModuleCapability, PackageCapability } from "@anchorkit/types";
 
 export const MODULE_CAPABILITIES: readonly ModuleCapability[] = [
   {
@@ -47,3 +47,30 @@ export const MODULE_CAPABILITIES: readonly ModuleCapability[] = [
     docsHref: "/docs#network-config",
   },
 ] as const;
+
+export const CONFIG_PACKAGE_CAPABILITIES: PackageCapability = {
+  packageName: "config",
+  overallState: "implemented",
+  features: [
+    {
+      id: "network-presets",
+      label: "Network Presets",
+      state: "implemented",
+      description: "Define connection URLs, passphrases, and explorer links for testnet, mainnet, and futurenet.",
+    },
+    {
+      id: "feature-flags",
+      label: "Feature Flags",
+      state: "implemented",
+      description: "Define, query, and enforce default or runtime-enabled gates for experimental features.",
+    },
+    {
+      id: "env-resolution",
+      label: "Environment Resolution",
+      state: "implemented",
+      description: "Merge default settings with explicit configuration overrides and resolve metadata sources.",
+    },
+  ],
+  docsHref: "/docs#config",
+};
+

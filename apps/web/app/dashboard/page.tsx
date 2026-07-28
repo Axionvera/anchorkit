@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
-import { Card, Button, CapabilityBadge } from "@/components/ui";
+import { Card, Button, CapabilityBadge, CapabilityHealthSummary } from "@/components/ui";
 import { MODULE_CAPABILITIES } from "@anchorkit/config";
 import type { CapabilityModuleId } from "@anchorkit/types";
 
@@ -25,7 +25,10 @@ export default function DashboardPage() {
       subtitle="Jump into the module you are building or testing. Everything is local-first and testnet-only by default."
       warning="Do not paste mainnet secrets into this dashboard. Mainnet is intentionally disabled unless the environment configuration is explicitly overridden."
     >
+      <CapabilityHealthSummary capabilities={MODULE_CAPABILITIES} />
+
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+
         {MODULE_CAPABILITIES.map((m) => {
           const meta = MODULE_META[m.id];
           const disabled = m.state === "unavailable";

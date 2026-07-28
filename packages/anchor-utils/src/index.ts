@@ -267,3 +267,6 @@ export function validateAnchorRequest(
     ? validateDepositRequest(input)
     : validateWithdrawalRequest(input);
 }
+
+export * from "./capabilities";
+

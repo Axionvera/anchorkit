@@ -218,3 +218,50 @@ export function CapabilityBadge({ state }: { state: CapabilityState }) {
     </span>
   );
 }
+
+export function groupCapabilitiesByState(capabilities: { state: CapabilityState }[]): Record<CapabilityState, number> {
+  const groups: Record<CapabilityState, number> = {
+    implemented: 0,
+    mock: 0,
+    "testnet-only": 0,
+    experimental: 0,
+    unavailable: 0,
+  };
+  for (const cap of capabilities) {
+    groups[cap.state] = (groups[cap.state] || 0) + 1;
+  }
+  return groups;
+}
+
+export function CapabilityHealthSummary({ capabilities }: { capabilities: readonly { state: CapabilityState }[] }) {
+  const groups = groupCapabilitiesByState(capabilities as { state: CapabilityState }[]);
+  const statesOrder: CapabilityState[] = ["implemented", "testnet-only", "mock", "experimental", "unavailable"];
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-ink-200 bg-ink-50/50 p-4 dark:border-ink-800 dark:bg-ink-900/30">
+      <span className="text-mono-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400 mr-2">
+        Module Readiness:
+      </span>
+      <div className="flex flex-wrap gap-2">
+        {statesOrder.map((state) => {
+          const count = groups[state];
+          if (count === 0) return null;
+          return (
+            <span
+              key={state}
+              className={clsx(
+                "inline-flex items-center rounded-lg border px-3 py-1 text-xs font-medium transition-all shadow-sm hover:shadow-md",
+                CAPABILITY_BADGE_STYLES[state]
+              )}
+            >
+              <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-current opacity-85" />
+              <span className="mr-1 font-bold">{count}</span>
+              <span>{CAPABILITY_BADGE_LABELS[state].toLowerCase()}</span>
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+

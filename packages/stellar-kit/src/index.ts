@@ -19,3 +19,5 @@ export * from "./severity";
 export * from "./soroban";
 export * from "./vault";
 export type { StellarKeypair } from "@anchorkit/types";
+export * from "./capabilities";
+
