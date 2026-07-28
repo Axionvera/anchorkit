@@ -38,6 +38,7 @@ AnchorKit/
 ├── packages/
 │   ├── types/                           Shared TypeScript contracts
 │   ├── config/                          Network and environment configuration
+│   ├── fixtures/                        Shared deterministic test fixtures (no real secrets)
 │   ├── validators/                      Runtime validation schemas
 │   ├── stellar-kit/                     Stellar network and transaction utilities
 │   └── anchor-utils/                    Anchor lifecycle and metadata utilities
@@ -73,6 +74,7 @@ apps/web
 
 anchor-utils
    ├──▶ stellar-kit, when Stellar-specific behaviour is required
+   ├──▶ fixtures, for backward-compatible re-exported mock/lifecycle fixtures
    ├──▶ validators
    ├──▶ config
    └──▶ types
@@ -80,6 +82,9 @@ anchor-utils
 stellar-kit
    ├──▶ validators
    ├──▶ config
+   └──▶ types
+
+fixtures
    └──▶ types
 
 validators
@@ -93,6 +98,10 @@ types
    └──▶ no internal AnchorKit package
 ```
 
+`fixtures` is also used as a **test-only** dependency by `validators` and
+`stellar-kit` (never from their `src/`) to avoid duplicating sample data
+across test suites.
+
 The dependency graph must not point upward.
 
 For example:
@@ -100,6 +109,7 @@ For example:
 - `stellar-kit` must not import `anchor-utils`;
 - `validators` must not import `stellar-kit`;
 - `types` must not import any other AnchorKit package;
+- `fixtures` must not import any other AnchorKit package except `types`;
 - no reusable package may import from `apps/web`.
 
 A module should depend only on the lowest-level packages it actually needs.
@@ -110,6 +120,7 @@ A module should depend only on the lowest-level packages it actually needs.
 | --------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | `packages/types`            | Shared contracts, branded types, enums, result shapes, and event models                                         | None                                                         |
 | `packages/config`           | Network presets, endpoints, environment defaults, and mainnet gating                                            | `types`                                                      |
+| `packages/fixtures`         | Shared, deterministic test fixtures (accounts, payments, anchors, escrow, diagnostics, invalid examples)        | `types`                                                      |
 | `packages/validators`       | Zod schemas, runtime validation, and safe validation errors                                                     | `types`, selected `config` values                            |
 | `packages/stellar-kit`      | Stellar keys, accounts, assets, payments, transactions, diagnostics, logging, explorer links, and event parsing | `types`, `config`, `validators`                              |
 | `packages/anchor-utils`     | Anchor requests, lifecycle transitions, status messages, badges, and fixtures                                   | `types`, `validators`, `config`, `stellar-kit` when required |
@@ -195,7 +206,34 @@ Changes affecting the following require security review:
 - environment fallbacks;
 - configuration error behaviour.
 
-### 5.3 `@anchorkit/validators`
+### 5.3 `@anchorkit/fixtures`
+
+`packages/fixtures` owns shared, deterministic test fixtures used across
+packages instead of each package hand-rolling its own sample data.
+
+It includes:
+
+- funded/unfunded Stellar account fixtures (`accounts.ts`);
+- native/issued asset fixtures (`assets.ts`);
+- payment intent fixtures, valid and invalid (`payments.ts`);
+- anchor deposit/withdrawal request and lifecycle fixtures (`anchors.ts`);
+- escrow event and milestone fixtures (`escrow.ts`);
+- deterministic `AccountInfo` fixtures for diagnostics tests (`diagnostics.ts`);
+- deliberately invalid fixtures for exercising validators (`invalid.ts`).
+
+Fixtures must:
+
+- contain no real secret keys or real user data;
+- use fixed, deterministic values (no `Date.now()`, no `Math.random()`);
+- mirror the shapes documented in `examples/*.json` where applicable.
+
+It may depend only on `types`. It must not depend on `config`, `validators`,
+`stellar-kit`, or `anchor-utils` — this keeps it importable by any package's
+test suite without creating cycles.
+
+See [Fixtures](./fixtures.md) for the full module reference.
+
+### 5.4 `@anchorkit/validators`
 
 `packages/validators` owns runtime validation of untrusted input.
 
@@ -243,7 +281,7 @@ Validators must not depend on:
 - `anchor-utils`;
 - `apps/web`.
 
-### 5.4 `@anchorkit/stellar-kit`
+### 5.5 `@anchorkit/stellar-kit`
 
 `packages/stellar-kit` owns reusable Stellar-specific runtime behaviour.
 
@@ -290,7 +328,7 @@ Incorrect:
 import { buildPaymentIntent } from "../../packages/stellar-kit/src/intent";
 ```
 
-### 5.5 `@anchorkit/anchor-utils`
+### 5.6 `@anchorkit/anchor-utils`
 
 `packages/anchor-utils` owns anchor-specific domain behaviour.
 
@@ -316,6 +354,11 @@ A dependency on `stellar-kit` is appropriate only where anchor functionality gen
 - generating an explorer link;
 - handling a shared Stellar error;
 - consuming a parsed contract event.
+
+`anchor-utils` re-exports its lifecycle fixtures and invalid-input fixtures
+from `@anchorkit/fixtures` for backward compatibility with existing consumers
+(e.g. the `apps/web` anchors page). New fixture data should be added to
+`@anchorkit/fixtures` directly rather than to `anchor-utils`.
 
 It must not contain:
 
@@ -689,7 +732,8 @@ Use `import type` for type-only dependencies.
 The following dependency directions are prohibited:
 
 ```text
-types → config, validators, stellar-kit, anchor-utils, or web
+types → config, validators, stellar-kit, anchor-utils, fixtures, or web
+fixtures → config, validators, stellar-kit, anchor-utils, or web
 config → validators, stellar-kit, anchor-utils, or web
 validators → stellar-kit, anchor-utils, or web
 stellar-kit → anchor-utils or web
@@ -742,6 +786,7 @@ Choose the owner using this guide.
 | ----------------------------------------------------------- | --------------------------- |
 | Shared public type or event model                           | `types`                     |
 | Network endpoint or environment default                     | `config`                    |
+| Shared deterministic test fixture                            | `fixtures`                  |
 | Runtime schema or validation result                         | `validators`                |
 | Account, asset, payment, key, transaction, or event utility | `stellar-kit`               |
 | Anchor request, lifecycle, or status behaviour              | `anchor-utils`              |
@@ -871,6 +916,7 @@ Convenience alone is not a sufficient reason to reverse dependency direction.
 - [Escrow Events](./escrow-events.md)
 - [Soroban Escrow Contract](./SOROBAN_ESCROW_CONTRACT.md)
 - [Examples](./examples.md)
+- [Fixtures](./fixtures.md)
 - [Security Notes](./SECURITY_NOTES.md)
 - [Secret Key Handling](./SECRET_KEY_HANDLING.md)
 - [Contributor Guide](./CONTRIBUTOR_GUIDE.md)

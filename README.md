@@ -74,6 +74,7 @@ AnchorKit/
 ├─ packages/
 │  ├─ types/                       Branded shared types
 │  ├─ config/                      Network presets + env defaults
+│  ├─ fixtures/                    Shared deterministic test fixtures (no real secrets)
 │  ├─ validators/                  Zod validation schemas
 │  ├─ stellar-kit/                 Core Stellar utilities + Vitest tests
 │  └─ anchor-utils/                SEP-style anchor utilities + Vitest tests

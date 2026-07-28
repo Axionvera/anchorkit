@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { Keypair } from "@stellar/stellar-base";
+import { FRIENDBOT_PUBLIC_KEY } from "@anchorkit/fixtures";
 import {
   generateTestnetKeypair,
   validatePublicKey,
@@ -83,7 +85,10 @@ describe("Stellar secret key validation and redaction", () => {
   });
 
   it("quietly rejects keys with bad characters", () => {
-    const bad = SECRET_KEY_SAMPLE.replace("C", "0");
+    // "0", "1", "8", "9" are outside the base32 alphabet used by Stellar keys,
+    // so swapping in a "1" after the S prefix is always an invalid character
+    // regardless of what the randomly generated sample secret contains.
+    const bad = `S1${SECRET_KEY_SAMPLE.slice(2)}`;
     const r = validateSecretKeyQuietly(bad);
     expect(r.valid).toBe(false);
     expect(r.errorCode).toBe("BAD_CHARS");
