@@ -1380,6 +1380,6 @@ Refresh this document when:
 - an external audit is completed;
 - the project moves beyond `0.1.x`.
 
-A fixed vulnerability must not remain listed as an open current finding.
+Furthermore, A fixed vulnerability must not remain listed as an open current finding.
 
 Retain it in the risk register as `Fixed` only when the historical context remains useful.
