@@ -172,6 +172,7 @@ All of these live under [`./docs/`](./docs/).
 | Architecture / package boundaries        | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                                 |
 | Stellar testnet usage                    | [`STELLAR_TESTNET_USAGE.md`](./docs/STELLAR_TESTNET_USAGE.md)               |
 | Security notes                           | [`SECURITY_NOTES.md`](./docs/SECURITY_NOTES.md)                             |
+| Security threat model                    | [`SECURITY_THREAT_MODEL.md`](./docs/SECURITY_THREAT_MODEL.md)               |
 | Security & architecture readiness review | [`SECURITY_ARCHITECTURE_REVIEW.md`](./docs/SECURITY_ARCHITECTURE_REVIEW.md) |
 | Secret key handling rules R0–R6          | [`SECRET_KEY_HANDLING.md`](./docs/SECRET_KEY_HANDLING.md)                   |
 | Account utilities                        | [`ACCOUNT_UTILITIES.md`](./docs/ACCOUNT_UTILITIES.md)                       |
