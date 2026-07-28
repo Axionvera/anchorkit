@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import type { AnchorTransactionStatus, MilestoneStatus } from "@anchorkit/types";
+import type { AnchorTransactionStatus, MilestoneStatus, TransactionReceiptStatus } from "@anchorkit/types";
+import { receiptStatusBadge } from "@anchorkit/stellar-kit";
 import { anchorStatusBadge } from "@anchorkit/anchor-utils";
 
 /**
@@ -60,6 +61,32 @@ export function MilestoneStatusBadge({ status }: { status: MilestoneStatus }) {
       )}
     >
       {label[status]}
+    </span>
+  );
+}
+
+const RECEIPT_BADGE_STYLES: Record<
+  ReturnType<typeof receiptStatusBadge>["tone"],
+  string
+> = {
+  green: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
+  blue: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900",
+  red: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900",
+  amber: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
+  neutral: "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
+};
+
+export function TransactionReceiptBadge({ status }: { status: TransactionReceiptStatus }) {
+  const badge = receiptStatusBadge(status);
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
+        RECEIPT_BADGE_STYLES[badge.tone]
+      )}
+    >
+      <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" />
+      {badge.label}
     </span>
   );
 }

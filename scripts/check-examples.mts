@@ -17,6 +17,7 @@ import {
   AnchorTransactionRecordSchema,
   MilestoneSchema,
   StellarPublicKeySchema,
+  TransactionReceiptSchema,
 } from "@anchorkit/validators";
 import { EXAMPLE_REGISTRY } from "../examples/registry";
 
@@ -28,6 +29,7 @@ const SCHEMA_MAP = {
   AnchorTransactionRecord: AnchorTransactionRecordSchema,
   Milestone: MilestoneSchema,
   StellarPublicKeyArray: StellarPublicKeySchema,
+  TransactionReceipt: TransactionReceiptSchema,
 } as const;
 
 interface ReportRow {
@@ -54,7 +56,11 @@ function validateEntry(entry: (typeof EXAMPLE_REGISTRY)[number]): ReportRow {
   }
 
   const schema = SCHEMA_MAP[entry.schema];
-  const items = entry.isArray && Array.isArray(raw) ? raw : [raw];
+  const source =
+    entry.arrayKey && typeof raw === "object" && raw !== null
+      ? (raw as Record<string, unknown>)[entry.arrayKey]
+      : raw;
+  const items = entry.isArray && Array.isArray(source) ? source : [source];
 
   let failures = 0;
   const messages: string[] = [];

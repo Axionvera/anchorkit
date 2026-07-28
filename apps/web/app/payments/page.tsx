@@ -5,12 +5,14 @@ import { PageShell } from "@/components/PageShell";
 import { Alert, Button, Card, Input, Label, Select } from "@/components/ui";
 import {
   createPaymentIntent,
+  createMockTransactionReceipt,
   estimateTransactionReadinessSync,
   getStellarExpertAccountUrl,
   isPublicKeyValid,
 } from "@anchorkit/stellar-kit";
-import type { AssetCode, MemoType, PaymentIntent, StellarAsset, StellarPublicKey, TransactionReadiness } from "@anchorkit/types";
+import type { AssetCode, MemoType, PaymentIntent, StellarAsset, StellarPublicKey, TransactionReadiness, TransactionReceiptStatus } from "@anchorkit/types";
 import { DEFAULT_NETWORK } from "@anchorkit/config";
+import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
 const DEMO_DEST = "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U";
@@ -29,6 +31,17 @@ export default function PaymentsPage() {
 
   const [simulateSource, setSimulateSource] = useState<"funded" | "unfunded" | "unknown">("funded");
   const [simulateDest, setSimulateDest] = useState<"funded" | "unfunded" | "unknown">("funded");
+  const [mockReceiptStatus, setMockReceiptStatus] = useState<TransactionReceiptStatus>("pending");
+
+  const mockReceipt = useMemo(
+    () =>
+      createMockTransactionReceipt({
+        status: mockReceiptStatus,
+        source: "payment",
+        network: DEFAULT_NETWORK,
+      }),
+    [mockReceiptStatus]
+  );
 
   const asset: StellarAsset = useMemo(() => {
     if (assetMode === "native") {
@@ -339,6 +352,30 @@ export default function PaymentsPage() {
             </>
           )}
         </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="space-y-4">
+          <h2 className="text-base font-semibold tracking-tight">Mock transaction receipt</h2>
+          <p className="text-sm text-ink-500 dark:text-ink-400">
+            Preview the normalized receipt model for each post-submit outcome. The MVP does not
+            submit real transactions — this selector demonstrates the shared receipt UI.
+          </p>
+          <div>
+            <Label>Receipt status</Label>
+            <Select
+              value={mockReceiptStatus}
+              onChange={(e) => setMockReceiptStatus(e.target.value as TransactionReceiptStatus)}
+            >
+              {(["confirmed", "pending", "failed", "rejected", "unknown"] as const).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </Card>
+        <TransactionReceiptPanel receipt={mockReceipt} title="Payment receipt preview" />
       </div>
     </PageShell>
   );

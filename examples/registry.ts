@@ -25,11 +25,14 @@ export interface ExampleEntry {
     | "StellarAsset"
     | "AnchorTransactionRecord"
     | "Milestone"
-    | "StellarPublicKeyArray";
+    | "StellarPublicKeyArray"
+    | "TransactionReceipt";
   /** Whether the example must pass or must fail schema validation. */
   expect: ExampleExpectation;
   /** When the file is a JSON array, validate each element. */
   isArray?: boolean;
+  /** When the array lives under a property (e.g. `{ receipts: [...] }`). */
+  arrayKey?: string;
 }
 
 export const EXAMPLE_REGISTRY: ExampleEntry[] = [
@@ -91,5 +94,13 @@ export const EXAMPLE_REGISTRY: ExampleEntry[] = [
     schema: "Milestone",
     expect: "valid",
     isArray: true,
+  },
+  {
+    id: "transaction-receipts",
+    path: "examples/transaction-receipts.example.json",
+    schema: "TransactionReceipt",
+    expect: "valid",
+    isArray: true,
+    arrayKey: "receipts",
   },
 ];
