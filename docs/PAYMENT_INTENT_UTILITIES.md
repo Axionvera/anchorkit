@@ -62,26 +62,13 @@ const intent = createPaymentIntent({
 });
 ```
 
-Check readiness in two modes:
+Check readiness using the unified transaction readiness pipeline:
 
-- `estimateTransactionReadinessSync(intent, options)` — pure. Pass simulated
-  `sourceAccountFunded`/`destAccountFunded` flags for fast UI feedback.
-- `estimateTransactionReadiness(intent, options)` — async, actually calls Horizon via
-  `getAccountStatus` on source and destination.
+- `evaluateTransactionReadinessSync(intent, options)` — pure synchronous evaluation across all 5 stages (`network`, `account`, `asset`, `amount`, `memo`).
+- `evaluateTransactionReadiness(intent, options)` — async evaluation fetching live account diagnostics.
 
-Return shape:
+Return shape includes typed state (`valid` | `warning` | `blocked` | `invalid` | `unavailable`), 5 stage results, issue list, reserve calculations, and diagnostics. See [TRANSACTION_READINESS.md](./TRANSACTION_READINESS.md) for full documentation.
 
-```ts
-{
-  ready: boolean,
-  warnings: Array<{ code, message, severity: "error" | "warning" | "info" }>,
-  summary: string,
-}
-```
-
-Readiness error codes surfaced today: `SOURCE_INVALID`, `DEST_INVALID`, `ASSET_INVALID`,
-`AMOUNT_INVALID`, `MEMO_INVALID`, `MAINNET_DISABLED`, `SAME_SOURCE_DEST`, `SOURCE_UNFUNDED`,
-`DEST_UNFUNDED`.
 
 ## Submission
 

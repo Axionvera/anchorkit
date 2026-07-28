@@ -69,7 +69,7 @@ export function isCallbackUrlValid(url: string): boolean {
 export function isAnchorTransactionStatus(
   value: string
 ): value is AnchorTransactionStatus {
-  return (ANCHOR_TRANSACTION_STATUSES as readonly string[]).includes(value);
+  return (ANCHOR_TRANSACTION_STATUSES as unknown as string[]).includes(value);
 }
 
 export interface AnchorStatusUserMessage {
@@ -267,3 +267,6 @@ export function validateAnchorRequest(
     ? validateDepositRequest(input)
     : validateWithdrawalRequest(input);
 }
+
+export * from "./capabilities";
+

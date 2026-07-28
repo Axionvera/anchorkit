@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { Keypair } from "@stellar/stellar-base";
+import { FRIENDBOT_PUBLIC_KEY } from "@anchorkit/fixtures";
 import {
   generateTestnetKeypair,
   validatePublicKey,
@@ -12,10 +14,11 @@ import {
   getPublicKeyFromSecret,
   redactSecrets,
 } from "../src";
+import { FRIENDBOT_PUBLIC_KEY, makeFakeSecret } from "./fixtures";
 
-const WELL_KNOWN_FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
+const WELL_KNOWN_FRIENDBOT = FRIENDBOT_PUBLIC_KEY;
 const SECRET_KEY_SAMPLE = "SCZANGBA5YHTNYVVV4C3U252E2B6P6F5T3U6MM63WBSBZATAQI3EBTQ4";
-const SECRET_KEY_SAMPLE_PUBLIC = "GA2C5RFPE6GCKMY3K7AIGZ5ZBBX26Z5B3E6G7V4MMSZ5L2R5YHMBFQJJ";
+const SECRET_KEY_SAMPLE_PUBLIC = "GC2BKLYOOYPDEFJKLKY6FNNRQMGFLVHJKQRGNSSRRGSMPGF32LHCQVGF";
 
 describe("Stellar public key validation", () => {
   it("accepts a valid 56-char G-prefixed base32 public key", () => {
@@ -82,7 +85,10 @@ describe("Stellar secret key validation and redaction", () => {
   });
 
   it("quietly rejects keys with bad characters", () => {
-    const bad = SECRET_KEY_SAMPLE.replace("C", "0");
+    // "0", "1", "8", "9" are outside the base32 alphabet used by Stellar keys,
+    // so swapping in a "1" after the S prefix is always an invalid character
+    // regardless of what the randomly generated sample secret contains.
+    const bad = `S1${SECRET_KEY_SAMPLE.slice(2)}`;
     const r = validateSecretKeyQuietly(bad);
     expect(r.valid).toBe(false);
     expect(r.errorCode).toBe("BAD_CHARS");

@@ -2,38 +2,20 @@
 
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
-import { Card, Button } from "@/components/ui";
+import { Card, Button, CapabilityBadge, CapabilityHealthSummary } from "@/components/ui";
+import { MODULE_CAPABILITIES } from "@anchorkit/config";
+import type { CapabilityModuleId } from "@anchorkit/types";
 
-const sections = [
-  {
-    href: "/accounts",
-    title: "Accounts",
-    count: "3 tools",
-    desc: "Create testnet keypairs, validate keys, and load Horizon account data.",
-    accent: "bg-stellar-500",
-  },
-  {
-    href: "/payments",
-    title: "Payments",
-    count: "2 modes",
-    desc: "Build a payment intent, validate inputs, and check readiness.",
-    accent: "bg-anchor-500",
-  },
-  {
-    href: "/anchors",
-    title: "Anchors",
-    count: "6 statuses",
-    desc: "Mock deposit and withdrawal lifecycle with SEP-style status badges.",
-    accent: "bg-amber-500",
-  },
-  {
-    href: "/escrow",
-    title: "Escrow",
-    count: "7 states",
-    desc: "Explore the Soroban treasury-escrow contract milestone workflow.",
-    accent: "bg-soroban-500",
-  },
-];
+type ModuleMeta = { href: string; count: string; accent: string };
+
+const MODULE_META: Record<CapabilityModuleId, ModuleMeta> = {
+  accounts: { href: "/accounts", count: "3 tools", accent: "bg-stellar-500" },
+  payments: { href: "/payments", count: "2 modes", accent: "bg-anchor-500" },
+  anchors: { href: "/anchors", count: "6 statuses", accent: "bg-amber-500" },
+  escrow: { href: "/escrow", count: "7 states", accent: "bg-soroban-500" },
+  diagnostics: { href: "/diagnostics", count: "0 tools", accent: "bg-ink-500" },
+  "network-config": { href: "/network-config", count: "3 networks", accent: "bg-purple-500" },
+};
 
 export default function DashboardPage() {
   return (
@@ -43,22 +25,46 @@ export default function DashboardPage() {
       subtitle="Jump into the module you are building or testing. Everything is local-first and testnet-only by default."
       warning="Do not paste mainnet secrets into this dashboard. Mainnet is intentionally disabled unless the environment configuration is explicitly overridden."
     >
+      <CapabilityHealthSummary capabilities={MODULE_CAPABILITIES} />
+
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {sections.map((s) => (
-          <Card key={s.href} className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className={`inline-block h-8 w-8 rounded-md ${s.accent} opacity-90`} />
-              <span className="text-mono-xs text-ink-500 dark:text-ink-400">{s.count}</span>
-            </div>
-            <h3 className="text-base font-semibold tracking-tight">{s.title}</h3>
-            <p className="flex-1 text-sm text-ink-500 dark:text-ink-300">{s.desc}</p>
-            <Link href={s.href}>
-              <Button variant="primary" className="w-full">
-                Open {s.title}
-              </Button>
-            </Link>
-          </Card>
-        ))}
+
+        {MODULE_CAPABILITIES.map((m) => {
+          const meta = MODULE_META[m.id];
+          const disabled = m.state === "unavailable";
+          return (
+            <Card key={m.id} className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className={`inline-block h-8 w-8 rounded-md ${meta.accent} opacity-90`} />
+                <span className="text-mono-xs text-ink-500 dark:text-ink-400">{meta.count}</span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-base font-semibold tracking-tight">{m.label}</h3>
+                <CapabilityBadge state={m.state} />
+              </div>
+              <p className="flex-1 text-sm text-ink-500 dark:text-ink-300">{m.description}</p>
+              {m.docsHref && (
+                <Link
+                  href={m.docsHref}
+                  className="text-mono-xs text-stellar-600 hover:underline dark:text-stellar-400"
+                >
+                  Feature readiness docs →
+                </Link>
+              )}
+              {disabled ? (
+                <Button variant="secondary" className="w-full" disabled>
+                  Not available yet
+                </Button>
+              ) : (
+                <Link href={meta.href}>
+                  <Button variant="primary" className="w-full">
+                    Open {m.label}
+                  </Button>
+                </Link>
+              )}
+            </Card>
+          );
+        })}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

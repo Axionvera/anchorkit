@@ -1,8 +1,10 @@
 import type {
+  AccountBalanceModel,
   PaymentIntent,
+  ReadinessStage,
+  ReadinessState,
   ReadinessWarning,
   StellarAsset,
-  StellarPublicKey,
   TransactionReadiness,
 } from "@anchorkit/types";
 import { STELLAR_NETWORKS } from "@anchorkit/types";
@@ -18,9 +20,10 @@ import { PaymentIntentSchema } from "@anchorkit/validators";
 import type { SafeParseReturnType } from "zod";
 import { createStellarError } from "./errors";
 import { isPublicKeyValid } from "./keys";
-import { isAssetValid } from "./assets";
-import { isAmountValid, isMemoValid } from "./payments";
-import { getAccountStatus } from "./accounts";
+import { isAssetValid, isNativeAsset } from "./assets";
+import { compareAmounts, isAmountValid, isMemoValid } from "./payments";
+import { getAccountStatus, loadAccount } from "./accounts";
+import { computeBalanceModel } from "./balances";
 
 export function createPaymentIntent(input: {
   sourcePublicKey: string;
@@ -50,6 +53,61 @@ export function isPaymentIntentValid(intent: unknown): boolean {
   return validatePaymentIntent(intent).success;
 }
 
+/**
+ * Map a set of readiness warnings to a single `StellarErrorCode` so callers can
+ * report the most severe blocker as a typed error (useful for logging and
+ * programmatic branching). Returns "UNKNOWN" when there are no error-severity
+ * warnings.
+ */
+export function mapReadinessToErrorCode(warnings: ReadinessWarning[]): string {
+  const blocker = warnings.find((w) => w.severity === "error");
+  return blocker?.code ?? "UNKNOWN";
+}
+
+/** Build a concise, user-facing summary for the aggregate readiness result. */
+function buildReadinessSummary(ready: boolean, warnings: ReadinessWarning[]): string {
+  if (warnings.length === 0) {
+    return "Payment intent is ready for the configured preflight checks.";
+  }
+
+  const errorCount = warnings.filter((warning) => warning.severity === "error").length;
+  const nonBlockingCount = warnings.length - errorCount;
+
+  if (!ready) {
+    return `Payment intent is blocked by ${errorCount} error${errorCount === 1 ? "" : "s"}${
+      nonBlockingCount > 0
+        ? ` and has ${nonBlockingCount} non-blocking warning${nonBlockingCount === 1 ? "" : "s"}`
+        : ""
+    }.`;
+  }
+
+  return `Payment intent passed with ${nonBlockingCount} non-blocking warning${
+    nonBlockingCount === 1 ? "" : "s"
+  }.`;
+}
+
+/** Derive the discrete readiness state from the collected warnings. */
+export function getReadinessState(warnings: ReadinessWarning[]): ReadinessState {
+  const errors = warnings.filter((w) => w.severity === "error");
+  if (errors.length === 0) {
+    return warnings.length === 0 ? "ready" : "warnings";
+  }
+  if (errors.some((w) => w.code === "MAINNET_DISABLED")) {
+    return "unsafe-network";
+  }
+  return "blocked";
+}
+
+/** Build a single readiness stage from its warnings. */
+function stage(id: string, label: string, warnings: ReadinessWarning[]): ReadinessStage {
+  const status: ReadinessStage["status"] = warnings.some((w) => w.severity === "error")
+    ? "fail"
+    : warnings.length > 0
+      ? "warn"
+      : "pass";
+  return { id, label, status, warnings };
+}
+
 export function estimateTransactionReadinessSync(
   intent: PaymentIntent,
   options: {
@@ -57,66 +115,83 @@ export function estimateTransactionReadinessSync(
     envConfig?: AnchorKitEnvConfig;
     sourceAccountFunded?: boolean;
     destAccountFunded?: boolean;
+    /**
+     * Spendable balance model for the source account. Opt-in: when omitted,
+     * readiness behaves exactly as before and makes no claim about funds.
+     */
+    sourceBalances?: AccountBalanceModel;
   } = {}
 ): TransactionReadiness {
-  const warnings: ReadinessWarning[] = [];
   const envConfig = options.envConfig ?? DEFAULT_ENV_CONFIG;
   const network = options.network ?? envConfig.defaultNetwork;
 
+  const warnings: ReadinessWarning[] = [];
+
+  // ── Stage: account (source) ───────────────────────────────────────────────
+  const accountWarnings: ReadinessWarning[] = [];
   if (!isPublicKeyValid(intent.sourcePublicKey)) {
-    warnings.push({
+    accountWarnings.push({
       code: "SOURCE_INVALID",
       message: "Source public key is invalid",
       severity: "error",
     });
   }
 
+  // ── Stage: account (destination) ──────────────────────────────────────────
+  const destWarnings: ReadinessWarning[] = [];
   if (!isPublicKeyValid(intent.destinationPublicKey)) {
-    warnings.push({
+    destWarnings.push({
       code: "DEST_INVALID",
       message: "Destination public key is invalid",
       severity: "error",
     });
   }
-
   if (
     isPublicKeyValid(intent.sourcePublicKey) &&
     isPublicKeyValid(intent.destinationPublicKey) &&
     intent.sourcePublicKey === intent.destinationPublicKey
   ) {
-    warnings.push({
+    destWarnings.push({
       code: "SAME_SOURCE_DEST",
       message: "Source and destination accounts are the same",
       severity: "warning",
     });
   }
 
+  // ── Stage: asset ──────────────────────────────────────────────────────────
+  const assetWarnings: ReadinessWarning[] = [];
   if (!isAssetValid(intent.asset)) {
-    warnings.push({
+    assetWarnings.push({
       code: "ASSET_INVALID",
       message: "Asset configuration is invalid",
       severity: "error",
     });
   }
 
+  // ── Stage: amount ────────────────────────────────────────────────────────
+  const amountWarnings: ReadinessWarning[] = [];
   if (!isAmountValid(intent.amount)) {
-    warnings.push({
+    amountWarnings.push({
       code: "AMOUNT_INVALID",
       message: "Payment amount is invalid or outside allowed range",
       severity: "error",
     });
   }
 
+  // ── Stage: memo ───────────────────────────────────────────────────────────
+  const memoWarnings: ReadinessWarning[] = [];
   if (intent.memo && !isMemoValid(intent.memo)) {
-    warnings.push({
+    memoWarnings.push({
       code: "MEMO_INVALID",
       message: "Memo value is invalid for the selected memo type",
       severity: "error",
     });
   }
 
+  // ── Stage: network safety ─────────────────────────────────────────────────
+  const networkWarnings: ReadinessWarning[] = [];
   if (network === STELLAR_NETWORKS.MAINNET && !isMainnetAllowed(envConfig)) {
-    warnings.push({
+    networkWarnings.push({
       code: "MAINNET_DISABLED",
       message:
         "Mainnet mode is disabled by default. Review security notes and explicitly enable mainnet if needed.",
@@ -124,16 +199,18 @@ export function estimateTransactionReadinessSync(
     });
   }
 
+  // ── Stage: balance / funding ──────────────────────────────────────────────
+  const balanceWarnings: ReadinessWarning[] = [];
+
   if (options.sourceAccountFunded === false) {
-    warnings.push({
+    balanceWarnings.push({
       code: "SOURCE_UNFUNDED",
       message: "Source account is not funded on the network",
       severity: "warning",
     });
   }
-
   if (options.destAccountFunded === false) {
-    warnings.push({
+    balanceWarnings.push({
       code: "DEST_UNFUNDED",
       message:
         "Destination account is not funded. Issued asset payments require the destination to have a trustline.",
@@ -141,12 +218,58 @@ export function estimateTransactionReadinessSync(
     });
   }
 
+  // Spendable-balance check. Only meaningful for native payments: the XLM
+  // minimum balance constrains how much XLM can leave the account, not how
+  // much of an issued asset can.
+  const sourceBalances = options.sourceBalances;
+  if (sourceBalances && isNativeAsset(intent.asset) && isAmountValid(intent.amount)) {
+    if (sourceBalances.state === "known" && sourceBalances.spendable !== null) {
+      if (compareAmounts(sourceBalances.spendable, intent.amount) < 0) {
+        balanceWarnings.push({
+          code: "INSUFFICIENT_FUNDS",
+          message:
+            `Spendable balance is ${sourceBalances.spendable} XLM, below the ` +
+            `${intent.amount} XLM payment. ${sourceBalances.explanation}`,
+          severity: "error",
+        });
+      }
+    } else {
+      // Deliberately carries no figure: an unavailable balance must not be
+      // presented as a number the user could act on.
+      balanceWarnings.push({
+        code: "SPENDABLE_UNKNOWN",
+        message: `Spendable balance could not be determined. ${sourceBalances.explanation}`,
+        severity: "info",
+      });
+    }
+  }
+
+  warnings.push(
+    ...accountWarnings,
+    ...destWarnings,
+    ...assetWarnings,
+    ...amountWarnings,
+    ...memoWarnings,
+    ...networkWarnings,
+    ...balanceWarnings
+  );
+
+  const stages: ReadinessStage[] = [
+    stage("account-source", "Source account", accountWarnings),
+    stage("account-dest", "Destination account", destWarnings),
+    stage("asset", "Asset", assetWarnings),
+    stage("amount", "Amount", amountWarnings),
+    stage("memo", "Memo", memoWarnings),
+    stage("network", "Network safety", networkWarnings),
+    stage("balance", "Balance & funding", balanceWarnings),
+  ];
+
   const errorCount = warnings.filter((w) => w.severity === "error").length;
   const ready = errorCount === 0;
-
+  const state = getReadinessState(warnings);
   const summary = buildReadinessSummary(ready, warnings);
 
-  return { ready, warnings, summary };
+  return { ready, state, warnings, stages, summary };
 }
 
 export async function estimateTransactionReadiness(
@@ -164,31 +287,26 @@ export async function estimateTransactionReadiness(
     assertNetworkAllowed(network, envConfig);
   }
 
-  const [sourceStatus, destStatus] = await Promise.allSettled([
-    getAccountStatus(intent.sourcePublicKey, { networkConfig, envConfig }),
+  // The source is loaded in full rather than status-only: `getAccountStatus`
+  // fetches the whole account and then discards the balances and subentry
+  // count, which are exactly what the spendable model needs. Reading them here
+  // costs no extra network call. The destination only needs its status.
+  const [sourceInfo, destStatus] = await Promise.allSettled([
+    loadAccount(intent.sourcePublicKey, { networkConfig, envConfig }),
     getAccountStatus(intent.destinationPublicKey, { networkConfig, envConfig }),
   ]);
 
   const sourceFunded =
-    sourceStatus.status === "fulfilled" ? sourceStatus.value === "funded" : undefined;
-  const destFunded =
-    destStatus.status === "fulfilled" ? destStatus.value === "funded" : undefined;
+    sourceInfo.status === "fulfilled" ? sourceInfo.value.status === "funded" : undefined;
+  const sourceBalances =
+    sourceInfo.status === "fulfilled" ? computeBalanceModel(sourceInfo.value) : undefined;
+  const destFunded = destStatus.status === "fulfilled" ? destStatus.value === "funded" : undefined;
 
   return estimateTransactionReadinessSync(intent, {
     network,
     envConfig,
     sourceAccountFunded: sourceFunded,
     destAccountFunded: destFunded,
+    sourceBalances,
   });
-}
-
-function buildReadinessSummary(ready: boolean, warnings: ReadinessWarning[]): string {
-  if (ready && warnings.length === 0) {
-    return "Payment intent is fully ready. Review warnings above for optional checks.";
-  }
-  if (ready && warnings.length > 0) {
-    return `Payment intent is ready with ${warnings.length} warning(s). Resolve warnings before signing.`;
-  }
-  const errors = warnings.filter((w) => w.severity === "error").length;
-  return `Payment intent has ${errors} blocker(s) and ${warnings.length - errors} warning(s). Fix blockers before building the transaction.`;
 }

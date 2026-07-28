@@ -27,10 +27,11 @@ import {
   sampleWithdrawalRequest,
   validateAnchorRequest,
   transition,
-  isTransitionValid,
   ALLOWED_TRANSITIONS,
 } from "@anchorkit/anchor-utils";
+import { anchorRecordToReceipt } from "@anchorkit/stellar-kit";
 import { validateCallbackUrl } from "@anchorkit/validators";
+import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
 import type {
   AnchorAssetConfig,
   AnchorTransactionKind,
@@ -38,6 +39,7 @@ import type {
   AnchorTransactionStatus,
   DepositRequestMetadata,
   StellarPublicKey,
+  StellarTransactionHash,
   WithdrawalRequestMetadata,
 } from "@anchorkit/types";
 
@@ -122,9 +124,15 @@ export default function AnchorsPage() {
         assetCode: mockAsset,
         amountIn: mockAmount,
         stellarAccount: FRIENDBOT,
+        stellarTransactionId:
+          mockStatus === "completed" || mockStatus === "pending_stellar"
+            ? ("c".repeat(64) as StellarTransactionHash)
+            : undefined,
       }),
     [mockKind, mockStatus, mockAsset, mockAmount]
   );
+
+  const mockReceipt = useMemo(() => anchorRecordToReceipt(mockRecord, "testnet"), [mockRecord]);
 
   return (
     <PageShell
@@ -300,11 +308,11 @@ export default function AnchorsPage() {
             <div>
               <Label>Preview a mock anchor record</Label>
               <div className="mt-2 flex flex-wrap gap-2">
-                <Select value={mockKind} onChange={(e) => setMockKind(e.target.value as any)}>
+                <Select value={mockKind} onChange={(e) => setMockKind(e.target.value as AnchorTransactionKind)}>
                   <option value="deposit">Deposit</option>
                   <option value="withdrawal">Withdrawal</option>
                 </Select>
-                <Select value={mockStatus} onChange={(e) => setMockStatus(e.target.value as any)}>
+                <Select value={mockStatus} onChange={(e) => setMockStatus(e.target.value as AnchorTransactionStatus)}>
                   {(
                     [
                       "pending_user",
@@ -341,6 +349,7 @@ export default function AnchorsPage() {
                   <DataRow label="Amount in" value={<span className="text-mono-sm">{mockRecord.amountIn} {mockRecord.assetCode}</span>} />
                 </dl>
               </div>
+              <TransactionReceiptPanel receipt={mockReceipt} title="Normalized anchor receipt" />
             </div>
           </div>
         </div>

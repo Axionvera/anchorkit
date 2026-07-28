@@ -13,9 +13,9 @@ import {
   disputedRaw,
   readyForReleaseRaw,
   releasedRaw,
-  allRaw,
-  CONTRACT,
-} from './fixtures/escrowEvents';
+  allEscrowEventsRaw as allRaw,
+  ESCROW_CONTRACT as CONTRACT,
+} from '@anchorkit/fixtures';
 
 describe('parseEscrowEvent — success paths', () => {
   it('decodes milestone_created', () => {

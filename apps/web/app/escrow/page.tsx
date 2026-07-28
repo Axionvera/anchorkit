@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Alert, Button, Card, DataRow, Input, Label, MilestoneStatusBadge } from "@/components/ui";
-import { parseEscrowEvents } from "@anchorkit/stellar-kit";
+import { parseEscrowEvents, escrowReleaseToReceipt } from "@anchorkit/stellar-kit";
 import { escrowEventExample } from "@/lib/escrowEventExample";
+import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
 import type { EscrowEventV1, EscrowSummary, Milestone, MilestoneStatus } from "@anchorkit/types";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
@@ -18,8 +19,7 @@ const LIFECYCLE: MilestoneStatus[] = [
   "released",
 ];
 
-const sampleEvidence =
-  "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9";
+const sampleEvidence = "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9";
 
 export default function EscrowPage() {
   const [title, setTitle] = useState("Milestone 1: Initial deliverables");
@@ -29,10 +29,12 @@ export default function EscrowPage() {
 
   const now = new Date().toISOString();
 
-  const mappedEvents = useMemo(
-    () => parseEscrowEvents(escrowEventExample).events,
-    []
-  );
+  const mappedEvents = useMemo(() => parseEscrowEvents(escrowEventExample).events, []);
+
+  const releaseReceipt = useMemo(() => {
+    const released = mappedEvents.find((e) => e.type === "released");
+    return released ? escrowReleaseToReceipt(released, "testnet") : null;
+  }, [mappedEvents]);
 
   const demoMilestone: Milestone = useMemo(() => {
     const status = LIFECYCLE[step] ?? "draft";
@@ -45,7 +47,10 @@ export default function EscrowPage() {
       evidenceHash: step >= 2 ? sampleEvidence : undefined,
       createdAt: now,
       updatedAt: now,
-      approvedAt: status === "approved" || status === "ready_for_release" || status === "released" ? now : undefined,
+      approvedAt:
+        status === "approved" || status === "ready_for_release" || status === "released"
+          ? now
+          : undefined,
       releasedAt: status === "released" ? now : undefined,
       disputedAt: status === "disputed" ? now : undefined,
       disputeReason: status === "disputed" ? disputeReason : undefined,
@@ -120,9 +125,15 @@ export default function EscrowPage() {
             <h2 className="text-base font-semibold tracking-tight">Milestone snapshot</h2>
             <div className="mt-3 rounded-lg border border-ink-200 p-4 text-sm dark:border-ink-800">
               <dl className="divide-y divide-ink-100 dark:divide-ink-800">
-                <DataRow label="Status" value={<MilestoneStatusBadge status={demoMilestone.status} />} />
+                <DataRow
+                  label="Status"
+                  value={<MilestoneStatusBadge status={demoMilestone.status} />}
+                />
                 <DataRow label="Title" value={demoMilestone.title} />
-                <DataRow label="Amount" value={<span className="text-mono-sm">{demoMilestone.amount} XLM</span>} />
+                <DataRow
+                  label="Amount"
+                  value={<span className="text-mono-sm">{demoMilestone.amount} XLM</span>}
+                />
                 <DataRow
                   label="Evidence hash"
                   value={
@@ -177,8 +188,8 @@ export default function EscrowPage() {
               )}
               {step === 4 && (
                 <Alert tone="error" title="Milestone disputed">
-                  Further approvals are blocked until the dispute is explicitly resolved
-                  (ApprovalAfterDispute error per contract).
+                  Further approvals are blocked (ApprovalAfterDispute). The MVP contract has no
+                  dispute-resolution entry point, so this state is terminal.
                 </Alert>
               )}
               {step === 5 && (
@@ -206,35 +217,50 @@ export default function EscrowPage() {
                 value={<span className="text-mono-sm hash-clip">{summary.admin}</span>}
               />
               <DataRow label="Total milestones" value={summary.totalMilestones} />
-              <DataRow label="Total amount" value={<span className="text-mono-sm">{summary.totalAmount}</span>} />
-              <DataRow label="Released amount" value={<span className="text-mono-sm text-green-700 dark:text-green-300">{summary.releasedAmount}</span>} />
-              <DataRow label="Pending amount" value={<span className="text-mono-sm text-amber-700 dark:text-amber-300">{summary.pendingAmount}</span>} />
+              <DataRow
+                label="Total amount"
+                value={<span className="text-mono-sm">{summary.totalAmount}</span>}
+              />
+              <DataRow
+                label="Released amount"
+                value={
+                  <span className="text-mono-sm text-green-700 dark:text-green-300">
+                    {summary.releasedAmount}
+                  </span>
+                }
+              />
+              <DataRow
+                label="Pending amount"
+                value={
+                  <span className="text-mono-sm text-amber-700 dark:text-amber-300">
+                    {summary.pendingAmount}
+                  </span>
+                }
+              />
               <DataRow label="Disputed count" value={summary.disputedCount} />
               <DataRow label="Completed count" value={summary.completedCount} />
             </dl>
           </div>
         </Card>
 
+        <TransactionReceiptPanel receipt={releaseReceipt} title="Escrow release receipt" />
+
         <Card>
           <h2 className="text-base font-semibold tracking-tight">Contract quick-links</h2>
           <ul className="mt-3 space-y-2 text-sm">
             <li className="rounded-md border border-ink-200 p-3 dark:border-ink-800">
               <div className="font-medium">Soroban contract source</div>
-              <div className="text-mono-xs text-ink-500">
-                contracts/treasury-escrow/src/lib.rs
-              </div>
+              <div className="text-mono-xs text-ink-500">contracts/treasury-escrow/src/lib.rs</div>
             </li>
             <li className="rounded-md border border-ink-200 p-3 dark:border-ink-800">
-              <div className="font-medium">Rust tests (status transitions, auth, duplicate release)</div>
-              <div className="text-mono-xs text-ink-500">
-                contracts/treasury-escrow/src/test.rs
+              <div className="font-medium">
+                Rust tests (status transitions, auth, duplicate release)
               </div>
+              <div className="text-mono-xs text-ink-500">contracts/treasury-escrow/src/test.rs</div>
             </li>
             <li className="rounded-md border border-ink-200 p-3 dark:border-ink-800">
               <div className="font-medium">Contract docs</div>
-              <div className="text-mono-xs text-ink-500">
-                docs/SOROBAN_ESCROW_CONTRACT.md
-              </div>
+              <div className="text-mono-xs text-ink-500">docs/SOROBAN_ESCROW_CONTRACT.md</div>
             </li>
             <li className="rounded-md border border-ink-200 p-3 dark:border-ink-800">
               <div className="font-medium">Test run command</div>
@@ -247,15 +273,13 @@ export default function EscrowPage() {
       </div>
 
       <Card>
-        <h2 className="text-base font-semibold tracking-tight">
-          Mapped escrow events
-        </h2>
+        <h2 className="text-base font-semibold tracking-tight">Mapped escrow events</h2>
         <p className="mb-3 text-sm text-ink-500">
           Raw Soroban events from{" "}
-          <span className="text-mono-xs">examples/escrow-events-example.json</span>{" "}
-          decoded by <span className="text-mono-xs">parseEscrowEvents</span> from{" "}
-          <span className="text-mono-xs">@anchorkit/stellar-kit</span>. This is the
-          client-side bridge between contract emissions and the UI.
+          <span className="text-mono-xs">examples/escrow-events-example.json</span> decoded by{" "}
+          <span className="text-mono-xs">parseEscrowEvents</span> from{" "}
+          <span className="text-mono-xs">@anchorkit/stellar-kit</span>. This is the client-side
+          bridge between contract emissions and the UI.
         </p>
         <EscrowEventLog events={mappedEvents} />
       </Card>
@@ -301,9 +325,7 @@ function EscrowEventLog({ events }: { events: EscrowEventV1[] }) {
             </span>
             <span className="text-mono-xs text-ink-500">milestone {e.milestoneId}</span>
           </div>
-          <div className="mt-1 text-ink-600 dark:text-ink-300">
-            {eventSummary(e)}
-          </div>
+          <div className="mt-1 text-ink-600 dark:text-ink-300">{eventSummary(e)}</div>
           <div className="mt-1 text-mono-xs text-ink-400">
             {e.timestamp} · {e.caller.slice(0, 6)}… · contract {e.contractId.slice(0, 6)}…
           </div>

@@ -1,0 +1,23 @@
+{
+  "description": "Deterministic transaction-readiness fixture (testnet-first). Used by examples and docs to show the readiness engine output for a known intent.",
+  "network": "testnet",
+  "intent": {
+    "sourcePublicKey": "GA2C5RFPE6GCKMY3K7AIGZ5ZBBX26Z5B3E6G7V4MMSZ5L2R5YHMBFQJJ",
+    "destinationPublicKey": "GBMFNDXCRSOD7Y7FW5WJ6TZ6MMHCYQJK76Y5QM5T2DJG7QX4LM4LMFTO",
+    "asset": { "type": "native", "code": "XLM", "issuer": null },
+    "amount": "10.0000000"
+  },
+  "expected": {
+    "state": "ready",
+    "ready": true,
+    "stages": [
+      { "id": "account-source", "status": "pass" },
+      { "id": "account-dest", "status": "pass" },
+      { "id": "asset", "status": "pass" },
+      { "id": "amount", "status": "pass" },
+      { "id": "memo", "status": "pass" },
+      { "id": "network", "status": "pass" },
+      { "id": "balance", "status": "pass" }
+    ]
+  }
+}

@@ -34,12 +34,12 @@ git checkout -b feat/my-feature
 Run lint, typecheck, tests, and format before pushing:
 
 ```bash
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm contract:test
-pnpm format
+pnpm verify
 ```
+
+That single command runs format check, lint, typecheck, tests, and build.
+See [docs/LOCAL_VERIFICATION.md](./docs/LOCAL_VERIFICATION.md). If you touched
+`contracts/`, also run `pnpm contract:test` (or use `pnpm verify:full`).
 
 Start the web dashboard during development:
 
@@ -57,6 +57,15 @@ pnpm web:dev
 - **Tests are required** for anything beyond a docs or obvious one-line fix.
 - **Docs are required** for any new public function or change in user-facing
   behaviour. Pick the right file under `/docs/`.
+
+## Pull request template
+
+Every PR is pre-filled from
+[.github/PULL_REQUEST_TEMPLATE.md](./.github/PULL_REQUEST_TEMPLATE.md). Fill in **every**
+section before requesting review — issue reference, affected packages/apps, testing performed,
+screenshots (for `apps/web` UI changes), security impact, documentation impact, and the
+maintainer review self-check. PRs with unfilled or deleted sections will be sent back for
+completion before review starts.
 
 ## GrantFox contribution flow
 

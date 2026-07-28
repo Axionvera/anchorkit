@@ -12,12 +12,10 @@
  * changing call sites' shape.
  */
 
-import { redactSecretKey, secretKeyToRedactedString } from "./keys";
-import { redactSecrets } from "./errors";
-import type { RedactedSecretKey } from "@anchorkit/types";
+import { redactSecrets } from "./redaction";
 
 export { redactSecretKey, secretKeyToRedactedString } from "./keys";
-export { redactSecrets } from "./errors";
+export { redactSecrets } from "./redaction";
 export type { RedactedSecretKey } from "@anchorkit/types";
 
 /** Recursively redact secret-shaped strings inside a value. */
@@ -32,7 +30,7 @@ function safeStringify(value: unknown): string {
     try {
       const seen = new WeakSet<object>();
       const scrubbed = JSON.parse(
-        JSON.stringify(value, (_key, val) => {
+        JSON.stringify(value, (_key, val: unknown) => {
           if (typeof val === "string") return redactSecrets(val);
           if (typeof val === "object" && val !== null) {
             if (seen.has(val)) return "[Circular]";
@@ -40,7 +38,7 @@ function safeStringify(value: unknown): string {
           }
           return val;
         })
-      );
+      ) as unknown;
       return JSON.stringify(scrubbed);
     } catch {
       // Fallback: String() then redact (handles BigInt, functions, etc.)
@@ -70,11 +68,13 @@ export interface SafeLogger {
 export function createSafeLogger(
   sinks?: Partial<{ log: LogSink; info: LogSink; warn: LogSink; error: LogSink }>
 ): SafeLogger {
+  /* eslint-disable no-console */
   const out = sinks ?? console;
   const logSink = out.log ?? console.log.bind(console);
   const infoSink = out.info ?? console.info.bind(console);
   const warnSink = out.warn ?? console.warn.bind(console);
   const errorSink = out.error ?? console.error.bind(console);
+  /* eslint-enable no-console */
 
   return {
     log: (...args) => logSink(...args.map(safeStringify)),

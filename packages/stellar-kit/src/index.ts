@@ -1,12 +1,24 @@
+export * from "./redaction";
 export * from "./errors";
 export * from "./keys";
 export * from "./accounts";
 export * from "./assets";
 export * from "./payments";
 export * from "./intent";
+export * from "./readiness";
 export * from "./transactions";
 export * from "./escrowEvents";
-export * from "./logging";
+export { createSafeLogger, safeLog, redactValue } from "./logging";
+export type { LogSink, SafeLogger } from "./logging";
 export * from "./explorer";
+export * from "./receipt";
+export * from "./balances";
 export * from "./diagnostics";
+export * from "./assetRegistry";
+export * from "./assetDisplay";
+export * from "./severity";
+export * from "./soroban";
+export * from "./vault";
 export type { StellarKeypair } from "@anchorkit/types";
+export * from "./capabilities";
+

@@ -44,6 +44,9 @@ for transparency with GrantFox reviewers.
 For issue creation, label sync, auto-merge, and batch recovery workflows, see
 [AUTOMATION_RUNBOOK.md](./AUTOMATION_RUNBOOK.md).
 
+For auto-assign workflow (first-comment assignment, failure cases, and
+maintainer recovery), see [AUTO_ASSIGN_WORKFLOW.md](./AUTO_ASSIGN_WORKFLOW.md).
+
 ## Releases
 
 - Use semver for packages (`0.x` MVP stage).

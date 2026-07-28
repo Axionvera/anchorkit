@@ -7,7 +7,10 @@ import type {
 } from "@anchorkit/types";
 import { StellarPublicKeySchema, StellarSecretKeySchema } from "@anchorkit/validators";
 import type { SafeParseReturnType } from "zod";
-import { createStellarError, redactSecrets } from "./errors";
+import { createStellarError } from "./errors";
+import { formatRedactedSecret } from "./redaction";
+
+export { formatRedactedSecret } from "./redaction";
 
 export function generateTestnetKeypair(): StellarKeypair {
   try {
@@ -21,7 +24,9 @@ export function generateTestnetKeypair(): StellarKeypair {
   }
 }
 
-export function validatePublicKey(publicKey: string): SafeParseReturnType<string, StellarPublicKey> {
+export function validatePublicKey(
+  publicKey: string
+): SafeParseReturnType<string, StellarPublicKey> {
   return StellarPublicKeySchema.safeParse(publicKey);
 }
 
@@ -40,7 +45,9 @@ export function assertPublicKeyValid(publicKey: string): asserts publicKey is St
   }
 }
 
-export function validateSecretKey(secretKey: string): SafeParseReturnType<string, StellarSecretKey> {
+export function validateSecretKey(
+  secretKey: string
+): SafeParseReturnType<string, StellarSecretKey> {
   return StellarSecretKeySchema.safeParse(secretKey);
 }
 
@@ -84,8 +91,9 @@ export function getPublicKeyFromSecret(secretKey: string): StellarPublicKey {
 }
 
 export function redactSecretKey(secretKey: string): RedactedSecretKey {
-  const prefix = secretKey.slice(0, 4);
-  const suffix = secretKey.slice(-4);
+  const safeStr = typeof secretKey === "string" ? secretKey : "";
+  const prefix = safeStr.slice(0, 4);
+  const suffix = safeStr.slice(-4);
   return {
     __redacted: true,
     prefix,
@@ -93,14 +101,13 @@ export function redactSecretKey(secretKey: string): RedactedSecretKey {
   };
 }
 
-export function formatRedactedSecret(redacted: RedactedSecretKey): string {
-  return `${redacted.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••${redacted.suffix}`;
-}
-
 export function secretKeyToRedactedString(secretKey: string): string {
+  if (typeof secretKey !== "string" || !secretKey) {
+    return "[INVALID_SECRET_KEY]";
+  }
   const result = validateSecretKeyQuietly(secretKey);
   if (!result.valid) {
-    return redactSecrets("[INVALID_SECRET_KEY]");
+    return "[INVALID_SECRET_KEY]";
   }
   return formatRedactedSecret(redactSecretKey(secretKey));
 }
