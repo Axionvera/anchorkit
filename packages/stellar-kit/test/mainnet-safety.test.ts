@@ -5,6 +5,7 @@ import { loadAccount, getAccountStatus } from "../src/accounts";
 import { diagnoseAccount } from "../src/diagnostics";
 import type { PaymentIntent } from "@anchorkit/types";
 import { DEFAULT_ENV_CONFIG, NETWORK_CONFIGS } from "@anchorkit/config";
+import { FRIENDBOT_PUBLIC_KEY, FRIENDBOT_PUBLIC_KEY_2 } from "./fixtures";
 
 const mockHorizonLoadAccount = vi.fn();
 
