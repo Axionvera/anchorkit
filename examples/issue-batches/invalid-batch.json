@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Add GrantFox issue quality validator",
+    "labels": ["GrantFox OSS", "Maybe Rewarded", "Official Campaign | FWC26", "monorepo", "feature", "developer-experience", "expert"],
+    "body": "Summary\nAdd a local validator for GrantFox-style issue JSON files.\n\nAcceptance Criteria\n- [ ] Issue batch schema validator is implemented.\n- [ ] Weak acceptance criteria are flagged."
+  },
+  {
+    "title": "",
+    "labels": [],
+    "body": ""
+  }
+]
