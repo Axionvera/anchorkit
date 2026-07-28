@@ -10,8 +10,10 @@ export * from "./transactions";
 export * from "./escrowEvents";
 export * from "./logging";
 export * from "./explorer";
+export * from "./receipt";
+export * from "./balances";
 export * from "./diagnostics";
-export * from "./soroban";
-export * from "./vault";
+export * from "./assetRegistry";
+export * from "./severity";
 export type { StellarKeypair } from "@anchorkit/types";
 

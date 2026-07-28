@@ -1,0 +1,7 @@
+[
+  {
+    "title": "[GrantFox] Add retry backoff to Horizon polling",
+    "labels": ["GrantFox OSS", "Maybe Rewarded", "Official Campaign | FWC26", "stellar", "bug", "good first issue"],
+    "body": "### Summary\nHorizon polling has no backoff on 429s.\n\n### Background\nSee Horizon rate limit docs.\n\n### Proposed scope\n**In scope**: exponential backoff in stellar-kit poller\n**Out of scope**: switching away from polling\n\n### Acceptance criteria\n- [ ] Poller retries with exponential backoff on HTTP 429\n\n### Tests required\n- packages/stellar-kit/test/poller.test.ts\n\n### Docs required\nNone required\n\n### Security and Stellar correctness notes\nNo secret key handling.\n\n### Estimate\nsmall"
+  }
+]

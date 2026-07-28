@@ -108,7 +108,6 @@ export const MemoInputSchema = z
     }
   });
 
-
 export const AssetCodeSchema = z
   .string()
   .min(1, "Asset code must not be empty")
@@ -155,8 +154,7 @@ export const PaymentAmountSchema = z
       });
     }
     const min = Number(DEFAULT_ENV_CONFIG.minimumPaymentAmount);
-    const integerPart = BigInt(val.split(".")[0] || "0");
-    const maxIntegerPart = BigInt(DEFAULT_ENV_CONFIG.maximumPaymentAmount.split(".")[0] || "999999999999");
+    const max = Number(DEFAULT_ENV_CONFIG.maximumPaymentAmount);
     if (num < min) {
       ctx.addIssue({
         code: z.ZodIssueCode.too_small,
@@ -166,10 +164,11 @@ export const PaymentAmountSchema = z
         message: `Amount must be at least ${DEFAULT_ENV_CONFIG.minimumPaymentAmount}`,
       });
     }
-    if (integerPart > maxIntegerPart) {
+    const integerPart = val.split(".")[0] ?? "0";
+    if (integerPart.length > 12 || num > max) {
       ctx.addIssue({
         code: z.ZodIssueCode.too_big,
-        maximum: Number(DEFAULT_ENV_CONFIG.maximumPaymentAmount),
+        maximum: max,
         type: "number",
         inclusive: true,
         message: `Amount must not exceed ${DEFAULT_ENV_CONFIG.maximumPaymentAmount}`,

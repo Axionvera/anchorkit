@@ -22,6 +22,8 @@ const docsNav = [
       { title: "Secret key handling rules", file: "SECRET_KEY_HANDLING.md" },
       { title: "Account utilities", file: "ACCOUNT_UTILITIES.md" },
       { title: "Payment intent utilities", file: "PAYMENT_INTENT_UTILITIES.md" },
+      { title: "Transaction readiness", file: "transaction-readiness.md" },
+      { title: "Transaction receipts", file: "transaction-receipts.md" },
     ],
   },
   {
