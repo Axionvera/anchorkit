@@ -25,7 +25,8 @@ export interface ExampleEntry {
     | "StellarAsset"
     | "AnchorTransactionRecord"
     | "Milestone"
-    | "StellarPublicKeyArray";
+    | "StellarPublicKeyArray"
+    | "RawEscrowEvent";
   /** Whether the example must pass or must fail schema validation. */
   expect: ExampleExpectation;
   /** When the file is a JSON array, validate each element. */
@@ -89,6 +90,13 @@ export const EXAMPLE_REGISTRY: ExampleEntry[] = [
     id: "escrow-milestone-lifecycle",
     path: "examples/escrow-milestone-lifecycle.json",
     schema: "Milestone",
+    expect: "valid",
+    isArray: true,
+  },
+  {
+    id: "escrow-events-example",
+    path: "examples/escrow-events-example.json",
+    schema: "RawEscrowEvent",
     expect: "valid",
     isArray: true,
   },

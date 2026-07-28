@@ -15,6 +15,7 @@ import {
   AnchorTransactionRecordSchema,
   MilestoneSchema,
   StellarPublicKeySchema,
+  RawEscrowEventSchema,
 } from "../src/index";
 import { EXAMPLE_REGISTRY } from "../../../examples/registry";
 
@@ -24,6 +25,7 @@ const SCHEMA_MAP = {
   AnchorTransactionRecord: AnchorTransactionRecordSchema,
   Milestone: MilestoneSchema,
   StellarPublicKeyArray: StellarPublicKeySchema,
+  RawEscrowEvent: RawEscrowEventSchema,
 } as const;
 
 const ROOT = resolve(import.meta.dirname, "../../..");

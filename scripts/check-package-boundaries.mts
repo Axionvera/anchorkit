@@ -30,9 +30,10 @@ const PACKAGES_DIR = join(ROOT, "packages");
 const ALLOWED_DEPENDENCIES: Record<string, string[]> = {
   types: [],
   config: ["types"],
+  fixtures: ["types"],
   validators: ["types", "config"],
   "stellar-kit": ["types", "config", "validators"],
-  "anchor-utils": ["types", "config", "validators", "stellar-kit"],
+  "anchor-utils": ["types", "config", "validators", "stellar-kit", "fixtures"],
 };
 
 const PACKAGE_NAMES = Object.keys(ALLOWED_DEPENDENCIES);
