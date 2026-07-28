@@ -1,33 +1,35 @@
 import clsx from "clsx";
 import type { AnchorTransactionStatus, MilestoneStatus, TransactionReceiptStatus } from "@anchorkit/types";
 import { receiptStatusBadge } from "@anchorkit/stellar-kit";
+import { anchorStatusBadge } from "@anchorkit/anchor-utils";
 
+/**
+ * Renders an anchor transaction status badge using the shared
+ * {@link anchorStatusBadge} mapping from `@anchorkit/anchor-utils`.
+ *
+ * The colour scheme is derived from the badge's `tone` so there is a single
+ * source of truth for status labelling and styling.
+ */
 export function AnchorStatusBadge({ status }: { status: AnchorTransactionStatus }) {
-  const styles: Record<AnchorTransactionStatus, string> = {
-    pending_user: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
-    pending_anchor: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900",
-    pending_stellar: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900",
-    completed: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
-    failed: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900",
-    refunded: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900",
+  const { label, tone } = anchorStatusBadge(status);
+
+  const toneStyles: Record<string, string> = {
+    neutral: "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
+    amber: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
+    blue: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900",
+    green: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
+    red: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900",
   };
-  const label: Record<AnchorTransactionStatus, string> = {
-    pending_user: "Awaiting user",
-    pending_anchor: "Anchor processing",
-    pending_stellar: "Settling on Stellar",
-    completed: "Completed",
-    failed: "Failed",
-    refunded: "Refunded",
-  };
+
   return (
     <span
       className={clsx(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        styles[status]
+        toneStyles[tone] ?? toneStyles.blue,
       )}
     >
       <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" />
-      {label[status]}
+      {label}
     </span>
   );
 }
