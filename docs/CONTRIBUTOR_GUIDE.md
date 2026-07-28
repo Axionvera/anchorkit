@@ -66,6 +66,13 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
 - For any contract state transition change: add a Rust test under `contracts/treasury-escrow/src/test.rs`.
 - For UI-only changes: add a short note on how you tested manually.
 
+## Security awareness
+
+Before working on any module listed as **CRITICAL** or **HIGH** in the
+[security module map](./SECURITY_MODULE_MAP.md), read the relevant section of
+[SECURITY_THREAT_MODEL.md](./SECURITY_THREAT_MODEL.md) and the R0–R6 rules in
+[SECRET_KEY_HANDLING.md](./SECRET_KEY_HANDLING.md).
+
 ## Documentation
 
 - If you add or remove a public package API, update the relevant docs under `/docs` (`*.md`).
