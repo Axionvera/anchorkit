@@ -15,6 +15,9 @@ technical, constructive, and respectful.
 - `GrantFox OSS` + `Maybe Rewarded` + `Official Campaign | FWC26` are issues participating in
   the GrantFox campaign. See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md).
 
+Start with the [DEVELOPER_JOURNEY.md](./DEVELOPER_JOURNEY.md) walkthrough to understand how the
+monorepo modules fit together before diving into an issue.
+
 ## Quick contribution loop
 
 1. Find an issue, or open a new one following the [ISSUE_STANDARD.md](./ISSUE_STANDARD.md).

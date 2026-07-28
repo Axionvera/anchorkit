@@ -65,3 +65,6 @@ AnchorKit/
 ```
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for deeper package boundaries.
+
+See [DEVELOPER_JOURNEY.md](./DEVELOPER_JOURNEY.md) for an end-to-end
+walkthrough showing how the modules work together.

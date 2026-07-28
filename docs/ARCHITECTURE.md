@@ -862,6 +862,7 @@ Convenience alone is not a sufficient reason to reverse dependency direction.
 ## 18. Related documentation
 
 - [Project Overview](./PROJECT_OVERVIEW.md)
+- [End-to-End Developer Journey](./DEVELOPER_JOURNEY.md)
 - [Local Setup](./LOCAL_SETUP.md)
 - [Account Utilities](./ACCOUNT_UTILITIES.md)
 - [Payment Intent Utilities](./PAYMENT_INTENT_UTILITIES.md)
