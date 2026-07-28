@@ -69,6 +69,9 @@ pub enum EscrowError {
     DisputeResolutionRequired = 12,
     MilestoneAlreadyExists = 13,
     DisputeWithoutEvidence = 14,
+    /// Evidence is write-once. Replacing a hash that is already recorded would
+    /// let a later submission silently redefine what an approval attested to.
+    EvidenceAlreadySubmitted = 15,
 }
 
 const ADMIN_KEY: Symbol = symbol_short!("admin");
@@ -191,11 +194,23 @@ impl TreasuryEscrowContract {
         Ok(())
     }
 
+    /// Records the evidence hash backing a milestone.
+    ///
+    /// Authorised: admin only. This is the entry point that unlocks both
+    /// `approve_milestone` (which requires evidence to exist) and
+    /// `dispute_milestone` (which requires status >= EvidenceSubmitted), so an
+    /// unauthenticated caller here could drive another account's milestone
+    /// through the approval gate.
+    ///
+    /// Evidence is write-once: once a hash is recorded it cannot be replaced,
+    /// only disputed. Otherwise evidence could be swapped after the admin
+    /// reviewed it but before release.
     pub fn submit_evidence(
         env: Env,
         id: u32,
         evidence_hash: BytesN<32>,
     ) -> Result<(), EscrowError> {
+        Self::require_admin(&env)?;
         let key = Self::milestone_storage_key(id);
         let mut ms: Milestone = env
             .storage()
@@ -204,6 +219,9 @@ impl TreasuryEscrowContract {
             .ok_or(EscrowError::MilestoneNotFound)?;
         if ms.status >= MilestoneStatus::Released as u32 {
             return Err(EscrowError::InvalidMilestoneStatus);
+        }
+        if ms.evidence_hash.is_some() {
+            return Err(EscrowError::EvidenceAlreadySubmitted);
         }
         ms.evidence_hash = Option::Some(evidence_hash.clone());
         ms.updated_at = env.ledger().timestamp();
