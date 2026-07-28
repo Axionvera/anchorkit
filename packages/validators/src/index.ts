@@ -9,3 +9,6 @@ export * from "./schemas/receipt";
 // ─── Validation engine (issue #6) ───────────────────────────────────────────
 export * from "./validationEngine";
 
+// ─── Package capability metadata ────────────────────────────────────────────
+export * from "./capabilities";
+
