@@ -274,6 +274,7 @@ GrantFox contribution workflow	GRANTFOX_WORKFLOW.md
 Advanced issue standard	ISSUE_STANDARD.md
 Maintainer review checklist	MAINTAINER_REVIEW_CHECKLIST.md
 Automation runbook	AUTOMATION_RUNBOOK.md
+Security module map	SECURITY_MODULE_MAP.md
 Roadmap	ROADMAP.md
 Escrow compatibility matrix	ESCROW_COMPATIBILITY_MATRIX.md
 🦊 GrantFox readiness
@@ -304,6 +305,7 @@ GrantFox contribution workflow GRANTFOX_WORKFLOW.md
 Advanced issue standard ISSUE_STANDARD.md
 Maintainer review checklist MAINTAINER_REVIEW_CHECKLIST.md
 Automation runbook AUTOMATION_RUNBOOK.md
+Security module map SECURITY_MODULE_MAP.md
 Dashboard capability states CAPABILITY_STATES.md
 Public roadmap & capability disclaimer ROADMAP.md
 🦊 GrantFox readiness
