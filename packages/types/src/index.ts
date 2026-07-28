@@ -71,6 +71,40 @@ export interface AccountInfo {
   error?: string;
 }
 
+/**
+ * Whether the spendable balance model could be derived at all.
+ *
+ * `unknown` is not "zero": it means the account data needed to compute a
+ * balance is missing or unreliable, so every amount is `null` rather than a
+ * number that would overstate what the user can actually spend.
+ */
+export type BalanceModelState = "known" | "unknown";
+
+/**
+ * Native (XLM) balance broken down into what is actually spendable.
+ *
+ * All amounts are decimal strings normalized to 7 decimal places (Stellar's
+ * precision), or `null` when `state` is `"unknown"`. The invariant
+ * `spendable + unavailable === total` holds for every `"known"` model.
+ *
+ * `spendable` excludes the minimum balance but NOT selling liabilities, which
+ * Horizon reports but `AccountBalances` does not carry. It is therefore an
+ * upper bound for accounts with open offers.
+ */
+export interface AccountBalanceModel {
+  state: BalanceModelState;
+  /** Total native balance held by the account. */
+  total: string | null;
+  /** Minimum balance locked by the protocol reserve. */
+  reserve: string | null;
+  /** Total minus reserve, never negative. */
+  spendable: string | null;
+  /** The portion of the total that cannot be spent (equals the locked reserve). */
+  unavailable: string | null;
+  /** Human-readable explanation suitable for UI. Contains no amounts when unknown. */
+  explanation: string;
+}
+
 export interface PaymentIntent {
   sourcePublicKey: StellarPublicKey;
   destinationPublicKey: StellarPublicKey;

@@ -349,6 +349,39 @@ export default function AccountsPage() {
                   }
                 />
               )}
+              {lookupDiag && lookupDiag.balances.state === "known" && (
+                <>
+                  <DataRow
+                    label="Spendable"
+                    value={
+                      <span title={lookupDiag.balances.explanation}>
+                        {lookupDiag.balances.spendable} XLM
+                      </span>
+                    }
+                  />
+                  <DataRow
+                    label="Unavailable"
+                    value={
+                      <span
+                        className="text-amber-600 dark:text-amber-400"
+                        title={lookupDiag.balances.explanation}
+                      >
+                        {lookupDiag.balances.unavailable} XLM — locked by the minimum balance
+                      </span>
+                    }
+                  />
+                </>
+              )}
+              {lookupDiag && lookupDiag.balances.state === "unknown" && (
+                <DataRow
+                  label="Spendable"
+                  value={
+                    <span className="text-amber-600 dark:text-amber-400">
+                      Unknown — {lookupDiag.balances.explanation}
+                    </span>
+                  }
+                />
+              )}
               {lookupDiag?.state === "invalid" && (
                 <DataRow
                   label="Diagnostic"
