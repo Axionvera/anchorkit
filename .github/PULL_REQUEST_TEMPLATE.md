@@ -12,10 +12,10 @@ implementation evidence, and tests. See
 format, status legend, and a worked example.
 
 | Acceptance Criterion | Status | Implementation Evidence | Tests | Notes |
-| --- | --- | --- | --- | --- |
-| … | | | | |
-| … | | | | |
-| … | | | | |
+| -------------------- | ------ | ----------------------- | ----- | ----- |
+| …                    |        |                         |       |       |
+| …                    |        |                         |       |       |
+| …                    |        |                         |       |       |
 
 ## Affected packages / apps
 
@@ -37,15 +37,15 @@ maintainer):
 
 Describe what you ran and how you verified the change (commands run, manual steps in the
 dashboard, contract test output, etc.). This is required even when the checklist below is filled
-in — the checklist confirms *that* something was tested, this explains *how*.
+in — the checklist confirms _that_ something was tested, this explains _how_.
 
 ## Screenshots / recordings
 
 Required for any `apps/web` UI change. Mark N/A otherwise.
 
 | Before | After |
-| --- | --- |
-|  |  |
+| ------ | ----- |
+|        |       |
 
 ## Security impact
 
@@ -68,14 +68,16 @@ your PR description and mark each item. Do not fill out Phase 2 (GrantFox reward
 that is completed by the campaign reviewer after merge.
 
 ### PR self-check
+
 - [ ] References the original issue with `Closes #NNN` in the PR body.
 - [ ] Acceptance criteria on the issue are checked off individually in the PR description.
 - [ ] `pnpm verify` passes locally (format, lint, typecheck, test, build).
 - [ ] `pnpm check:boundaries` passes locally (if any `packages/*/src` import changed).
 - [ ] `pnpm contract:test` passes locally (if anything under `contracts/` changed).
-  Optionally use `pnpm verify:full` to cover verify + examples + boundaries + contract tests.
+      Optionally use `pnpm verify:full` to cover verify + examples + boundaries + contract tests.
 
 ### Stellar network correctness
+
 - [ ] New key parsing matches branded types.
 - [ ] Amounts remain 7-decimal strings.
 - [ ] Memo rules enforced if touched.
@@ -83,17 +85,20 @@ that is completed by the campaign reviewer after merge.
 - [ ] `assertNetworkAllowed` called before any Horizon/RPC call that could reach mainnet.
 
 ### Anchor and SEP flow correctness
+
 - [ ] Deposit/withdrawal metadata uses correct Zod schemas.
 - [ ] `validateCallbackUrl` rejects non-HTTPS if callbacks touched.
 - [ ] Lifecycle transitions not bypassed — `isTransitionValid` / `transition` used.
 - [ ] Exhaustive `never` checks in status-to-message/badge switches.
 
 ### Payment intent and readiness correctness
+
 - [ ] Payment intents validated through `PaymentIntentSchema`.
 - [ ] Readiness stages produce correct warnings for each scenario.
 - [ ] Spendable balance model correctly integrated when provided.
 
 ### Soroban contract correctness (if `contracts/` changed)
+
 - [ ] Admin-only functions call `require_admin()`.
 - [ ] Status transitions remain in the allowed DAG.
 - [ ] Evidence is write-once (`EvidenceAlreadySubmitted` enforced).
@@ -102,6 +107,7 @@ that is completed by the campaign reviewer after merge.
 - [ ] Summary aggregations use `saturating_add` / `saturating_sub`.
 
 ### Secret leakage (R0–R6)
+
 - [ ] R0: No raw secret in logs/errors.
 - [ ] R1: No secret echoed in UI/copy/URL.
 - [ ] R2: No localStorage/cookie persistence.
@@ -112,17 +118,20 @@ that is completed by the campaign reviewer after merge.
 - [ ] Diff search for `/S[A-Z2-7]{50,}/` is clean.
 
 ### Mainnet safety
+
 - [ ] Defaults remain testnet-first.
 - [ ] New mainnet paths behind `assertNetworkAllowed`.
 - [ ] No hardcoded mainnet production URLs.
 
 ### Tests
+
 - [ ] New public functions have positive + negative Vitest cases.
 - [ ] New branches in error mapping / status transitions have tests.
 - [ ] Contract changes: happy path + error path tests in `src/test.rs`.
 - [ ] Tests do not print or assert on raw secrets.
 
 ### Documentation
+
 - [ ] Topic docs updated for new user-facing exports.
 - [ ] README docs index updated if new doc added.
 - [ ] Security docs updated if new threat areas introduced.

@@ -56,8 +56,9 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
   packages/apps, testing performed, screenshots for `apps/web` UI changes, security impact,
   and documentation impact. Do not delete sections that don't apply — mark them N/A instead so
   reviewers know they were considered.
-- For GrantFox issues, paste the
-  [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) self-check into your
+- For GrantFox issues, review the criteria in
+  [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) and
+  [REVIEWER_QUALITY_CHECKLIST.md](./REVIEWER_QUALITY_CHECKLIST.md), and paste the self-check into your
   PR description.
 
 ## Tests are expected

@@ -29,43 +29,43 @@ Read the public roadmap and full capability disclaimer
 for the current capability table, mock and experimental areas, unsupported
 features, MVP limitations, testnet assumptions, and planned work.
 
-
 ## 📚 Docs index
 
 All of these live under [`./docs/`](./docs/).
 
-| Topic | File |
-| --- | --- |
-| Project overview | [`PROJECT_OVERVIEW.md`](./docs/PROJECT_OVERVIEW.md) |
-| End-to-end developer journey | [`DEVELOPER_JOURNEY.md`](./docs/DEVELOPER_JOURNEY.md) |
-| Local setup | [`LOCAL_SETUP.md`](./docs/LOCAL_SETUP.md) |
-| Architecture / package boundaries | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md) |
-| Stellar testnet usage | [`STELLAR_TESTNET_USAGE.md`](./docs/STELLAR_TESTNET_USAGE.md) |
-| Security notes | [`SECURITY_NOTES.md`](./docs/SECURITY_NOTES.md) |
-| Security threat model | [`SECURITY_THREAT_MODEL.md`](./docs/SECURITY_THREAT_MODEL.md) |
-| Security & architecture readiness review | [`SECURITY_ARCHITECTURE_REVIEW.md`](./docs/SECURITY_ARCHITECTURE_REVIEW.md) |
-| Secret key handling rules R0–R6 | [`SECRET_KEY_HANDLING.md`](./docs/SECRET_KEY_HANDLING.md) |
-| Account utilities | [`ACCOUNT_UTILITIES.md`](./docs/ACCOUNT_UTILITIES.md) |
-| Payment intent utilities | [`PAYMENT_INTENT_UTILITIES.md`](./docs/PAYMENT_INTENT_UTILITIES.md) |
-| Anchor utilities | [`ANCHOR_UTILITIES.md`](./docs/ANCHOR_UTILITIES.md) |
-| Soroban treasury escrow contract | [`SOROBAN_ESCROW_CONTRACT.md`](./docs/SOROBAN_ESCROW_CONTRACT.md) |
-| Shared error taxonomy | [`ERROR_TAXONOMY.md`](./docs/ERROR_TAXONOMY.md) |
-| Escrow storage migration guide | [`ESCROW_MIGRATION.md`](./docs/ESCROW_MIGRATION.md) |
-| Escrow compatibility matrix | [`ESCROW_COMPATIBILITY_MATRIX.md`](./docs/ESCROW_COMPATIBILITY_MATRIX.md) |
-| Shared test fixtures | [`FIXTURE_FRAMEWORK.md`](./docs/FIXTURE_FRAMEWORK.md) |
-| Status severity mapping | [`STATUS_SEVERITY_MAPPING.md`](./docs/STATUS_SEVERITY_MAPPING.md) |
-| Contributor guide | [`CONTRIBUTOR_GUIDE.md`](./docs/CONTRIBUTOR_GUIDE.md) |
-| Meaningful vs. insufficient contribution examples | [`MEANINGFUL_WORK_EXAMPLES.md`](./docs/MEANINGFUL_WORK_EXAMPLES.md) |
-| Maintainer guide | [`MAINTAINER_GUIDE.md`](./docs/MAINTAINER_GUIDE.md) |
-| Issue writing guide | [`ISSUE_WRITING_GUIDE.md`](./docs/ISSUE_WRITING_GUIDE.md) |
-| Acceptance criteria completion table | [`ACCEPTANCE_CRITERIA_COMPLETION.md`](./docs/ACCEPTANCE_CRITERIA_COMPLETION.md) |
-| GrantFox contribution workflow | [`GRANTFOX_WORKFLOW.md`](./docs/GRANTFOX_WORKFLOW.md) |
-| Advanced issue standard | [`ISSUE_STANDARD.md`](./docs/ISSUE_STANDARD.md) |
-| Maintainer review checklist | [`MAINTAINER_REVIEW_CHECKLIST.md`](./docs/MAINTAINER_REVIEW_CHECKLIST.md) |
-| Automation runbook | [`AUTOMATION_RUNBOOK.md`](./docs/AUTOMATION_RUNBOOK.md) |
-| Auto-assign workflow | [`AUTO_ASSIGN_WORKFLOW.md`](./docs/AUTO_ASSIGN_WORKFLOW.md) |
-| Dashboard capability states | [`CAPABILITY_STATES.md`](./docs/CAPABILITY_STATES.md) |
-| Public roadmap & capability disclaimer | [`ROADMAP.md`](./docs/ROADMAP.md) |
+| Topic                                             | File                                                                            |
+| ------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Project overview                                  | [`PROJECT_OVERVIEW.md`](./docs/PROJECT_OVERVIEW.md)                             |
+| End-to-end developer journey                      | [`DEVELOPER_JOURNEY.md`](./docs/DEVELOPER_JOURNEY.md)                           |
+| Local setup                                       | [`LOCAL_SETUP.md`](./docs/LOCAL_SETUP.md)                                       |
+| Architecture / package boundaries                 | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                                     |
+| Stellar testnet usage                             | [`STELLAR_TESTNET_USAGE.md`](./docs/STELLAR_TESTNET_USAGE.md)                   |
+| Security notes                                    | [`SECURITY_NOTES.md`](./docs/SECURITY_NOTES.md)                                 |
+| Security threat model                             | [`SECURITY_THREAT_MODEL.md`](./docs/SECURITY_THREAT_MODEL.md)                   |
+| Security & architecture readiness review          | [`SECURITY_ARCHITECTURE_REVIEW.md`](./docs/SECURITY_ARCHITECTURE_REVIEW.md)     |
+| Secret key handling rules R0–R6                   | [`SECRET_KEY_HANDLING.md`](./docs/SECRET_KEY_HANDLING.md)                       |
+| Account utilities                                 | [`ACCOUNT_UTILITIES.md`](./docs/ACCOUNT_UTILITIES.md)                           |
+| Payment intent utilities                          | [`PAYMENT_INTENT_UTILITIES.md`](./docs/PAYMENT_INTENT_UTILITIES.md)             |
+| Anchor utilities                                  | [`ANCHOR_UTILITIES.md`](./docs/ANCHOR_UTILITIES.md)                             |
+| Soroban treasury escrow contract                  | [`SOROBAN_ESCROW_CONTRACT.md`](./docs/SOROBAN_ESCROW_CONTRACT.md)               |
+| Shared error taxonomy                             | [`ERROR_TAXONOMY.md`](./docs/ERROR_TAXONOMY.md)                                 |
+| Escrow storage migration guide                    | [`ESCROW_MIGRATION.md`](./docs/ESCROW_MIGRATION.md)                             |
+| Escrow compatibility matrix                       | [`ESCROW_COMPATIBILITY_MATRIX.md`](./docs/ESCROW_COMPATIBILITY_MATRIX.md)       |
+| Shared test fixtures                              | [`FIXTURE_FRAMEWORK.md`](./docs/FIXTURE_FRAMEWORK.md)                           |
+| Status severity mapping                           | [`STATUS_SEVERITY_MAPPING.md`](./docs/STATUS_SEVERITY_MAPPING.md)               |
+| Contributor guide                                 | [`CONTRIBUTOR_GUIDE.md`](./docs/CONTRIBUTOR_GUIDE.md)                           |
+| Meaningful vs. insufficient contribution examples | [`MEANINGFUL_WORK_EXAMPLES.md`](./docs/MEANINGFUL_WORK_EXAMPLES.md)             |
+| Maintainer guide                                  | [`MAINTAINER_GUIDE.md`](./docs/MAINTAINER_GUIDE.md)                             |
+| Issue writing guide                               | [`ISSUE_WRITING_GUIDE.md`](./docs/ISSUE_WRITING_GUIDE.md)                       |
+| Acceptance criteria completion table              | [`ACCEPTANCE_CRITERIA_COMPLETION.md`](./docs/ACCEPTANCE_CRITERIA_COMPLETION.md) |
+| GrantFox contribution workflow                    | [`GRANTFOX_WORKFLOW.md`](./docs/GRANTFOX_WORKFLOW.md)                           |
+| Advanced issue standard                           | [`ISSUE_STANDARD.md`](./docs/ISSUE_STANDARD.md)                                 |
+| Maintainer review checklist                       | [`MAINTAINER_REVIEW_CHECKLIST.md`](./docs/MAINTAINER_REVIEW_CHECKLIST.md)       |
+| Reviewer quality checklist                        | [`REVIEWER_QUALITY_CHECKLIST.md`](./docs/REVIEWER_QUALITY_CHECKLIST.md)         |
+| Automation runbook                                | [`AUTOMATION_RUNBOOK.md`](./docs/AUTOMATION_RUNBOOK.md)                         |
+| Auto-assign workflow                              | [`AUTO_ASSIGN_WORKFLOW.md`](./docs/AUTO_ASSIGN_WORKFLOW.md)                     |
+| Dashboard capability states                       | [`CAPABILITY_STATES.md`](./docs/CAPABILITY_STATES.md)                           |
+| Public roadmap & capability disclaimer            | [`ROADMAP.md`](./docs/ROADMAP.md)                                               |
 
 ## 🦊 GrantFox readiness
 
@@ -76,8 +76,9 @@ carrying the `GrantFox OSS` + `Maybe Rewarded` + `Official Campaign | FWC26` lab
 - Detailed, scoped issue templates (`.github/ISSUE_TEMPLATE/grantfox_issue.md` +
   [docs/ISSUE_STANDARD.md](./docs/ISSUE_STANDARD.md)).
 - A written contributor flow: [docs/GRANTFOX_WORKFLOW.md](./docs/GRANTFOX_WORKFLOW.md).
-- A pre-merge review checklist every PR must pass:
-  [docs/MAINTAINER_REVIEW_CHECKLIST.md](./docs/MAINTAINER_REVIEW_CHECKLIST.md).
+- Pre-merge review guidance and quality checklists every PR must pass:
+  [docs/MAINTAINER_REVIEW_CHECKLIST.md](./docs/MAINTAINER_REVIEW_CHECKLIST.md) and
+  [docs/REVIEWER_QUALITY_CHECKLIST.md](./docs/REVIEWER_QUALITY_CHECKLIST.md).
 - A labels manifest covering Stellar ecosystem taxonomy plus the campaign
   labels: see [`.github/LABELS.yml`](./.github/LABELS.yml).
 

@@ -44,6 +44,7 @@ const docsNav = [
       { title: "Advanced issue standard", file: "ISSUE_STANDARD.md" },
       { title: "GrantFox contribution workflow", file: "GRANTFOX_WORKFLOW.md" },
       { title: "Maintainer review checklist", file: "MAINTAINER_REVIEW_CHECKLIST.md" },
+      { title: "Reviewer quality checklist", file: "REVIEWER_QUALITY_CHECKLIST.md" },
     ],
   },
 ];

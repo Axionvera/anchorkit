@@ -13,13 +13,14 @@ security and quality bar. This is the playbook.
    `Official Campaign | FWC26` labels explicitly set by a maintainer before the campaign
    board will pick them up.
 5. If an issue is unclear, ask the reporter for a reproduction or more context. Close stale
-  non-reproducible issues with a polite note and the `needs-repro` label first, then close.
+   non-reproducible issues with a polite note and the `needs-repro` label first, then close.
 
 ## Review
 
-Use the checklist in [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) for
-every PR. Do not merge until every box is addressed. Copy the checklist into a review comment
-for transparency with GrantFox reviewers.
+Use the checklists in [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) and
+[REVIEWER_QUALITY_CHECKLIST.md](./REVIEWER_QUALITY_CHECKLIST.md) for every PR. Do not merge until
+every box is addressed. Copy the checklist into a review comment for transparency with GrantFox
+reviewers.
 
 ## Merging
 
