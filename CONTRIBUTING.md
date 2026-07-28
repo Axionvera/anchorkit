@@ -11,6 +11,9 @@ Before opening your first PR, please read:
 - [docs/MAINTAINER_REVIEW_CHECKLIST.md](./docs/MAINTAINER_REVIEW_CHECKLIST.md) — your
   PR reviewer will apply this checklist to every review, so it’s worth reading
   up front.
+- [docs/MEANINGFUL_WORK_EXAMPLES.md](./docs/MEANINGFUL_WORK_EXAMPLES.md) — worked
+  examples of low-effort, partial, under-tested, failing-CI, and acceptable PRs
+  against real AnchorKit code, so "meaningful contribution" isn't left to guesswork.
 - If you are contributing under a GrantFox campaign, also read
   [docs/GRANTFOX_WORKFLOW.md](./docs/GRANTFOX_WORKFLOW.md) and
   [docs/ISSUE_STANDARD.md](./docs/ISSUE_STANDARD.md).
