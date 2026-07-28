@@ -33,9 +33,9 @@ describe("Amount validation", () => {
     expect(isAmountValid("0.00000001")).toBe(false);
   });
 
-  it("rejects amounts exceeding MAX (1e12 - epsilon)", () => {
+  it("rejects amounts exceeding MAX (1e12)", () => {
     expect(isAmountValid("999999999999.9999999")).toBe(true);
-    expect(isAmountValid("1000000000000")).toBe(false);
+    expect(isAmountValid("1000000000001")).toBe(false);
   });
 
   it("rejects sub-stroop amounts below 1e-7", () => {

@@ -87,7 +87,13 @@ export function mapHorizonError(
         message: "Network error when connecting to Stellar Horizon API",
       };
     }
+
+    return {
+      code: "UNKNOWN",
+      message: redactSecrets(error.message),
+    };
   }
 
-  return { code: "UNKNOWN", message: "An unexpected error occurred" };
+  return { code: "UNKNOWN", message: redactSecrets(String(error)) };
 }
+
