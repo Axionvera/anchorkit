@@ -29,6 +29,10 @@ However, the review identified **one critical contract vulnerability**, several
 medium-severity gaps across packages, and significant test coverage holes that
 should be addressed before any mainnet consideration.
 
+> **Status note (issue #52):** CF-T1 (no mainnet-safety test coverage) and
+> SK-S3 (mainnet guard only at the intent layer) are addressed — see their
+> rows below for details. Remaining findings are unchanged.
+
 ### Severity distribution
 
 | Severity | Count | Areas |
@@ -60,7 +64,7 @@ should be addressed before any mainnet consideration.
 |---|----------|-----------|-------------|
 | SK-S1 | MEDIUM | `test/keys.test.ts:17-18` | Hardcoded well-known test secret key (`SCZANGBA5YHT...`) may trigger secret scanners in CI. `logging.test.ts` already follows the safer pattern of generating fake secrets at runtime. |
 | SK-S2 | LOW | `src/errors.ts:39` | Redundant `SA[A-Z2-7]{54}` regex pattern — already covered by `S[A-Z2-7]{55}`. |
-| SK-S3 | MEDIUM | `src/intent.ts:118,163` / `src/accounts.ts:28` | Mainnet guard exists only at the intent layer. `loadAccount`, URL builders, and `diagnoseAccount` accept any `NetworkConfig` without checking mainnet allowance. |
+| SK-S3 | MEDIUM | `src/intent.ts:118,163` / `src/accounts.ts:28` | ✅ **Fixed** (issue #52). Mainnet guard previously existed only at the intent layer. `loadAccount`/`getAccountStatus`/`diagnoseAccount` now gate via `assertNetworkAllowed` inside `accounts.ts#createServer`, before any Horizon call. URL builders (`explorer.ts`) remain intentionally ungated since they never touch the network. |
 | SK-S4 | MEDIUM | `src/assets.ts:48,56,65,73` | Double-cast through `unknown` (`as unknown as SafeParseReturnType<string, StellarAsset>`) masks a type system mismatch in `parseAssetString` — the function signature claims `string` input but internally constructs objects for Zod parsing. |
 | SK-S5 | LOW | `src/payments.ts:25-28` | `normalizeAmount` uses `Number()` without guarding `Infinity`/`NaN`. `Number("Infinity").toFixed(7)` throws `RangeError`. |
 | SK-S6 | LOW | `src/payments.ts:30-36` | `compareAmounts` returns `0` (equal) for non-numeric input because `NaN < NaN` and `NaN > NaN` are both `false`. |
@@ -125,7 +129,7 @@ should be addressed before any mainnet consideration.
 
 | # | Priority | Description |
 |---|----------|-------------|
-| CF-T1 | **HIGH** | **Zero test files exist.** `assertNetworkAllowed()` — the critical mainnet safety gate — has no test coverage. A regression removing the check would go unnoticed. |
+| CF-T1 | **HIGH** | ✅ **Fixed** (issue #52). `assertNetworkAllowed()` and `isMainnetAllowed()` are now covered by `packages/config/test/mainnet-safety.test.ts`, plus end-to-end gating tests in `packages/stellar-kit/test/mainnet-safety.test.ts` (`loadAccount`, `getAccountStatus`, `diagnoseAccount`, `estimateTransactionReadiness`). |
 
 ---
 
@@ -222,14 +226,14 @@ should be addressed before any mainnet consideration.
 ### 3.1 Mainnet safety
 
 The testnet-first default (`DEFAULT_ENV_CONFIG.allowMainnet = false`) is correctly
-implemented at the config layer. However, the guard is only enforced at the
-`intent.ts` level in stellar-kit. Lower-level functions (`loadAccount`, URL
-builders, `diagnoseAccount`) accept any `NetworkConfig` without checking mainnet
-allowance.
+implemented at the config layer.
 
-**Recommendation:** Add a utility like `assertTestnetOnly(network)` that can be
-called from any entry point, or document clearly that the guard is intentional
-only at the intent layer.
+✅ **Fixed (issue #52):** the guard was previously enforced only at the
+`intent.ts` level in stellar-kit. It is now also enforced in `accounts.ts`
+(`createServer`, used by `loadAccount`/`getAccountStatus`/`diagnoseAccount`),
+which is the sole entry point stellar-kit uses to reach Horizon. URL builders
+in `explorer.ts` remain intentionally ungated since they only construct
+strings and never make network calls.
 
 ### 3.2 Secret handling
 
@@ -278,8 +282,8 @@ explicit named exports instead of barrel `export *`.
 
 | # | Package | Description |
 |---|---------|-------------|
-| 5 | config | Zero tests for `assertNetworkAllowed()` |
-| 6 | stellar-kit | `intent.ts` and `accounts.ts` mainnet guard asymmetry |
+| 5 | config | ✅ Fixed (#52) — Zero tests for `assertNetworkAllowed()` |
+| 6 | stellar-kit | ✅ Fixed (#52) — `intent.ts` and `accounts.ts` mainnet guard asymmetry |
 | 7 | stellar-kit | `errors.ts` and `intent.ts` have zero test coverage |
 | 8 | anchor-utils | `validatePaymentRailConfig` and `validateAnchorRequest` untested |
 | 9 | anchor-utils | Dual validation APIs (Zod wrappers + engine wrappers) |
@@ -299,7 +303,7 @@ explicit named exports instead of barrel `export *`.
 
 | Package | Status |
 |---------|--------|
-| `@anchorkit/config` | **Zero test files.** The mainnet safety gate is untested. |
+| `@anchorkit/config` | ✅ Fixed (#52) — was zero test files; see `test/mainnet-safety.test.ts`. |
 | `@anchorkit/stellar-kit` `errors.ts` | No dedicated test file. `mapHorizonError` and `sanitizeCause` untested. |
 | `@anchorkit/stellar-kit` `intent.ts` | No test file. All payment intent functions untested. |
 
@@ -320,7 +324,7 @@ explicit named exports instead of barrel `export *`.
 |------|-----|
 | Escrow contract | No documentation of the `Disputed` terminal state or the missing resolution path |
 | `AUTOMATION_RUNBOOK.md` | Recently added — covers automation workflows |
-| Mainnet safety | No document explaining which layers enforce the guard and which don't |
+| Mainnet safety | ✅ Fixed (#52) — see § 3.1 above for which layers enforce the guard |
 | Secret key handling | R0-R6 rules exist but `StellarSecretKeySchema` public export contradicts the spirit of the rules |
 | Package boundaries | No document explaining which packages are public vs internal API |
 
@@ -343,7 +347,7 @@ Based on this review, the following issues should be created (priority order):
    - Update status guard in `submit_evidence` to reject `Disputed` status
    - Add test coverage
 
-4. **[HIGH] Add tests for `@anchorkit/config`**
+4. **[HIGH] Add tests for `@anchorkit/config`** — ✅ Done (#52)
    - Test `assertNetworkAllowed()` with testnet (pass) and mainnet (throw)
    - Test `getNetworkConfig()` with valid and invalid inputs
    - Test `isMainnetAllowed()` boundary values

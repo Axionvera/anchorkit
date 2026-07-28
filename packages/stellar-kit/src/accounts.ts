@@ -7,7 +7,8 @@ import type {
   NetworkConfig,
   StellarPublicKey,
 } from "@anchorkit/types";
-import { getNetworkConfig } from "@anchorkit/config";
+import { STELLAR_NETWORKS } from "@anchorkit/types";
+import { assertNetworkAllowed, DEFAULT_ENV_CONFIG, getNetworkConfig } from "@anchorkit/config";
 import type { AnchorKitEnvConfig } from "@anchorkit/config";
 import { isPublicKeyValid } from "./keys";
 import { createStellarError, mapHorizonError } from "./errors";
@@ -18,8 +19,19 @@ export interface AccountLoaderOptions {
   fetchFn?: typeof fetch;
 }
 
+/**
+ * Constructs a Horizon server for the given network, refusing to do so for
+ * mainnet unless the caller's env config has explicitly opted in via
+ * `allowMainnet: true` (see `assertNetworkAllowed`). This is the single entry
+ * point through which the package talks to Horizon, so gating it here closes
+ * off mainnet access for `loadAccount` and everything built on top of it
+ * (`getAccountStatus`, `diagnoseAccount`, `estimateTransactionReadiness`).
+ */
 function createServer(options: AccountLoaderOptions = {}): Server {
   const networkConfig = options.networkConfig ?? getNetworkConfig();
+  if (networkConfig.network === STELLAR_NETWORKS.MAINNET) {
+    assertNetworkAllowed(networkConfig.network, options.envConfig ?? DEFAULT_ENV_CONFIG);
+  }
   return new Horizon.Server(networkConfig.horizonUrl, {
     allowHttp: !networkConfig.isMainnet,
   });
@@ -36,8 +48,13 @@ export async function loadAccount(
   /* eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion */
   const pk = publicKey as StellarPublicKey;
 
+  // Gate mainnet access before entering the try/catch below, since that
+  // catch maps Horizon/network failures into a soft `AccountInfo` error
+  // status — a MAINNET_DISABLED safety error must reject instead of being
+  // swallowed into a status field.
+  const server = createServer(options);
+
   try {
-    const server = createServer(options);
     const account = await server.loadAccount(publicKey);
     return {
       publicKey: pk,

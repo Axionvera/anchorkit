@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DEFAULT_NETWORK } from "@anchorkit/config";
 import { PageShell } from "@/components/PageShell";
 import {
   Alert,
@@ -47,10 +48,12 @@ export default function AccountsPage() {
   const [lookupDiag, setLookupDiag] = useState<AccountDiagnostic | null>(null);
 
   const [txHashInput, setTxHashInput] = useState("");
-  const txParse = txHashInput.trim() ? parseTransactionHash(txHashInput.trim(), "testnet") : null;
+  const txParse = txHashInput.trim()
+    ? parseTransactionHash(txHashInput.trim(), DEFAULT_NETWORK)
+    : null;
 
   const expertUrl = isPublicKeyValid(lookupKey)
-    ? getStellarExpertAccountUrl(lookupKey, "testnet")
+    ? getStellarExpertAccountUrl(lookupKey, DEFAULT_NETWORK)
     : null;
   const friendbot = isPublicKeyValid(lookupKey)
     ? getTestnetFriendbotUrl(lookupKey)
@@ -65,7 +68,7 @@ export default function AccountsPage() {
     }
     setLookupLoading(true);
     try {
-      const diag = await diagnoseAccount(lookupKey, { network: "testnet" });
+      const diag = await diagnoseAccount(lookupKey, { network: DEFAULT_NETWORK });
       setLookupDiag(diag);
       setLookupInfo(diag.account);
       setLookupStatus(diag.state === "invalid" ? "unknown" : (diag.state as AccountStatus));
@@ -229,7 +232,7 @@ export default function AccountsPage() {
                         <p>Matches Stellar public key format (56 chars, G prefix, base32).</p>
                         {isPublicKeyValid(validateInput) && (
                           <a
-                            href={getStellarExpertAccountUrl(validateInput, "testnet") ?? "#"}
+                            href={getStellarExpertAccountUrl(validateInput, DEFAULT_NETWORK) ?? "#"}
                             target="_blank"
                             rel="noreferrer"
                             className="mt-1 inline-block text-mono-xs text-stellar-600 underline dark:text-stellar-400"
@@ -403,7 +406,7 @@ export default function AccountsPage() {
         )}
         {txParse && txParse.ok && (
           <a
-            href={buildTransactionLink(txParse.value.hash, "testnet")}
+            href={buildTransactionLink(txParse.value.hash, DEFAULT_NETWORK)}
             target="_blank"
             rel="noreferrer"
             className="mt-3 inline-block rounded-md border border-ink-300 px-3 py-1.5 text-sm dark:border-ink-700"
