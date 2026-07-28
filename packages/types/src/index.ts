@@ -410,6 +410,71 @@ export interface ConfigSourceMetadata {
   stability?: FeatureStability;
 }
 
+// ─── Asset display metadata ──────────────────────────────────────────────────
+
+/**
+ * Typed state for asset display resolution.
+ *
+ * - `"native"` — XLM, universally supported.
+ * - `"issued"` — valid issued asset from the registry.
+ * - `"unsupported"` — structurally valid but not permitted on the target network.
+ * - `"unknown"` — not in the registry or structurally invalid.
+ */
+export type AssetDisplayState = "native" | "issued" | "unsupported" | "unknown";
+
+export const ASSET_DISPLAY_STATES: readonly AssetDisplayState[] = [
+  "native",
+  "issued",
+  "unsupported",
+  "unknown",
+] as const;
+
+/**
+ * Placeholder icon data for an asset when no image URL is configured.
+ * Renders as a coloured circle with the first character of the asset code.
+ */
+export interface AssetIconPlaceholder {
+  /** Single character drawn inside the icon circle. */
+  character: string;
+  /** Tailwind-compatible background colour class. */
+  bgColor: string;
+}
+
+/**
+ * Configured display metadata for a known asset.
+ */
+export interface AssetDisplayMetadata {
+  /** Human-readable display name (e.g. "Stellar Lumens", "USD Coin"). */
+  displayName: string;
+  /** Short asset code (e.g. "XLM", "USDC"). */
+  code: string;
+  /** Asset issuer public key — `null` for native XLM. */
+  issuer: string | null;
+  /** Icon placeholder for when no image is available. */
+  iconPlaceholder: AssetIconPlaceholder;
+  /** Which networks this asset is known on (from registry). */
+  networks: StellarNetwork[];
+  /** Human-readable trust assumption note. */
+  trustNote: string;
+}
+
+/**
+ * Fully resolved asset display info returned by the resolver.
+ * Combines the resolved display state with the underlying asset and metadata.
+ */
+export interface AssetDisplayInfo {
+  /** Typed resolution state. */
+  state: AssetDisplayState;
+  /** The underlying Stellar asset. */
+  asset: StellarAsset;
+  /** Which network was queried. */
+  network: StellarNetwork;
+  /** Display metadata — present when state is `"native"` or `"issued"`. */
+  metadata: AssetDisplayMetadata | null;
+  /** Error message when state is `"unsupported"`. */
+  error: string | null;
+}
+
 export type StellarErrorCode =
   | "PUBLIC_KEY_INVALID"
   | "SECRET_KEY_INVALID"

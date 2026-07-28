@@ -1125,6 +1125,7 @@ Do not include token values.
 
 ## 23. Related documentation
 
+- [Auto-Assign Workflow](./AUTO_ASSIGN_WORKFLOW.md)
 - [Issue Batch Validator](./ISSUE_BATCH_VALIDATOR.md)
 - [Issue Standard](./ISSUE_STANDARD.md)
 - [Issue Writing Guide](./ISSUE_WRITING_GUIDE.md)
