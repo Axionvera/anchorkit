@@ -2,15 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
-import { Alert, Button, Card, Input, Label, Select, DataRow } from "@/components/ui";
+import { Alert, Button, Card, Input, Label, Select } from "@/components/ui";
 import {
   createPaymentIntent,
+  createMockTransactionReceipt,
   estimateTransactionReadinessSync,
   getStellarExpertAccountUrl,
   isPublicKeyValid,
 } from "@anchorkit/stellar-kit";
-import type { MemoType, PaymentIntent, StellarAsset, TransactionReadiness } from "@anchorkit/types";
+import type { AssetCode, MemoType, PaymentIntent, StellarAsset, StellarPublicKey, TransactionReadiness, TransactionReceiptStatus } from "@anchorkit/types";
 import { DEFAULT_NETWORK } from "@anchorkit/config";
+import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
 const DEMO_DEST = "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U";
@@ -29,6 +31,17 @@ export default function PaymentsPage() {
 
   const [simulateSource, setSimulateSource] = useState<"funded" | "unfunded" | "unknown">("funded");
   const [simulateDest, setSimulateDest] = useState<"funded" | "unfunded" | "unknown">("funded");
+  const [mockReceiptStatus, setMockReceiptStatus] = useState<TransactionReceiptStatus>("pending");
+
+  const mockReceipt = useMemo(
+    () =>
+      createMockTransactionReceipt({
+        status: mockReceiptStatus,
+        source: "payment",
+        network: DEFAULT_NETWORK,
+      }),
+    [mockReceiptStatus]
+  );
 
   const asset: StellarAsset = useMemo(() => {
     if (assetMode === "native") {
@@ -36,18 +49,21 @@ export default function PaymentsPage() {
     }
     return {
       type: "issued",
-      code: assetCode as any,
-      issuer: assetIssuer as any,
+      code: assetCode as AssetCode,
+      issuer: assetIssuer as StellarPublicKey,
     };
   }, [assetMode, assetCode, assetIssuer]);
 
-  const memo = memoType === "none" ? undefined : { type: memoType, value: memoValue };
+  const memo = useMemo(
+    () => (memoType === "none" ? undefined : { type: memoType, value: memoValue }),
+    [memoType, memoValue]
+  );
 
   const intent: PaymentIntent | null = useMemo(() => {
     try {
       return createPaymentIntent({
-        sourcePublicKey: source as any,
-        destinationPublicKey: dest as any,
+        sourcePublicKey: source as StellarPublicKey,
+        destinationPublicKey: dest as StellarPublicKey,
         asset,
         amount,
         memo,
@@ -99,7 +115,7 @@ export default function PaymentsPage() {
                 <span>{isPublicKeyValid(source) ? "Format OK" : "Invalid format"}</span>
                 <Select
                   value={simulateSource}
-                  onChange={(e) => setSimulateSource(e.target.value as any)}
+                  onChange={(e) => setSimulateSource(e.target.value as "funded" | "unfunded" | "unknown")}
                   className="mt-1"
                 >
                   <option value="funded">Simulate: funded</option>
@@ -120,7 +136,7 @@ export default function PaymentsPage() {
                 <span>{isPublicKeyValid(dest) ? "Format OK" : "Invalid format"}</span>
                 <Select
                   value={simulateDest}
-                  onChange={(e) => setSimulateDest(e.target.value as any)}
+                  onChange={(e) => setSimulateDest(e.target.value as "funded" | "unfunded" | "unknown")}
                   className="mt-1"
                 >
                   <option value="funded">Simulate: funded</option>
@@ -221,15 +237,53 @@ export default function PaymentsPage() {
                 <span className="text-sm text-ink-500 dark:text-ink-400">Overall</span>
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-mono-xs font-medium ${
-                    readiness.ready
+                    readiness.state === "ready"
                       ? "bg-green-100 text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900"
-                      : "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900"
+                      : readiness.state === "warnings"
+                        ? "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900"
+                        : readiness.state === "unsafe-network"
+                          ? "bg-red-100 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900"
+                          : "bg-red-100 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900"
                   }`}
                 >
-                  {readiness.ready ? "Ready" : "Not ready"}
+                  {readiness.state === "ready"
+                    ? "Ready"
+                    : readiness.state === "warnings"
+                      ? "Ready (with warnings)"
+                      : readiness.state === "unsafe-network"
+                        ? "Unsafe network"
+                        : "Blocked"}
                 </span>
               </div>
               <p className="text-sm">{readiness.summary}</p>
+              <div>
+                <div className="mb-1 text-sm font-medium">Validation stages</div>
+                <ul className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                  {readiness.stages.map((s) => (
+                    <li
+                      key={s.id}
+                      className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-mono-xs ${
+                        s.status === "pass"
+                          ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950/30 dark:text-green-200"
+                          : s.status === "warn"
+                            ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200"
+                            : "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-1.5 w-1.5 rounded-full ${
+                          s.status === "pass"
+                            ? "bg-green-500"
+                            : s.status === "warn"
+                              ? "bg-amber-500"
+                              : "bg-red-500"
+                        }`}
+                      />
+                      {s.label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
               <div>
                 <div className="mb-1 text-sm font-medium">Warnings ({readiness.warnings.length})</div>
                 {readiness.warnings.length === 0 ? (
@@ -298,6 +352,30 @@ export default function PaymentsPage() {
             </>
           )}
         </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="space-y-4">
+          <h2 className="text-base font-semibold tracking-tight">Mock transaction receipt</h2>
+          <p className="text-sm text-ink-500 dark:text-ink-400">
+            Preview the normalized receipt model for each post-submit outcome. The MVP does not
+            submit real transactions — this selector demonstrates the shared receipt UI.
+          </p>
+          <div>
+            <Label>Receipt status</Label>
+            <Select
+              value={mockReceiptStatus}
+              onChange={(e) => setMockReceiptStatus(e.target.value as TransactionReceiptStatus)}
+            >
+              {(["confirmed", "pending", "failed", "rejected", "unknown"] as const).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </Card>
+        <TransactionReceiptPanel receipt={mockReceipt} title="Payment receipt preview" />
       </div>
     </PageShell>
   );

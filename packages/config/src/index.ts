@@ -1,11 +1,5 @@
-import type {
-  ConfigSourceMetadata,
-  FeatureFlagDefinition,
-  FeatureFlagId,
-  NetworkConfig,
-  StellarNetwork,
-} from "@anchorkit/types";
-import { STELLAR_NETWORKS } from "@anchorkit/types";
+import type { NetworkConfig, StellarNetwork } from "@anchorkit/types";
+import { STELLAR_NETWORKS, createAnchorKitError } from "@anchorkit/types";
 
 const TESTNET_CONFIG: NetworkConfig = {
   network: STELLAR_NETWORKS.TESTNET,
@@ -124,9 +118,14 @@ export function assertNetworkAllowed(
   env: AnchorKitEnvConfig = DEFAULT_ENV_CONFIG
 ): void {
   if (network === STELLAR_NETWORKS.MAINNET && !isMainnetAllowed(env)) {
-    throw new Error(
-      "Mainnet access is disabled by default for safety. Set allowMainnet: true in env config only after reviewing security notes."
-    );
+    throw createAnchorKitError({
+      category: "CONFIG",
+      code: "MAINNET_DISABLED",
+      message:
+        "Mainnet access is disabled by default for safety. Set allowMainnet: true in env config only after reviewing security notes.",
+      userSafeMessage:
+        "Mainnet access is disabled by default. Please configure allowMainnet: true to proceed.",
+    });
   }
 }
 

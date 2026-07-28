@@ -21,7 +21,8 @@
  * silently wrapping around.
  */
 
-import type { AnchorTransactionStatus, AnchorTransactionKind } from "@anchorkit/types";
+import type { AnchorTransactionStatus, AnchorTransactionKind, AnchorKitError } from "@anchorkit/types";
+import { createAnchorKitError } from "@anchorkit/types";
 
 /** Legal next-state sets for each status. Terminal states map to empty sets. */
 export const ALLOWED_TRANSITIONS: Readonly<
@@ -49,7 +50,7 @@ export function isTerminalStatus(status: AnchorTransactionStatus): boolean {
 /** True if moving `from` → `to` is a legal lifecycle transition. */
 export function isTransitionValid(
   from: AnchorTransactionStatus,
-  to: AnchorTransactionStatus,
+  to: AnchorTransactionStatus
 ): boolean {
   if (from === to) return true; // staying put is always allowed
   return ALLOWED_TRANSITIONS[from]?.includes(to) ?? false;
@@ -59,16 +60,16 @@ export interface TransitionResult {
   ok: boolean;
   status?: AnchorTransactionStatus;
   error?: string;
+  anchorKitError?: AnchorKitError;
 }
 
 /**
  * Attempt a lifecycle transition. Returns `{ ok: true, status }` on success,
- * or `{ ok: false, error }` when the move is illegal (e.g. jumping from
- * `pending_user` straight to `completed`, or moving out of a terminal state).
+ * or `{ ok: false, error, anchorKitError }` when the move is illegal.
  */
 export function transition(
   from: AnchorTransactionStatus,
-  to: AnchorTransactionStatus,
+  to: AnchorTransactionStatus
 ): TransitionResult {
   if (isTransitionValid(from, to)) {
     return { ok: true, status: to };
@@ -77,22 +78,30 @@ export function transition(
   const allowedText = allowed.length
     ? allowed.join(", ")
     : "(no further transitions — terminal)";
+  const msg = `Illegal transition '${from}' → '${to}'. Allowed next: ${allowedText}.`;
+  
+  const err = createAnchorKitError({
+    category: "ANCHOR",
+    code: "ILLEGAL_LIFECYCLE_TRANSITION",
+    message: msg,
+    userSafeMessage: "This transaction transition is not allowed by the anchor lifecycle rules.",
+    details: { from, to, allowed },
+  });
+
   return {
     ok: false,
-    error: `Illegal transition '${from}' → '${to}'. Allowed next: ${allowedText}.`,
+    error: msg,
+    anchorKitError: err,
   };
 }
 
 /**
  * Compute the next automatic status along the happy path, or the given
- * terminal override. Unlike `advanceAnchorTransactionStatus`, this returns
- * `null` (instead of snapping to `pending_user`) when the current status has
- * no forward edge or is already terminal — so callers can flag a no-op
- * rather than silently loop.
+ * terminal override.
  */
 export function nextStatus(
   current: AnchorTransactionStatus,
-  terminal?: "completed" | "failed" | "refunded",
+  terminal?: "completed" | "failed" | "refunded"
 ): AnchorTransactionStatus | null {
   if (terminal) return terminal;
   const forward = ALLOWED_TRANSITIONS[current];
@@ -100,11 +109,10 @@ export function nextStatus(
 }
 
 /**
- * Validate a sequence of status changes (e.g. an audit trail or a recorded
- * timeline). Returns the first illegal step, or `null` if every step is valid.
+ * Validate a sequence of status changes. Returns the first illegal step, or `null`.
  */
 export function findFirstIllegalTransition(
-  steps: readonly AnchorTransactionStatus[],
+  steps: readonly AnchorTransactionStatus[]
 ): { from: AnchorTransactionStatus; to: AnchorTransactionStatus; index: number } | null {
   for (let i = 1; i < steps.length; i++) {
     const from = steps[i - 1]!;
@@ -119,7 +127,7 @@ export function findFirstIllegalTransition(
 /** Convenience: describe the lifecycle step for UI labels. */
 export function lifecycleStepLabel(
   status: AnchorTransactionStatus,
-  kind: AnchorTransactionKind,
+  kind: AnchorTransactionKind
 ): string {
   const k = kind === "deposit" ? "Deposit" : "Withdrawal";
   switch (status) {

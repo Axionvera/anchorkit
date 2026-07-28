@@ -30,6 +30,7 @@
     "@anchorkit/config": "workspace:*",
     "@anchorkit/validators": "workspace:*",
     "@anchorkit/stellar-kit": "workspace:*",
+    "@anchorkit/fixtures": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {

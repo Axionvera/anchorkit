@@ -7,6 +7,15 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+  FRIENDBOT_PUBLIC_KEY,
+  sampleDepositRequest,
+  sampleWithdrawalRequest,
+  invalidDepositRequest,
+  invalidWithdrawalRequest,
+  invalidAnchorAssetConfig,
+  invalidCallbackUrl,
+} from '@anchorkit/fixtures';
+import {
   validateDepositRequest,
   validateWithdrawalRequest,
   validateAnchorAssetConfig,
@@ -16,27 +25,11 @@ import {
   type ValidationResult,
 } from '../src/validationEngine';
 
-const FRIENDBOT =
-  'GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR';
+const FRIENDBOT = FRIENDBOT_PUBLIC_KEY;
 
-const goodDeposit = {
-  assetCode: 'XLM',
-  amount: '100.0000000',
-  account: FRIENDBOT,
-  memo: 'INV-42',
-  memoType: 'text',
-  railId: 'sepa_eu',
-  type: 'SEPA',
-  emailAddress: 'dev@example.com',
-};
+const goodDeposit = sampleDepositRequest;
 
-const goodWithdrawal = {
-  assetCode: 'USDC',
-  amount: '250.75',
-  account: FRIENDBOT,
-  dest: 'US123456789012',
-  type: 'ACH',
-};
+const goodWithdrawal = sampleWithdrawalRequest;
 
 const goodAsset = {
   code: 'USDC',
@@ -59,11 +52,7 @@ describe('validateDepositRequest', () => {
   });
 
   it('rejects a deposit missing account and with zero amount', () => {
-    const r = validateDepositRequest({
-      assetCode: 'XLM',
-      amount: '0',
-      type: 'SEPA',
-    });
+    const r = validateDepositRequest(invalidDepositRequest);
     expect(r.ok).toBe(false);
     if (!r.ok) {
       expect(r.errors[0]?.code).toBe('INVALID_DEPOSIT_METADATA');
@@ -90,9 +79,10 @@ describe('validateWithdrawalRequest', () => {
     if (!r.ok) expect(r.errors[0]?.code).toBe('INVALID_WITHDRAWAL_METADATA');
   });
 
-  it('rejects a withdrawal with a non-numeric amount', () => {
-    const r = validateWithdrawalRequest({ ...goodWithdrawal, amount: 'abc' });
+  it('rejects a withdrawal with an invalid destination and non-numeric amount', () => {
+    const r = validateWithdrawalRequest(invalidWithdrawalRequest);
     expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors[0]?.code).toBe('INVALID_WITHDRAWAL_METADATA');
   });
 });
 
@@ -103,6 +93,12 @@ describe('validateAnchorAssetConfig', () => {
 
   it('rejects an asset config with a bad issuer', () => {
     const r = validateAnchorAssetConfig({ ...goodAsset, issuer: 'GTOO' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors[0]?.code).toBe('INVALID_ASSET_CONFIG');
+  });
+
+  it('rejects the shared invalid asset config fixture (short issuer)', () => {
+    const r = validateAnchorAssetConfig(invalidAnchorAssetConfig);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errors[0]?.code).toBe('INVALID_ASSET_CONFIG');
   });
@@ -118,7 +114,7 @@ describe('validateCallbackUrl', () => {
   });
 
   it('rejects a plaintext non-localhost url', () => {
-    const r = validateCallbackUrl('http://example.com/callback');
+    const r = validateCallbackUrl(invalidCallbackUrl);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errors[0]?.code).toBe('INVALID_CALLBACK_URL');
   });

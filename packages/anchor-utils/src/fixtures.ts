@@ -3,6 +3,7 @@ import type {
   AnchorTransactionStatus,
   DepositRequestMetadata,
   StellarPublicKey,
+  StellarTransactionHash,
   WithdrawalRequestMetadata,
 } from "@anchorkit/types";
 import { createMockAnchorTransactionRecord } from "./index";
@@ -11,7 +12,7 @@ const FRIENDBOT: StellarPublicKey =
   "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR" as StellarPublicKey;
 
 const SAMPLE_TX_HASH =
-  "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2" as const;
+  "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
 
 export const sampleDepositRequest: DepositRequestMetadata = {
   assetCode: "XLM",
@@ -63,7 +64,7 @@ export function buildDepositLifecycle(): AnchorTransactionRecord[] {
       status,
       stellarTransactionId:
         status === "pending_stellar" || status === "completed"
-          ? (SAMPLE_TX_HASH as unknown as import("@anchorkit/types").StellarTransactionHash)
+          ? (SAMPLE_TX_HASH as unknown as StellarTransactionHash)
           : undefined,
       updatedAt: new Date(Date.now() - 1000 * 60 * 60 * (6 - i)).toISOString(),
       completedAt: status === "completed" ? new Date().toISOString() : undefined,
@@ -111,7 +112,7 @@ export function buildWithdrawalLifecycle(): AnchorTransactionRecord[] {
         status,
         stellarTransactionId:
           i >= 1 && i < 4
-            ? (SAMPLE_TX_HASH as unknown as import("@anchorkit/types").StellarTransactionHash)
+            ? (SAMPLE_TX_HASH as unknown as StellarTransactionHash)
             : undefined,
         updatedAt: new Date(Date.now() - 1000 * 60 * 60 * (8 - i)).toISOString(),
         completedAt: status === "failed" || status === "refunded" ? new Date().toISOString() : undefined,

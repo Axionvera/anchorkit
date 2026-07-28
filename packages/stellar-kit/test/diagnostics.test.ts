@@ -2,39 +2,34 @@ import { describe, it, expect } from "vitest";
 import { Keypair } from "@stellar/stellar-base";
 import { diagnoseAccount, diagnoseAccountInfo, computeReserve } from "../src/diagnostics";
 import type { AccountInfo } from "@anchorkit/types";
+import {
+  FUNDED_ACCOUNT,
+  FUNDED_ACCOUNT_INFO,
+  UNFUNDED_ACCOUNT,
+  UNFUNDED_ACCOUNT_INFO,
+  NETWORK_ERROR_ACCOUNT_INFO,
+} from "./fixtures";
 
-const fundedKey = Keypair.random().publicKey();
-const unfundedKey = Keypair.random().publicKey();
+const fundedKey = FUNDED_ACCOUNT;
+const unfundedKey = UNFUNDED_ACCOUNT;
 
-const fundedInfo: AccountInfo = {
-  publicKey: fundedKey as AccountInfo["publicKey"],
-  status: "funded",
-  sequence: "123",
-  subentryCount: 3,
-  balances: { native: "100", assets: [] },
-};
-
-const unfundedInfo: AccountInfo = {
-  publicKey: unfundedKey as AccountInfo["publicKey"],
-  status: "unfunded",
-};
-
-const networkErrorInfo: AccountInfo = {
-  publicKey: fundedKey as AccountInfo["publicKey"],
-  status: "unknown",
-  error: "request timed out",
-};
+const fundedInfo = FUNDED_ACCOUNT_INFO;
+const unfundedInfo = UNFUNDED_ACCOUNT_INFO;
+const networkErrorInfo = NETWORK_ERROR_ACCOUNT_INFO;
 
 describe("computeReserve", () => {
   it("computes minimum balance from subentry count", () => {
     const r = computeReserve(3);
-    // 2 + (3 + 2) * 0.5 = 4.5
-    expect(r.minimumBalanceXlm).toBe(4.5);
+    // Stellar's rule: (2 base entries + 3 subentries) * 0.5 XLM = 2.5
+    expect(r.minimumBalanceXlm).toBe(2.5);
     expect(r.subentryCount).toBe(3);
+    expect(r.entryCount).toBe(5);
+    expect(r.baseReserve).toBe(0.5);
   });
 
   it("handles undefined subentry count", () => {
-    expect(computeReserve(undefined).minimumBalanceXlm).toBe(3);
+    // A bare account owns only the 2 base entries: 2 * 0.5 = 1 XLM
+    expect(computeReserve(undefined).minimumBalanceXlm).toBe(1);
   });
 });
 
@@ -44,7 +39,7 @@ describe("diagnoseAccountInfo (sync)", () => {
     expect(d.state).toBe("funded");
     expect(d.isValidPublicKey).toBe(true);
     expect(d.expertUrl).toContain(fundedKey);
-    expect(d.reserve?.minimumBalanceXlm).toBe(4.5);
+    expect(d.reserve?.minimumBalanceXlm).toBe(2.5);
   });
 
   it("maps unfunded account without reserve", () => {

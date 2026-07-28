@@ -32,5 +32,21 @@ export const EscrowSummarySchema = z.object({
   admin: z.string().min(1),
 });
 
+/**
+ * Raw Soroban-style contract event as observed by a client, mirroring
+ * `RawEscrowEvent` in `@anchorkit/types`. `topic` and `data` are kept loose
+ * since the discriminator/payload shape varies per event type — the strict
+ * per-type shape is enforced by `parseEscrowEvent` in `@anchorkit/stellar-kit`,
+ * not here.
+ */
+export const RawEscrowEventSchema = z.object({
+  contractId: z.string().min(1),
+  topic: z.array(z.unknown()),
+  data: z.record(z.unknown()),
+  timestamp: z.string().datetime().optional(),
+  ledger: z.number().int().optional(),
+});
+
 export type ParsedMilestone = z.infer<typeof MilestoneSchema>;
 export type ParsedEscrowSummary = z.infer<typeof EscrowSummarySchema>;
+export type ParsedRawEscrowEvent = z.infer<typeof RawEscrowEventSchema>;

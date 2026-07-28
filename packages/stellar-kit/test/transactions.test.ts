@@ -9,9 +9,10 @@ import {
   getHorizonAccountUrl,
   getHorizonTransactionUrl,
 } from "../src";
+import { FRIENDBOT_PUBLIC_KEY, SAMPLE_TX_HASH } from "./fixtures";
 
-const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
-const VALID_HASH = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
+const FRIENDBOT = FRIENDBOT_PUBLIC_KEY;
+const VALID_HASH = SAMPLE_TX_HASH;
 
 describe("Transaction hash parsing", () => {
   it("accepts a lowercase 64-char hex string", () => {

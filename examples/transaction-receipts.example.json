@@ -1,0 +1,59 @@
+{
+  "description": "Transaction receipt fixtures covering every normalized outcome status (issue #91).",
+  "network": "testnet",
+  "receipts": [
+    {
+      "id": "fixture_receipt_confirmed",
+      "status": "confirmed",
+      "network": "testnet",
+      "headline": "Transaction confirmed",
+      "detail": "The transaction completed successfully on the Stellar network.",
+      "source": "payment",
+      "transactionHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "submittedAt": "2026-01-15T10:00:00.000Z",
+      "finalizedAt": "2026-01-15T10:00:05.000Z"
+    },
+    {
+      "id": "fixture_receipt_pending",
+      "status": "pending",
+      "network": "testnet",
+      "headline": "Transaction pending",
+      "detail": "The transaction has been submitted and is awaiting confirmation.",
+      "source": "payment",
+      "transactionHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "submittedAt": "2026-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "fixture_receipt_failed",
+      "status": "failed",
+      "network": "testnet",
+      "headline": "Transaction failed",
+      "detail": "Simulated submission failure for demo purposes.",
+      "source": "payment",
+      "submittedAt": "2026-01-15T10:00:00.000Z",
+      "finalizedAt": "2026-01-15T10:00:02.000Z",
+      "errorCode": "TRANSACTION_FAILED",
+      "errorMessage": "Simulated submission failure for demo purposes."
+    },
+    {
+      "id": "fixture_receipt_rejected",
+      "status": "rejected",
+      "network": "testnet",
+      "headline": "Transaction rejected",
+      "detail": "Simulated rejection for demo purposes.",
+      "source": "anchor",
+      "submittedAt": "2026-01-15T10:00:00.000Z",
+      "finalizedAt": "2026-01-15T10:00:01.000Z",
+      "errorCode": "TRANSACTION_REJECTED",
+      "errorMessage": "Simulated rejection for demo purposes."
+    },
+    {
+      "id": "fixture_receipt_unknown",
+      "status": "unknown",
+      "network": "testnet",
+      "headline": "Transaction status unknown",
+      "detail": "The outcome could not be determined. Check the explorer or try again later.",
+      "source": "escrow"
+    }
+  ]
+}
