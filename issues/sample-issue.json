@@ -1,0 +1,12 @@
+{
+  "title": "Add a local validator for GrantFox-style advanced issue JSON files.",
+  "description": "Issue batches can contain missing fields, unsupported labels, weak acceptance criteria, or low-value tasks. AnchorKit automation should validate issue batch structure and advanced issue quality before creation.",
+  "labels": ["feature"],
+  "complexity": "expert",
+  "acceptanceCriteria": [
+    "Issue batch schema validator is implemented.",
+    "Unsupported labels are detected before GitHub issue creation.",
+    "Missing required fields are reported clearly.",
+    "Weak or empty acceptance criteria are flagged."
+  ]
+}
