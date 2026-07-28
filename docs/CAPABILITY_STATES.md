@@ -24,6 +24,9 @@ A module can contain lower-level utilities with a different scope. For example, 
   - `@anchorkit/stellar-kit` -> [`packages/stellar-kit/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/stellar-kit/src/capabilities.ts) (`STELLAR_KIT_CAPABILITIES`)
   - `@anchorkit/anchor-utils` -> [`packages/anchor-utils/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/anchor-utils/src/capabilities.ts) (`ANCHOR_UTILS_CAPABILITIES`)
   - `@anchorkit/config` -> [`packages/config/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/config/src/capabilities.ts) (`CONFIG_PACKAGE_CAPABILITIES`)
+  - `@anchorkit/types` -> [`packages/types/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/types/src/capabilities.ts) (`TYPES_PACKAGE_CAPABILITIES`)
+  - `@anchorkit/validators` -> [`packages/validators/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/validators/src/capabilities.ts) (`VALIDATORS_PACKAGE_CAPABILITIES`)
+  - `@anchorkit/fixtures` -> [`packages/fixtures/src/capabilities.ts`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/packages/fixtures/src/capabilities.ts) (`FIXTURES_PACKAGE_CAPABILITIES`)
 - **Dashboard rendering**: [`apps/web/app/dashboard/page.tsx`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/apps/web/app/dashboard/page.tsx) uses `CapabilityHealthSummary` and `CapabilityBadge` from [`apps/web/components/ui.tsx`](file:///c:/Users/ABUBAKAR%20ABDULRAHMAN/Documents/anchorkit/apps/web/components/ui.tsx).
 
 ---
@@ -50,6 +53,9 @@ AnchorKit packages self-describe their capability readiness. Each major package 
 | `@anchorkit/stellar-kit` | `testnet-only` | Keypair management, account loading, spendable balance parsing, payment intent validation, readiness engine, severity mapping, secret redaction, Soroban smart contract RPC client, vault manager. |
 | `@anchorkit/anchor-utils` | `implemented` | Zod validators for anchor deposit/withdrawal, payment rail configuration, callback URL validation, lifecycle state transitions, mock record generation, and fixtures. |
 | `@anchorkit/config` | `implemented` | Network configs (testnet, mainnet, futurenet), feature flag definitions and gates, environment configuration resolution. |
+| `@anchorkit/types` | `implemented` | Core type definitions, error taxonomy, escrow event types, capability state types, severity types, asset display types. |
+| `@anchorkit/validators` | `implemented` | Stellar Zod schemas, anchor schemas, escrow schemas, receipt schemas, and a uniform validation engine with mapped error codes. |
+| `@anchorkit/fixtures` | `implemented` | Well-known constants, account/asset/payment/anchor/escrow/diagnostics fixtures, and intentionally invalid inputs for negative testing. |
 
 ---
 
@@ -98,4 +104,6 @@ export interface PackageCapability {
 3. Export it in the package's primary entrypoint `src/index.ts`.
 4. Add a test suite verifying its structure under `test/capabilities.test.ts`.
 5. Update the **Package-Level Capability Exports** table in this document.
-6. Verify that it builds and passes all tests.
+6. Add or update the package health array in `apps/web/app/dashboard/page.tsx`.
+7. Update `apps/web/test/dashboard-package-health.test.ts` to expect the new package.
+8. Verify that it builds and passes all tests.

@@ -11,4 +11,6 @@ export * from "./validationEngine";
 
 // ─── UI validation state ────────────────────────────────────────────────────
 export * from "./uiState";
+// ─── Package capability metadata ────────────────────────────────────────────
+export * from "./capabilities";
 

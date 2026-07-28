@@ -55,6 +55,7 @@ All of these live under [`./docs/`](./docs/).
 | Shared test fixtures | [`FIXTURE_FRAMEWORK.md`](./docs/FIXTURE_FRAMEWORK.md) |
 | Status severity mapping | [`STATUS_SEVERITY_MAPPING.md`](./docs/STATUS_SEVERITY_MAPPING.md) |
 | Contributor guide | [`CONTRIBUTOR_GUIDE.md`](./docs/CONTRIBUTOR_GUIDE.md) |
+| Meaningful vs. insufficient contribution examples | [`MEANINGFUL_WORK_EXAMPLES.md`](./docs/MEANINGFUL_WORK_EXAMPLES.md) |
 | Maintainer guide | [`MAINTAINER_GUIDE.md`](./docs/MAINTAINER_GUIDE.md) |
 | Issue writing guide | [`ISSUE_WRITING_GUIDE.md`](./docs/ISSUE_WRITING_GUIDE.md) |
 | Acceptance criteria completion table | [`ACCEPTANCE_CRITERIA_COMPLETION.md`](./docs/ACCEPTANCE_CRITERIA_COMPLETION.md) |

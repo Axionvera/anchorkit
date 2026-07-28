@@ -575,6 +575,9 @@ export * from "./escrowEvents";
 // ─── Shared error taxonomy ──────────────────────────────────────────────────
 export * from "./errors";
 
+// ─── Package capability metadata ────────────────────────────────────────────
+export * from "./capabilities";
+
 // ─── Capability states ──────────────────────────────────────────────────────
 export type CapabilityState =
   | "implemented"
