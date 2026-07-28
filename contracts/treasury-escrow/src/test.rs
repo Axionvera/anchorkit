@@ -234,3 +234,52 @@ fn escrow_summary_tallies_multiple_milestones() {
     assert_eq!(s.disputed_count, 1);
     assert_eq!(s.completed_count, 1);
 }
+
+#[test]
+fn storage_version_returns_current_version_after_initialization() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let (_, client) = setup_contract(&env);
+
+    let version = client.storage_version();
+    assert_eq!(version, CURRENT_STORAGE_VERSION);
+    assert_eq!(version, 1);
+}
+
+#[test]
+fn storage_version_returns_zero_before_initialization() {
+    let env = Env::default();
+    let contract_id = env.register(TreasuryEscrowContract, ());
+    let client = TreasuryEscrowContractClient::new(&env, &contract_id);
+
+    let version = client.storage_version();
+    assert_eq!(version, 0);
+}
+
+#[test]
+fn initialize_event_includes_storage_version() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let contract_id = env.register(TreasuryEscrowContract, ());
+    let client = TreasuryEscrowContractClient::new(&env, &contract_id);
+
+    let res = client.try_initialize(&admin);
+    assert!(res.is_ok());
+    assert_eq!(client.storage_version(), CURRENT_STORAGE_VERSION);
+}
+
+#[test]
+fn storage_version_is_persistent_across_reads() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let (_, client) = setup_contract(&env);
+
+    assert_eq!(client.storage_version(), 1);
+
+    let title = SorobanString::from_str(&env, "Test milestone");
+    client.create_milestone(&1u32, &title, &100i128);
+    assert_eq!(client.storage_version(), 1);
+
+    client.assign_amount(&1u32, &200i128);
+    assert_eq!(client.storage_version(), 1);
+}
