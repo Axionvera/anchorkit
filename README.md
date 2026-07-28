@@ -274,6 +274,7 @@ GrantFox contribution workflow	GRANTFOX_WORKFLOW.md
 Advanced issue standard	ISSUE_STANDARD.md
 Maintainer review checklist	MAINTAINER_REVIEW_CHECKLIST.md
 Automation runbook	AUTOMATION_RUNBOOK.md
+Auto-assign workflow	AUTO_ASSIGN_WORKFLOW.md
 Roadmap	ROADMAP.md
 Escrow compatibility matrix	ESCROW_COMPATIBILITY_MATRIX.md
 🦊 GrantFox readiness
@@ -303,8 +304,9 @@ Issue writing guide ISSUE_WRITING_GUIDE.md
 GrantFox contribution workflow GRANTFOX_WORKFLOW.md
 Advanced issue standard ISSUE_STANDARD.md
 Maintainer review checklist MAINTAINER_REVIEW_CHECKLIST.md
-Automation runbook AUTOMATION_RUNBOOK.md
-Dashboard capability states CAPABILITY_STATES.md
+Automation runbook	AUTOMATION_RUNBOOK.md
+Auto-assign workflow	AUTO_ASSIGN_WORKFLOW.md
+Dashboard capability states	CAPABILITY_STATES.md
 Public roadmap & capability disclaimer ROADMAP.md
 🦊 GrantFox readiness
 AnchorKit was designed from the start to be a high-quality target for GrantFox
