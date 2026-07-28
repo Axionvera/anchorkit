@@ -145,8 +145,11 @@ pnpm contract:test
 AnchorKit is testnet-first and secret-safe by design:
 
 1. **No mainnet by default.** `DEFAULT_ENV_CONFIG.allowMainnet = false`. Any
-   attempt to call mainnet Horizon/Soroban without an explicit env override
-   throws a typed error.
+   attempt to reach mainnet Horizon — via `loadAccount`, `getAccountStatus`,
+   `diagnoseAccount`, or payment-readiness checks — without an explicit
+   `allowMainnet: true` env override throws a typed `MAINNET_DISABLED` error
+   before any network call is made. (Soroban RPC access is not yet
+   implemented in the toolkit, so there is nothing to gate there yet.)
 2. **Secret keys are redacted everywhere.** Logs, errors, UI, and even many
    internal code paths use `secretKeyToRedactedString(...)` / `redactSecrets(str)`.
    See [docs/SECRET_KEY_HANDLING.md](./docs/SECRET_KEY_HANDLING.md) for the R0–R6
