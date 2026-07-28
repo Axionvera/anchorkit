@@ -128,7 +128,16 @@ Run all TypeScript unit tests:
 pnpm test
 ```
 
-Run lint, typecheck, and build the full monorepo:
+Run the single local verification command (format, lint, typecheck, test, build):
+
+```bash
+pnpm verify
+```
+
+See [docs/LOCAL_VERIFICATION.md](./docs/LOCAL_VERIFICATION.md) for details and the optional
+`pnpm verify:full` variant (examples, package boundaries, Soroban contract tests).
+
+Run lint, typecheck, and build individually if needed:
 
 ```bash
 pnpm lint
@@ -171,6 +180,7 @@ All of these live under [`./docs/`](./docs/).
 | Project overview                         | [`PROJECT_OVERVIEW.md`](./docs/PROJECT_OVERVIEW.md)                         |
 | End-to-end developer journey             | [`DEVELOPER_JOURNEY.md`](./docs/DEVELOPER_JOURNEY.md)                       |
 | Local setup                              | [`LOCAL_SETUP.md`](./docs/LOCAL_SETUP.md)                                   |
+| Local verification (`pnpm verify`)       | [`LOCAL_VERIFICATION.md`](./docs/LOCAL_VERIFICATION.md)                     |
 | Architecture / package boundaries        | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                                 |
 | Stellar testnet usage                    | [`STELLAR_TESTNET_USAGE.md`](./docs/STELLAR_TESTNET_USAGE.md)               |
 | Security notes                           | [`SECURITY_NOTES.md`](./docs/SECURITY_NOTES.md)                             |

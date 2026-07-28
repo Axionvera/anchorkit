@@ -38,7 +38,9 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
 2. Comment on the issue to apply. Wait for an assignment before starting work.
 3. Fork the repo, create a branch, run `pnpm install`.
 4. Implement, add tests, update docs if needed.
-5. Run `pnpm lint && pnpm typecheck && pnpm test && pnpm contract:test` locally.
+5. Run `pnpm verify` locally (format, lint, typecheck, test, build). See
+   [LOCAL_VERIFICATION.md](./LOCAL_VERIFICATION.md). If you changed `contracts/`,
+   also run `pnpm contract:test` or `pnpm verify:full`.
 6. Open a PR referencing the issue number (e.g. `Closes #42`).
 7. Respond to maintainer review and update your branch.
 

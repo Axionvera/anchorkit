@@ -206,15 +206,22 @@ The PR body **should** contain:
 
 ### CI requirements
 
-All of these must pass before merge:
+All of these must pass before merge. Prefer the single local command:
 
 ```bash
-pnpm lint
-pnpm typecheck
-pnpm test
+pnpm verify
+```
+
+That covers format check, lint, typecheck, test, and build. Details:
+[LOCAL_VERIFICATION.md](./LOCAL_VERIFICATION.md).
+
+Also run when relevant:
+
+```bash
 pnpm check:boundaries   # if packages/*/src imports changed
 pnpm contract:test      # if contracts/ changed
-pnpm format:check       # or run pnpm format first
+# or:
+pnpm verify:full        # verify + examples + boundaries + contract tests
 ```
 
 ---
