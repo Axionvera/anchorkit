@@ -7,9 +7,9 @@ import type {
   NetworkConfig,
   StellarPublicKey,
 } from "@anchorkit/types";
-import { DEFAULT_ENV_CONFIG, getNetworkConfig } from "@anchorkit/config";
+import { getNetworkConfig } from "@anchorkit/config";
 import type { AnchorKitEnvConfig } from "@anchorkit/config";
-import { assertPublicKeyValid, isPublicKeyValid } from "./keys";
+import { isPublicKeyValid } from "./keys";
 import { createStellarError, mapHorizonError } from "./errors";
 
 export interface AccountLoaderOptions {
@@ -22,7 +22,7 @@ function createServer(options: AccountLoaderOptions = {}): Server {
   const networkConfig = options.networkConfig ?? getNetworkConfig();
   return new Horizon.Server(networkConfig.horizonUrl, {
     allowHttp: !networkConfig.isMainnet,
-  }) as Server;
+  });
 }
 
 export async function loadAccount(
@@ -33,9 +33,8 @@ export async function loadAccount(
     throw createStellarError("PUBLIC_KEY_INVALID", "Cannot load account: invalid public key");
   }
 
+  /* eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion */
   const pk = publicKey as StellarPublicKey;
-  const envConfig = options.envConfig ?? DEFAULT_ENV_CONFIG;
-  const networkConfig = options.networkConfig ?? getNetworkConfig(envConfig.defaultNetwork);
 
   try {
     const server = createServer(options);

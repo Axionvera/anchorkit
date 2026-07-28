@@ -2,7 +2,6 @@ import type {
   PaymentIntent,
   ReadinessWarning,
   StellarAsset,
-  StellarPublicKey,
   TransactionReadiness,
 } from "@anchorkit/types";
 import { STELLAR_NETWORKS } from "@anchorkit/types";

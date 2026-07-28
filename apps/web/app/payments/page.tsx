@@ -2,14 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
-import { Alert, Button, Card, Input, Label, Select, DataRow } from "@/components/ui";
+import { Alert, Button, Card, Input, Label, Select } from "@/components/ui";
 import {
   createPaymentIntent,
   estimateTransactionReadinessSync,
   getStellarExpertAccountUrl,
   isPublicKeyValid,
 } from "@anchorkit/stellar-kit";
-import type { MemoType, PaymentIntent, StellarAsset, TransactionReadiness } from "@anchorkit/types";
+import type { AssetCode, MemoType, PaymentIntent, StellarAsset, StellarPublicKey, TransactionReadiness } from "@anchorkit/types";
 import { DEFAULT_NETWORK } from "@anchorkit/config";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
@@ -36,18 +36,21 @@ export default function PaymentsPage() {
     }
     return {
       type: "issued",
-      code: assetCode as any,
-      issuer: assetIssuer as any,
+      code: assetCode as AssetCode,
+      issuer: assetIssuer as StellarPublicKey,
     };
   }, [assetMode, assetCode, assetIssuer]);
 
-  const memo = memoType === "none" ? undefined : { type: memoType, value: memoValue };
+  const memo = useMemo(
+    () => (memoType === "none" ? undefined : { type: memoType, value: memoValue }),
+    [memoType, memoValue]
+  );
 
   const intent: PaymentIntent | null = useMemo(() => {
     try {
       return createPaymentIntent({
-        sourcePublicKey: source as any,
-        destinationPublicKey: dest as any,
+        sourcePublicKey: source as StellarPublicKey,
+        destinationPublicKey: dest as StellarPublicKey,
         asset,
         amount,
         memo,
@@ -99,7 +102,7 @@ export default function PaymentsPage() {
                 <span>{isPublicKeyValid(source) ? "Format OK" : "Invalid format"}</span>
                 <Select
                   value={simulateSource}
-                  onChange={(e) => setSimulateSource(e.target.value as any)}
+                  onChange={(e) => setSimulateSource(e.target.value as "funded" | "unfunded" | "unknown")}
                   className="mt-1"
                 >
                   <option value="funded">Simulate: funded</option>
@@ -120,7 +123,7 @@ export default function PaymentsPage() {
                 <span>{isPublicKeyValid(dest) ? "Format OK" : "Invalid format"}</span>
                 <Select
                   value={simulateDest}
-                  onChange={(e) => setSimulateDest(e.target.value as any)}
+                  onChange={(e) => setSimulateDest(e.target.value as "funded" | "unfunded" | "unknown")}
                   className="mt-1"
                 >
                   <option value="funded">Simulate: funded</option>

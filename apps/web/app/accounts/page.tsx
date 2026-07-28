@@ -18,8 +18,6 @@ import {
   secretKeyToRedactedString,
   getStellarExpertAccountUrl,
   getTestnetFriendbotUrl,
-  loadAccount,
-  getAccountStatus,
   getPublicKeyFromSecret,
   parseTransactionHash,
   buildTransactionLink,
@@ -29,7 +27,6 @@ import {
 import type {
   StellarKeypair,
   AccountInfo,
-  StellarPublicKey,
   StellarSecretKey,
   AccountStatus,
 } from "@anchorkit/types";
