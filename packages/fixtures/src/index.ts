@@ -13,6 +13,7 @@ export * from "./accounts";
 export * from "./payments";
 export * from "./anchors";
 export * from "./escrow";
+export * from "./milestoneUi";
 export * from "./diagnostics";
 export * from "./invalid";
 
