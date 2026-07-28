@@ -26,7 +26,7 @@
     "contract:build": "cd contracts/treasury-escrow && cargo build --target wasm32-unknown-unknown --release",
     "web:dev": "turbo run dev --filter=@anchorkit/web",
     "web:build": "turbo run build --filter=@anchorkit/web",
-    "validate:issues": "npx tsx scripts/validate-issues.mts"
+    "validate:issue-files": "tsx scripts/validate-issues.mts"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

@@ -33,9 +33,7 @@ export interface ReceiptStatusBadgeStyle {
   tone: "neutral" | "amber" | "blue" | "green" | "red";
 }
 
-export function isTransactionReceiptStatus(
-  value: string
-): value is TransactionReceiptStatus {
+export function isTransactionReceiptStatus(value: string): value is TransactionReceiptStatus {
   return (TRANSACTION_RECEIPT_STATUSES as unknown as string[]).includes(value);
 }
 
@@ -58,7 +56,8 @@ export function receiptStatusToUserMessage(
     case "failed":
       return {
         headline: "Transaction failed",
-        detail: "The transaction could not be completed. Review the error details and retry if appropriate.",
+        detail:
+          "The transaction could not be completed. Review the error details and retry if appropriate.",
         severity: "error",
       };
     case "rejected":
@@ -140,9 +139,7 @@ export interface BuildTransactionReceiptParams {
  * Build a receipt and attach a network-aware explorer link when a valid hash
  * is present.
  */
-export function buildTransactionReceipt(
-  params: BuildTransactionReceiptParams
-): TransactionReceipt {
+export function buildTransactionReceipt(params: BuildTransactionReceiptParams): TransactionReceipt {
   const network = params.network ?? "testnet";
   const message = receiptStatusToUserMessage(params.status);
   const receipt: TransactionReceipt = {
@@ -221,7 +218,7 @@ export function escrowReleaseToReceipt(
     });
   }
 
-  const released = event as ReleasedEvent;
+  const released = event;
   const hasHash = Boolean(released.transactionHash);
   return buildTransactionReceipt({
     id: `escrow_release_${released.milestoneId}`,
@@ -294,9 +291,7 @@ export function createMockTransactionReceipt(
     transactionHash: hash,
     submittedAt: now,
     finalizedAt:
-      status === "confirmed" || status === "failed" || status === "rejected"
-        ? now
-        : undefined,
+      status === "confirmed" || status === "failed" || status === "rejected" ? now : undefined,
     errorCode: params.errorCode ?? (status === "failed" ? "TRANSACTION_FAILED" : undefined),
     errorMessage:
       params.errorMessage ??

@@ -12,10 +12,10 @@
  * changing call sites' shape.
  */
 
-import { redactSecrets } from "./errors";
+import { redactSecrets } from "./redaction";
 
 export { redactSecretKey, secretKeyToRedactedString } from "./keys";
-export { redactSecrets } from "./errors";
+export { redactSecrets } from "./redaction";
 export type { RedactedSecretKey } from "@anchorkit/types";
 
 /** Recursively redact secret-shaped strings inside a value. */

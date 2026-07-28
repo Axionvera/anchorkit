@@ -1,4 +1,10 @@
-import type { NetworkConfig, StellarNetwork } from "@anchorkit/types";
+import type {
+  ConfigSourceMetadata,
+  FeatureFlagDefinition,
+  FeatureFlagId,
+  NetworkConfig,
+  StellarNetwork,
+} from "@anchorkit/types";
 import { STELLAR_NETWORKS, createAnchorKitError } from "@anchorkit/types";
 
 const TESTNET_CONFIG: NetworkConfig = {
@@ -43,14 +49,16 @@ export const DEFAULT_FEATURE_FLAGS: Record<string, FeatureFlagDefinition> = {
   experimental_soroban: {
     id: "experimental_soroban",
     name: "Experimental Soroban Support",
-    description: "Enables experimental Soroban smart contract operations and custom RPC extensions.",
+    description:
+      "Enables experimental Soroban smart contract operations and custom RPC extensions.",
     stability: "experimental",
     defaultEnabled: false,
   },
   experimental_vault: {
     id: "experimental_vault",
     name: "Experimental Vault Manager",
-    description: "Enables experimental vault management, session tracking, and multi-sig escrow vault rules.",
+    description:
+      "Enables experimental vault management, session tracking, and multi-sig escrow vault rules.",
     stability: "experimental",
     defaultEnabled: false,
   },
@@ -163,7 +171,7 @@ export function assertFeatureEnabled(
     const stability = def ? def.stability : "experimental";
     const error = new Error(
       `Feature '${name}' (${flagId}) is disabled by default. Feature stability: ${stability}. Enable it by setting featureFlags.${flagId}: true in config.`
-    ) as any;
+    ) as Error & { code: "FEATURE_DISABLED"; redacted: true };
     error.code = "FEATURE_DISABLED";
     error.name = "StellarKitError";
     error.redacted = true;
@@ -178,21 +186,80 @@ export function resolveConfigSourceMetadata(
   const source = isDefault ? "default" : "explicit";
 
   const result: ConfigSourceMetadata[] = [
-    { source, key: "defaultNetwork", isSensitive: false, resolvedValue: env.defaultNetwork, stability: "stable" },
-    { source, key: "allowMainnet", isSensitive: false, resolvedValue: env.allowMainnet, stability: "stable" },
-    { source, key: "horizonTimeoutMs", isSensitive: false, resolvedValue: env.horizonTimeoutMs, stability: "stable" },
-    { source, key: "horizonRateLimitPerSecond", isSensitive: false, resolvedValue: env.horizonRateLimitPerSecond, stability: "stable" },
-    { source, key: "maximumMemoTextBytes", isSensitive: false, resolvedValue: env.maximumMemoTextBytes, stability: "stable" },
-    { source, key: "minimumPaymentAmount", isSensitive: false, resolvedValue: env.minimumPaymentAmount, stability: "stable" },
-    { source, key: "maximumPaymentAmount", isSensitive: false, resolvedValue: env.maximumPaymentAmount, stability: "stable" },
-    { source, key: "secretKeyPrefix", isSensitive: true, resolvedValue: "[REDACTED]", stability: "stable" },
-    { source, key: "publicKeyPrefix", isSensitive: false, resolvedValue: env.publicKeyPrefix, stability: "stable" },
+    {
+      source,
+      key: "defaultNetwork",
+      isSensitive: false,
+      resolvedValue: env.defaultNetwork,
+      stability: "stable",
+    },
+    {
+      source,
+      key: "allowMainnet",
+      isSensitive: false,
+      resolvedValue: env.allowMainnet,
+      stability: "stable",
+    },
+    {
+      source,
+      key: "horizonTimeoutMs",
+      isSensitive: false,
+      resolvedValue: env.horizonTimeoutMs,
+      stability: "stable",
+    },
+    {
+      source,
+      key: "horizonRateLimitPerSecond",
+      isSensitive: false,
+      resolvedValue: env.horizonRateLimitPerSecond,
+      stability: "stable",
+    },
+    {
+      source,
+      key: "maximumMemoTextBytes",
+      isSensitive: false,
+      resolvedValue: env.maximumMemoTextBytes,
+      stability: "stable",
+    },
+    {
+      source,
+      key: "minimumPaymentAmount",
+      isSensitive: false,
+      resolvedValue: env.minimumPaymentAmount,
+      stability: "stable",
+    },
+    {
+      source,
+      key: "maximumPaymentAmount",
+      isSensitive: false,
+      resolvedValue: env.maximumPaymentAmount,
+      stability: "stable",
+    },
+    {
+      source,
+      key: "secretKeyPrefix",
+      isSensitive: true,
+      resolvedValue: "[REDACTED]",
+      stability: "stable",
+    },
+    {
+      source,
+      key: "publicKeyPrefix",
+      isSensitive: false,
+      resolvedValue: env.publicKeyPrefix,
+      stability: "stable",
+    },
   ];
 
   const definitions = getFeatureFlagDefinitions();
   for (const def of definitions) {
     const enabled = isFeatureEnabled(def.id, env);
-    const flagSource = env.featureFlags && def.id in env.featureFlags ? (isDefault ? "default" : "explicit") : "default";
+    const flagSource =
+      env.featureFlags && def.id in env.featureFlags
+        ? isDefault
+          ? "default"
+          : "explicit"
+        : "default";
     result.push({
       source: flagSource,
       key: `featureFlags.${def.id}`,
@@ -204,7 +271,6 @@ export function resolveConfigSourceMetadata(
 
   return result;
 }
-
 
 // ─── Module capabilities ────────────────────────────────────────────────────
 export * from "./capabilities";

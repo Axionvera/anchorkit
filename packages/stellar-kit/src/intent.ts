@@ -64,6 +64,28 @@ export function mapReadinessToErrorCode(warnings: ReadinessWarning[]): string {
   return blocker?.code ?? "UNKNOWN";
 }
 
+/** Build a concise, user-facing summary for the aggregate readiness result. */
+function buildReadinessSummary(ready: boolean, warnings: ReadinessWarning[]): string {
+  if (warnings.length === 0) {
+    return "Payment intent is ready for the configured preflight checks.";
+  }
+
+  const errorCount = warnings.filter((warning) => warning.severity === "error").length;
+  const nonBlockingCount = warnings.length - errorCount;
+
+  if (!ready) {
+    return `Payment intent is blocked by ${errorCount} error${errorCount === 1 ? "" : "s"}${
+      nonBlockingCount > 0
+        ? ` and has ${nonBlockingCount} non-blocking warning${nonBlockingCount === 1 ? "" : "s"}`
+        : ""
+    }.`;
+  }
+
+  return `Payment intent passed with ${nonBlockingCount} non-blocking warning${
+    nonBlockingCount === 1 ? "" : "s"
+  }.`;
+}
+
 /** Derive the discrete readiness state from the collected warnings. */
 export function getReadinessState(warnings: ReadinessWarning[]): ReadinessState {
   const errors = warnings.filter((w) => w.severity === "error");
@@ -77,14 +99,8 @@ export function getReadinessState(warnings: ReadinessWarning[]): ReadinessState 
 }
 
 /** Build a single readiness stage from its warnings. */
-function stage(
-  id: string,
-  label: string,
-  warnings: ReadinessWarning[]
-): ReadinessStage {
-  const status: ReadinessStage["status"] = warnings.some(
-    (w) => w.severity === "error"
-  )
+function stage(id: string, label: string, warnings: ReadinessWarning[]): ReadinessStage {
+  const status: ReadinessStage["status"] = warnings.some((w) => w.severity === "error")
     ? "fail"
     : warnings.length > 0
       ? "warn"
@@ -284,8 +300,7 @@ export async function estimateTransactionReadiness(
     sourceInfo.status === "fulfilled" ? sourceInfo.value.status === "funded" : undefined;
   const sourceBalances =
     sourceInfo.status === "fulfilled" ? computeBalanceModel(sourceInfo.value) : undefined;
-  const destFunded =
-    destStatus.status === "fulfilled" ? destStatus.value === "funded" : undefined;
+  const destFunded = destStatus.status === "fulfilled" ? destStatus.value === "funded" : undefined;
 
   return estimateTransactionReadinessSync(intent, {
     network,
@@ -295,4 +310,3 @@ export async function estimateTransactionReadiness(
     sourceBalances,
   });
 }
-

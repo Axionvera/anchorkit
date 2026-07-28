@@ -12,18 +12,11 @@
  */
 
 import type { StellarAsset, StellarNetwork } from "@anchorkit/types";
-import {
-  getNativeAsset,
-  isNativeAsset,
-  validateAsset,
-} from "./assets";
+import { isNativeAsset, validateAsset } from "./assets";
 import { createStellarError } from "./errors";
 
 /** How an asset is treated on a given network. */
-export type AssetSupport =
-  | "supported"
-  | "testnetOnly"
-  | "unsupported";
+export type AssetSupport = "supported" | "testnetOnly" | "unsupported";
 
 /** A single registry entry: an asset plus the networks it is allowed on. */
 export interface RegistryEntry {
@@ -151,10 +144,7 @@ export function validateAssetOnNetwork(
   const parsed = validateAsset(asset);
   if (!parsed.success) {
     const firstIssue = parsed.error.issues[0];
-    throw createStellarError(
-      "ASSET_INVALID",
-      firstIssue?.message ?? "Invalid asset configuration"
-    );
+    throw createStellarError("ASSET_INVALID", firstIssue?.message ?? "Invalid asset configuration");
   }
 
   const result = lookupAsset(parsed.data, network, registry);
@@ -176,7 +166,9 @@ export function checkAssetOnNetwork(
   asset: unknown,
   network: StellarNetwork,
   registry: AssetRegistry = DEFAULT_TESTNET_REGISTRY
-): { ok: true; value: StellarAsset } | { ok: false; code: "ASSET_INVALID" | "ASSET_UNSUPPORTED"; error: string } {
+):
+  | { ok: true; value: StellarAsset }
+  | { ok: false; code: "ASSET_INVALID" | "ASSET_UNSUPPORTED"; error: string } {
   const parsed = validateAsset(asset);
   if (!parsed.success) {
     const firstIssue = parsed.error.issues[0];

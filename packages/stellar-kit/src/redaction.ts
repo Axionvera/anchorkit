@@ -17,19 +17,7 @@ export const STELLAR_SECRET_KEY_REGEX = /S[A-Z2-7]{55}/g;
  * e.g., secretKey="...", secret_key: "...", privateKey=...
  */
 export const SECRET_ASSIGNMENT_REGEX =
-  /(secret[_\-]?key|private[_\-]?key|seed[_\-]?phrase|secret[_\-]?seed)\s*[:=]\s*(["']?)([^\s"',}]+)\2/gi;
-
-/**
- * Pattern list for scanning and scrubbing secret tokens from arbitrary strings.
- */
-const SECRET_PATTERNS = [
-  STELLAR_SECRET_KEY_REGEX,
-  /S[A-Za-z2-7]{55}/g,
-  SECRET_ASSIGNMENT_REGEX,
-  /secret[_\-]?key/i,
-  /private[_\-]?key/i,
-  /seed[_\-]?phrase/i,
-];
+  /(secret[_-]?key|private[_-]?key|seed[_-]?phrase|secret[_-]?seed)\s*[:=]\s*(["']?)([^\s"',}]+)\2/gi;
 
 /**
  * Check if a string contains any secret-like value or unsafe pattern.
@@ -89,11 +77,11 @@ export function redactSecrets(input: string): string {
   // Redact key-value assignments: secret_key="VAL" -> secret_key="[REDACTED]"
   result = result.replace(
     SECRET_ASSIGNMENT_REGEX,
-    (fullMatch, keyName, quote, val) => {
+    (_fullMatch: string, keyName: string, quote: string, value: string) => {
       const q = quote || "";
-      if (val.length === 56 && val.startsWith("S")) {
-        const redactedVal = val.slice(0, 4) + "[REDACTED]" + val.slice(-4);
-        return `${keyName}=${q}${redactedVal}${q}`;
+      if (value.length === 56 && value.startsWith("S")) {
+        const redactedValue = value.slice(0, 4) + "[REDACTED]" + value.slice(-4);
+        return `${keyName}=${q}${redactedValue}${q}`;
       }
       return `${keyName}=${q}[REDACTED]${q}`;
     }
@@ -105,10 +93,9 @@ export function redactSecrets(input: string): string {
   });
 
   // Redact keywords if matched as isolated descriptors
-  for (const pattern of [/secret[\s_\-]?key/i, /private[\s_\-]?key/i, /seed[\s_\-]?phrase/i]) {
+  for (const pattern of [/secret[\s_-]?key/i, /private[\s_-]?key/i, /seed[\s_-]?phrase/i]) {
     result = result.replace(pattern, "[REDACTED]");
   }
-
 
   return result;
 }

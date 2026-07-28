@@ -25,22 +25,25 @@ export const MODULE_CAPABILITIES: readonly ModuleCapability[] = [
   {
     id: "escrow",
     label: "Escrow",
-    state: "testnet-only",
-    description: "Soroban treasury-escrow contract milestone workflow, deployed on testnet.",
+    state: "mock",
+    description:
+      "Step through an in-memory milestone and fixture events. The web page does not call or deploy the Rust contract.",
     docsHref: "/docs#escrow",
   },
   {
     id: "diagnostics",
     label: "Diagnostics",
     state: "unavailable",
-    description: "Network and account diagnostics tooling is not yet implemented.",
+    description:
+      "The standalone dashboard module is not built; account diagnostics remain available on the Accounts page.",
     docsHref: "/docs#diagnostics",
   },
   {
     id: "network-config",
     label: "Network configuration",
-    state: "experimental",
-    description: "Switch and inspect Stellar network configuration (testnet/futurenet).",
+    state: "unavailable",
+    description:
+      "Network presets exist in @anchorkit/config, but the standalone dashboard workflow is not built.",
     docsHref: "/docs#network-config",
   },
 ] as const;
