@@ -205,3 +205,6 @@ export function resolveConfigSourceMetadata(
   return result;
 }
 
+
+// ─── Module capabilities ────────────────────────────────────────────────────
+export * from "./capabilities";
