@@ -10,4 +10,5 @@ export * from "./logging";
 export * from "./explorer";
 export * from "./balances";
 export * from "./diagnostics";
+export * from "./assetRegistry";
 export type { StellarKeypair } from "@anchorkit/types";
