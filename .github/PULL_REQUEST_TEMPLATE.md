@@ -6,11 +6,16 @@ Describe what this PR delivers in 1-3 sentences.
 
 ## Issue scope
 
-Copy the Acceptance Criteria checkboxes from the issue and check off each delivered line:
+Fill in a completion table mapping every Acceptance Criterion from the issue to its status,
+implementation evidence, and tests. See
+[docs/ACCEPTANCE_CRITERIA_COMPLETION.md](../docs/ACCEPTANCE_CRITERIA_COMPLETION.md) for the full
+format, status legend, and a worked example.
 
-- [ ] …
-- [ ] …
-- [ ] …
+| Acceptance Criterion | Status | Implementation Evidence | Tests | Notes |
+| --- | --- | --- | --- | --- |
+| … | | | | |
+| … | | | | |
+| … | | | | |
 
 ## Affected packages / apps
 
