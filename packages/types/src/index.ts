@@ -126,9 +126,36 @@ export interface ReadinessWarning {
   severity: "error" | "warning" | "info";
 }
 
-export interface TransactionReadiness {
-  ready: boolean;
+/**
+ * Discrete readiness outcome. Superset of the boolean `ready` flag so callers
+ * and UI can branch on a single typed value:
+ * - "ready"         — no warnings at all.
+ * - "warnings"      — only non-blocking warnings (e.g. same src/dest).
+ * - "unsafe-network"— a mainnet/network-safety blocker is present.
+ * - "blocked"       — one or more hard errors (invalid key, bad asset, etc.).
+ */
+export type ReadinessState = "ready" | "warnings" | "unsafe-network" | "blocked";
+
+/** A single validation stage of the readiness engine. */
+export interface ReadinessStage {
+  /** Stable stage id, e.g. "account-source". */
+  id: string;
+  /** Human-readable label for UI. */
+  label: string;
+  /** Stage outcome derived from its warnings. */
+  status: "pass" | "warn" | "fail";
+  /** Warnings produced by this stage. */
   warnings: ReadinessWarning[];
+}
+
+export interface TransactionReadiness {
+  /** Deprecated-friendly boolean: true when there are no error-severity warnings. */
+  ready: boolean;
+  /** Typed aggregate state. */
+  state: ReadinessState;
+  warnings: ReadinessWarning[];
+  /** Per-stage results, in execution order. */
+  stages: ReadinessStage[];
   summary: string;
 }
 

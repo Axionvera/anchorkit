@@ -1,6 +1,8 @@
 import type {
   AccountBalanceModel,
   PaymentIntent,
+  ReadinessStage,
+  ReadinessState,
   ReadinessWarning,
   StellarAsset,
   TransactionReadiness,
@@ -51,6 +53,45 @@ export function isPaymentIntentValid(intent: unknown): boolean {
   return validatePaymentIntent(intent).success;
 }
 
+/**
+ * Map a set of readiness warnings to a single `StellarErrorCode` so callers can
+ * report the most severe blocker as a typed error (useful for logging and
+ * programmatic branching). Returns "UNKNOWN" when there are no error-severity
+ * warnings.
+ */
+export function mapReadinessToErrorCode(warnings: ReadinessWarning[]): string {
+  const blocker = warnings.find((w) => w.severity === "error");
+  return blocker?.code ?? "UNKNOWN";
+}
+
+/** Derive the discrete readiness state from the collected warnings. */
+export function getReadinessState(warnings: ReadinessWarning[]): ReadinessState {
+  const errors = warnings.filter((w) => w.severity === "error");
+  if (errors.length === 0) {
+    return warnings.length === 0 ? "ready" : "warnings";
+  }
+  if (errors.some((w) => w.code === "MAINNET_DISABLED")) {
+    return "unsafe-network";
+  }
+  return "blocked";
+}
+
+/** Build a single readiness stage from its warnings. */
+function stage(
+  id: string,
+  label: string,
+  warnings: ReadinessWarning[]
+): ReadinessStage {
+  const status: ReadinessStage["status"] = warnings.some(
+    (w) => w.severity === "error"
+  )
+    ? "fail"
+    : warnings.length > 0
+      ? "warn"
+      : "pass";
+  return { id, label, status, warnings };
+}
+
 export function estimateTransactionReadinessSync(
   intent: PaymentIntent,
   options: {
@@ -65,64 +106,76 @@ export function estimateTransactionReadinessSync(
     sourceBalances?: AccountBalanceModel;
   } = {}
 ): TransactionReadiness {
-  const warnings: ReadinessWarning[] = [];
   const envConfig = options.envConfig ?? DEFAULT_ENV_CONFIG;
   const network = options.network ?? envConfig.defaultNetwork;
 
+  const warnings: ReadinessWarning[] = [];
+
+  // ── Stage: account (source) ───────────────────────────────────────────────
+  const accountWarnings: ReadinessWarning[] = [];
   if (!isPublicKeyValid(intent.sourcePublicKey)) {
-    warnings.push({
+    accountWarnings.push({
       code: "SOURCE_INVALID",
       message: "Source public key is invalid",
       severity: "error",
     });
   }
 
+  // ── Stage: account (destination) ──────────────────────────────────────────
+  const destWarnings: ReadinessWarning[] = [];
   if (!isPublicKeyValid(intent.destinationPublicKey)) {
-    warnings.push({
+    destWarnings.push({
       code: "DEST_INVALID",
       message: "Destination public key is invalid",
       severity: "error",
     });
   }
-
   if (
     isPublicKeyValid(intent.sourcePublicKey) &&
     isPublicKeyValid(intent.destinationPublicKey) &&
     intent.sourcePublicKey === intent.destinationPublicKey
   ) {
-    warnings.push({
+    destWarnings.push({
       code: "SAME_SOURCE_DEST",
       message: "Source and destination accounts are the same",
       severity: "warning",
     });
   }
 
+  // ── Stage: asset ──────────────────────────────────────────────────────────
+  const assetWarnings: ReadinessWarning[] = [];
   if (!isAssetValid(intent.asset)) {
-    warnings.push({
+    assetWarnings.push({
       code: "ASSET_INVALID",
       message: "Asset configuration is invalid",
       severity: "error",
     });
   }
 
+  // ── Stage: amount ────────────────────────────────────────────────────────
+  const amountWarnings: ReadinessWarning[] = [];
   if (!isAmountValid(intent.amount)) {
-    warnings.push({
+    amountWarnings.push({
       code: "AMOUNT_INVALID",
       message: "Payment amount is invalid or outside allowed range",
       severity: "error",
     });
   }
 
+  // ── Stage: memo ───────────────────────────────────────────────────────────
+  const memoWarnings: ReadinessWarning[] = [];
   if (intent.memo && !isMemoValid(intent.memo)) {
-    warnings.push({
+    memoWarnings.push({
       code: "MEMO_INVALID",
       message: "Memo value is invalid for the selected memo type",
       severity: "error",
     });
   }
 
+  // ── Stage: network safety ─────────────────────────────────────────────────
+  const networkWarnings: ReadinessWarning[] = [];
   if (network === STELLAR_NETWORKS.MAINNET && !isMainnetAllowed(envConfig)) {
-    warnings.push({
+    networkWarnings.push({
       code: "MAINNET_DISABLED",
       message:
         "Mainnet mode is disabled by default. Review security notes and explicitly enable mainnet if needed.",
@@ -130,16 +183,18 @@ export function estimateTransactionReadinessSync(
     });
   }
 
+  // ── Stage: balance / funding ──────────────────────────────────────────────
+  const balanceWarnings: ReadinessWarning[] = [];
+
   if (options.sourceAccountFunded === false) {
-    warnings.push({
+    balanceWarnings.push({
       code: "SOURCE_UNFUNDED",
       message: "Source account is not funded on the network",
       severity: "warning",
     });
   }
-
   if (options.destAccountFunded === false) {
-    warnings.push({
+    balanceWarnings.push({
       code: "DEST_UNFUNDED",
       message:
         "Destination account is not funded. Issued asset payments require the destination to have a trustline.",
@@ -154,7 +209,7 @@ export function estimateTransactionReadinessSync(
   if (sourceBalances && isNativeAsset(intent.asset) && isAmountValid(intent.amount)) {
     if (sourceBalances.state === "known" && sourceBalances.spendable !== null) {
       if (compareAmounts(sourceBalances.spendable, intent.amount) < 0) {
-        warnings.push({
+        balanceWarnings.push({
           code: "INSUFFICIENT_FUNDS",
           message:
             `Spendable balance is ${sourceBalances.spendable} XLM, below the ` +
@@ -165,7 +220,7 @@ export function estimateTransactionReadinessSync(
     } else {
       // Deliberately carries no figure: an unavailable balance must not be
       // presented as a number the user could act on.
-      warnings.push({
+      balanceWarnings.push({
         code: "SPENDABLE_UNKNOWN",
         message: `Spendable balance could not be determined. ${sourceBalances.explanation}`,
         severity: "info",
@@ -173,12 +228,32 @@ export function estimateTransactionReadinessSync(
     }
   }
 
+  warnings.push(
+    ...accountWarnings,
+    ...destWarnings,
+    ...assetWarnings,
+    ...amountWarnings,
+    ...memoWarnings,
+    ...networkWarnings,
+    ...balanceWarnings
+  );
+
+  const stages: ReadinessStage[] = [
+    stage("account-source", "Source account", accountWarnings),
+    stage("account-dest", "Destination account", destWarnings),
+    stage("asset", "Asset", assetWarnings),
+    stage("amount", "Amount", amountWarnings),
+    stage("memo", "Memo", memoWarnings),
+    stage("network", "Network safety", networkWarnings),
+    stage("balance", "Balance & funding", balanceWarnings),
+  ];
+
   const errorCount = warnings.filter((w) => w.severity === "error").length;
   const ready = errorCount === 0;
-
+  const state = getReadinessState(warnings);
   const summary = buildReadinessSummary(ready, warnings);
 
-  return { ready, warnings, summary };
+  return { ready, state, warnings, stages, summary };
 }
 
 export async function estimateTransactionReadiness(
