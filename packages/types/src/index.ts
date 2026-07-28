@@ -550,6 +550,9 @@ export interface StatusSeverity {
 // ─── Escrow events ──────────────────────────────────────────────────────────
 export * from "./escrowEvents";
 
+// ─── Milestone UI state model ──────────────────────────────────────────────
+export * from "./milestoneUi";
+
 // ─── Shared error taxonomy ──────────────────────────────────────────────────
 export * from "./errors";
 
