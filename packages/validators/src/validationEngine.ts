@@ -19,6 +19,7 @@ import {
   AnchorAssetConfigSchema,
   CallbackUrlSchema,
   PaymentAmountSchema,
+  PaymentIntentSchema,
 } from './index';
 import type {
   DepositRequestMetadata,
@@ -37,7 +38,9 @@ export type AnchorValidationErrorCode =
   | 'INVALID_AMOUNT'
   | 'INVALID_ACCOUNT'
   | 'INVALID_DESTINATION'
+  | 'INVALID_READINESS_INPUT'
   | 'SCHEMA_ERROR';
+
 
 /** A single typed, user-safe validation error. */
 export interface ValidationError {
@@ -116,7 +119,15 @@ export function validateAmount(input: unknown): ValidationResult<string> {
   return { ok: false, errors: toValidationErrors('INVALID_AMOUNT', result.error) };
 }
 
+/** Validate raw payment intent structure for readiness processing. */
+export function validateReadinessInput(input: unknown): ValidationResult<PaymentIntent> {
+  const result = PaymentIntentSchema.safeParse(input);
+  if (result.success) return { ok: true, value: result.data };
+  return { ok: false, errors: toValidationErrors('INVALID_READINESS_INPUT', result.error) };
+}
+
 /** Convenience: first user-safe message, or undefined. */
 export function firstErrorMessage(result: ValidationResult<unknown>): string | undefined {
   return result.ok ? undefined : result.errors[0]?.message;
 }
+

@@ -124,6 +124,31 @@ export interface ReadinessWarning {
   code: string;
   message: string;
   severity: "error" | "warning" | "info";
+  stage?: ReadinessStageId;
+}
+
+export type TransactionReadinessState =
+  | "valid"
+  | "invalid"
+  | "blocked"
+  | "warning"
+  | "unavailable";
+
+export type ReadinessStageId = "network" | "account" | "asset" | "amount" | "memo";
+
+export interface ReadinessStageResult {
+  stage: ReadinessStageId;
+  state: TransactionReadinessState;
+  message: string;
+  details?: Record<string, unknown>;
+}
+
+export interface ReadinessIssue {
+  code: string;
+  stage: ReadinessStageId;
+  severity: "error" | "warning" | "info";
+  message: string;
+  field?: string;
 }
 
 /**
@@ -157,6 +182,8 @@ export interface TransactionReadiness {
   /** Per-stage results, in execution order. */
   stages: ReadinessStage[];
   summary: string;
+  sourceDiagnostic?: unknown;
+  destDiagnostic?: unknown;
 }
 
 /**

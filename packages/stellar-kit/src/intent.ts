@@ -296,13 +296,3 @@ export async function estimateTransactionReadiness(
   });
 }
 
-function buildReadinessSummary(ready: boolean, warnings: ReadinessWarning[]): string {
-  if (ready && warnings.length === 0) {
-    return "Payment intent is fully ready. Review warnings above for optional checks.";
-  }
-  if (ready && warnings.length > 0) {
-    return `Payment intent is ready with ${warnings.length} warning(s). Resolve warnings before signing.`;
-  }
-  const errors = warnings.filter((w) => w.severity === "error").length;
-  return `Payment intent has ${errors} blocker(s) and ${warnings.length - errors} warning(s). Fix blockers before building the transaction.`;
-}
