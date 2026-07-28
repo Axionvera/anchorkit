@@ -106,6 +106,16 @@ export {
   RECEIPTS_ARRAY,
 } from "./receipts";
 
+// ─── Severity ──────────────────────────────────────────────────────────────
+export {
+  RECEIPT_SEVERITY_ENTRIES,
+  ANCHOR_SEVERITY_ENTRIES,
+  READINESS_SEVERITY_ENTRIES,
+  ACCOUNT_SEVERITY_ENTRIES,
+  MILESTONE_SEVERITY_ENTRIES,
+  BADGE_TONE_LEVELS,
+} from "./severity";
+
 // ─── Secrets ────────────────────────────────────────────────────────────────
 export {
   makeFakeSecret,
