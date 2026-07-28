@@ -12,6 +12,7 @@ item or marks it as needing changes.
 - [ ] `pnpm lint` passes locally.
 - [ ] `pnpm typecheck` passes locally.
 - [ ] `pnpm test` passes locally.
+- [ ] `pnpm check:boundaries` passes locally (required if any `packages/*/src` import changed — see [ARCHITECTURE.md §3](./ARCHITECTURE.md#3-dependency-direction)).
 - [ ] `pnpm contract:test` passes locally (if anything under `contracts/` changed).
 - [ ] `pnpm format:check` passes or `pnpm format` was applied.
 
