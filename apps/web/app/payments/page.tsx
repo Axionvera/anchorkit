@@ -224,15 +224,53 @@ export default function PaymentsPage() {
                 <span className="text-sm text-ink-500 dark:text-ink-400">Overall</span>
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-mono-xs font-medium ${
-                    readiness.ready
+                    readiness.state === "ready"
                       ? "bg-green-100 text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900"
-                      : "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900"
+                      : readiness.state === "warnings"
+                        ? "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900"
+                        : readiness.state === "unsafe-network"
+                          ? "bg-red-100 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900"
+                          : "bg-red-100 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900"
                   }`}
                 >
-                  {readiness.ready ? "Ready" : "Not ready"}
+                  {readiness.state === "ready"
+                    ? "Ready"
+                    : readiness.state === "warnings"
+                      ? "Ready (with warnings)"
+                      : readiness.state === "unsafe-network"
+                        ? "Unsafe network"
+                        : "Blocked"}
                 </span>
               </div>
               <p className="text-sm">{readiness.summary}</p>
+              <div>
+                <div className="mb-1 text-sm font-medium">Validation stages</div>
+                <ul className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                  {readiness.stages.map((s) => (
+                    <li
+                      key={s.id}
+                      className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-mono-xs ${
+                        s.status === "pass"
+                          ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950/30 dark:text-green-200"
+                          : s.status === "warn"
+                            ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200"
+                            : "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-1.5 w-1.5 rounded-full ${
+                          s.status === "pass"
+                            ? "bg-green-500"
+                            : s.status === "warn"
+                              ? "bg-amber-500"
+                              : "bg-red-500"
+                        }`}
+                      />
+                      {s.label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
               <div>
                 <div className="mb-1 text-sm font-medium">Warnings ({readiness.warnings.length})</div>
                 {readiness.warnings.length === 0 ? (
