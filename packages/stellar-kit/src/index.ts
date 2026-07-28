@@ -9,4 +9,6 @@ export * from "./escrowEvents";
 export * from "./logging";
 export * from "./explorer";
 export * from "./diagnostics";
+export * from "./soroban";
+export * from "./vault";
 export type { StellarKeypair } from "@anchorkit/types";

@@ -252,6 +252,33 @@ export interface EscrowEvent {
   details?: Record<string, unknown>;
 }
 
+export type FeatureStability = "stable" | "experimental" | "deprecated";
+
+export type FeatureFlagId =
+  | "experimental_soroban"
+  | "experimental_vault"
+  | "mainnet_access"
+  | "advanced_diagnostics"
+  | (string & {});
+
+export interface FeatureFlagDefinition {
+  id: FeatureFlagId;
+  name: string;
+  description: string;
+  stability: FeatureStability;
+  defaultEnabled: boolean;
+}
+
+export type ConfigSource = "default" | "env" | "explicit" | "override";
+
+export interface ConfigSourceMetadata {
+  source: ConfigSource;
+  key: string;
+  isSensitive: boolean;
+  resolvedValue?: unknown;
+  stability?: FeatureStability;
+}
+
 export type StellarErrorCode =
   | "PUBLIC_KEY_INVALID"
   | "SECRET_KEY_INVALID"
@@ -263,6 +290,8 @@ export type StellarErrorCode =
   | "TRANSACTION_HASH_INVALID"
   | "NETWORK_ERROR"
   | "MAINNET_DISABLED"
+  | "FEATURE_DISABLED"
+  | "UNSUPPORTED_FEATURE"
   | "UNAUTHORIZED"
   | "UNKNOWN";
 

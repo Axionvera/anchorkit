@@ -15,6 +15,19 @@ export function createStellarError(
   return error;
 }
 
+export function createFeatureDisabledError(
+  flagId: string,
+  featureName?: string,
+  stability?: string
+): StellarKitError {
+  const nameStr = featureName ? `'${featureName}' (${flagId})` : `'${flagId}'`;
+  const stabilityStr = stability ? ` Feature stability: ${stability}.` : "";
+  return createStellarError(
+    "FEATURE_DISABLED",
+    `Feature ${nameStr} is disabled by default.${stabilityStr} Enable it in config by setting featureFlags.${flagId}: true.`
+  );
+}
+
 function sanitizeCause(cause: unknown): unknown {
   if (cause instanceof Error) {
     const sanitizedMessage = redactSecrets(cause.message);
