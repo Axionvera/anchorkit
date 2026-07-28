@@ -387,6 +387,55 @@ export interface StellarKitError extends Error {
   redacted: true;
 }
 
+// ─── Shared severity mapping ────────────────────────────────────────────────
+
+/**
+ * Canonical severity levels used across all modules. Every domain status
+ * maps to one of these levels so UI components render consistently.
+ */
+export type SeverityLevel = "info" | "success" | "warning" | "blocked" | "error" | "unknown";
+
+/**
+ * Visual badge tone for status indicators. Maps 1:1 to Tailwind color scales.
+ * `blocked` maps to `red` like `error` but signals a distinct semantic meaning
+ * (user action required vs. system failure).
+ */
+export type BadgeTone = "neutral" | "amber" | "blue" | "green" | "red";
+
+/**
+ * Recommended user action for a given severity level.
+ */
+export type RecommendedAction =
+  | "none"
+  | "retry"
+  | "contact_support"
+  | "check_explorer"
+  | "enable_mainnet"
+  | "fund_account"
+  | "wait"
+  | "review_details";
+
+/**
+ * Full severity mapping for a domain status. Consumed by badge components,
+ * alert components, and documentation generators.
+ */
+export interface StatusSeverity {
+  /** The canonical severity level. */
+  level: SeverityLevel;
+  /** Display label for badges. */
+  label: string;
+  /** Visual tone for badge styling. */
+  tone: BadgeTone;
+  /** User-facing headline. */
+  headline: string;
+  /** User-facing detail message. */
+  detail: string;
+  /** Recommended next action, if any. */
+  action?: RecommendedAction;
+  /** Path to relevant documentation section, if any. */
+  docLink?: string;
+}
+
 // ─── Escrow events ──────────────────────────────────────────────────────────
 export * from "./escrowEvents";
 
