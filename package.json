@@ -21,12 +21,12 @@
     "check:examples": "tsx scripts/check-examples.mts",
     "check:boundaries": "tsx scripts/check-package-boundaries.mts",
     "validate:issues": "tsx scripts/validate-issue-batch.mts",
+    "validate:issue-files": "tsx scripts/validate-issues.mts",
     "clean": "turbo run clean && rm -rf node_modules && rm -rf .turbo",
     "contract:test": "cd contracts/treasury-escrow && cargo test",
     "contract:build": "cd contracts/treasury-escrow && cargo build --target wasm32-unknown-unknown --release",
     "web:dev": "turbo run dev --filter=@anchorkit/web",
-    "web:build": "turbo run build --filter=@anchorkit/web",
-    "validate:issues": "npx tsx scripts/validate-issues.mts"
+    "web:build": "turbo run build --filter=@anchorkit/web"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
