@@ -14,11 +14,20 @@ crash reports, or CI output (issue #3). Two layers:
 |---|---|---|
 | `redactSecretKey(secret)` | `RedactedSecretKey { prefix, suffix, __redacted }` | Keep only first 4 + last 4 chars. |
 | `secretKeyToRedactedString(secret)` | `string` | Human-readable `SABC••••••XYZQ`. |
-| `redactSecrets(input)` | `string` | Scan a string and redact any Stellar-shaped secret (`S…`, 56 chars) plus `secret key` / `private key` / `seed phrase` tokens. |
+| `redactSecrets(input)` | `string` | Scan a string and redact any Stellar-shaped secret (`S…`, 56 chars), secret assignments (`secretKey=...`), plus `secret key` / `private key` / `seed phrase` tokens. |
 | `formatRedactedSecret(redacted)` | `string` | Render a `RedactedSecretKey`. |
+| `containsSecret(input)` | `boolean` | Check if a string contains any 56-character Stellar secret key or secret assignment pattern. |
+| `detectUnsafePatterns(input)` | `{ hasSecrets: boolean; matches: UnsafePatternMatch[] }` | Diagnostic scan for secret-like patterns. |
 
 `RedactedSecretKey` is a branded type (`__redacted: true`) so it can never be
 mistaken for a usable key at the type level.
+
+## Diagnostics and Error Integration
+
+AnchorKit automatically applies redaction across error creation and account diagnostics:
+- **`createStellarError`**: All error messages are sanitized at creation time via `redactSecrets(message)`.
+- **`diagnoseAccount` & `diagnoseAccountInfo`**: Inputs and error outputs pass through `redactSecrets` so passing a secret key or invalid string as a public key parameter will never leak credentials in diagnostic results.
+
 
 ## Safe logger
 

@@ -8,11 +8,13 @@
  * Stellar Expert link — without ever exposing secrets.
  */
 
-import type { AccountInfo, AccountStatus, NetworkConfig, StellarPublicKey } from "@anchorkit/types";
-import { getNetworkConfig } from "@anchorkit/config";
+import type { AccountInfo, AccountStatus, ConfigSourceMetadata, NetworkConfig, StellarPublicKey } from "@anchorkit/types";
+import type { AnchorKitEnvConfig } from "@anchorkit/config";
+import { DEFAULT_ENV_CONFIG, getFeatureFlagDefinitions, getNetworkConfig, isFeatureEnabled, resolveConfigSourceMetadata } from "@anchorkit/config";
 import { isPublicKeyValid } from "./keys";
 import { buildAccountLink } from "./explorer";
 import { loadAccount } from "./accounts";
+import { redactSecrets } from "./redaction";
 
 /** Diagnostic states — superset of the raw `AccountStatus`. */
 export type AccountDiagnosticState =
@@ -69,6 +71,22 @@ export interface AccountDiagnostic {
   error: string | null;
 }
 
+export interface ConfigDiagnostic {
+  /** Safe configuration resolution metadata (secrets redacted). */
+  configSources: ConfigSourceMetadata[];
+  /** Feature flags metadata and current resolved state. */
+  featureFlags: Array<{
+    id: string;
+    name: string;
+    enabled: boolean;
+    stability: string;
+  }>;
+  /** True if no experimental or deprecated features are active. */
+  isAllStable: boolean;
+  /** ISO timestamp when diagnostics were generated. */
+  timestamp: string;
+}
+
 function mapStatusToState(status: AccountStatus): AccountDiagnosticState {
   switch (status) {
     case "funded":
@@ -99,13 +117,13 @@ export function diagnoseAccountInfo(
   const reserve = state === "funded" ? computeReserve(info.subentryCount) : null;
 
   return {
-    input: info.publicKey,
+    input: valid ? info.publicKey : redactSecrets(info.publicKey),
     state,
     isValidPublicKey: valid,
     expertUrl: valid ? buildAccountLink(info.publicKey, network) : null,
     reserve,
     account: info,
-    error: info.error ?? null,
+    error: info.error ? redactSecrets(info.error) : null,
   };
 }
 
@@ -115,6 +133,30 @@ export function diagnoseAccountInfo(
  * Network/parse failures degrade gracefully into `invalid` / `unavailable`
  * states instead of throwing.
  */
+export function diagnoseConfig(
+  env: AnchorKitEnvConfig = DEFAULT_ENV_CONFIG
+): ConfigDiagnostic {
+  const configSources = resolveConfigSourceMetadata(env);
+  const definitions = getFeatureFlagDefinitions();
+  const featureFlags = definitions.map((def) => ({
+    id: def.id,
+    name: def.name,
+    enabled: isFeatureEnabled(def.id, env),
+    stability: def.stability,
+  }));
+
+  const enabledExperimentalOrDeprecated = featureFlags.some(
+    (ff) => ff.enabled && ff.stability !== "stable"
+  );
+
+  return {
+    configSources,
+    featureFlags,
+    isAllStable: !enabledExperimentalOrDeprecated,
+    timestamp: new Date().toISOString(),
+  };
+}
+
 export async function diagnoseAccount(
   publicKey: string,
   options: { network?: NetworkConfig["network"]; loadAccount?: (pk: string) => Promise<AccountInfo> } = {}
@@ -123,7 +165,7 @@ export async function diagnoseAccount(
 
   if (!isPublicKeyValid(publicKey)) {
     return {
-      input: publicKey,
+      input: redactSecrets(publicKey),
       state: "invalid",
       isValidPublicKey: false,
       expertUrl: null,
@@ -141,14 +183,16 @@ export async function diagnoseAccount(
     return diagnoseAccountInfo(info, { network });
   } catch (err) {
     return {
-      input: publicKey,
+      input: redactSecrets(publicKey),
       state: "unavailable",
       isValidPublicKey: true,
       expertUrl: buildAccountLink(publicKey as StellarPublicKey, network),
       reserve: null,
       account: null,
-      error: err instanceof Error ? err.message : "Account diagnostics unavailable.",
+      error: err instanceof Error ? redactSecrets(err.message) : "Account diagnostics unavailable.",
     };
   }
 }
+
+
 
