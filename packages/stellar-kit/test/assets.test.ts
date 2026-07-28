@@ -9,8 +9,9 @@ import {
   isIssuedAsset,
   parseAssetList,
 } from "../src";
+import { FRIENDBOT_PUBLIC_KEY } from "./fixtures";
 
-const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
+const FRIENDBOT = FRIENDBOT_PUBLIC_KEY;
 
 describe("Asset parsing", () => {
   it("parses empty string and 'XLM' / 'native' into native XLM asset", () => {

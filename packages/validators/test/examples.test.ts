@@ -15,7 +15,7 @@ import {
   AnchorTransactionRecordSchema,
   MilestoneSchema,
   StellarPublicKeySchema,
-  RawEscrowEventSchema,
+  TransactionReceiptSchema,
 } from "../src/index";
 import { EXAMPLE_REGISTRY } from "../../../examples/registry";
 
@@ -25,7 +25,7 @@ const SCHEMA_MAP = {
   AnchorTransactionRecord: AnchorTransactionRecordSchema,
   Milestone: MilestoneSchema,
   StellarPublicKeyArray: StellarPublicKeySchema,
-  RawEscrowEvent: RawEscrowEventSchema,
+  TransactionReceipt: TransactionReceiptSchema,
 } as const;
 
 const ROOT = resolve(import.meta.dirname, "../../..");
@@ -42,7 +42,11 @@ describe.each(EXAMPLE_REGISTRY)("$id", (entry) => {
   it(`matches expectation (${entry.expect})`, () => {
     const raw = JSON.parse(readFileSync(resolve(ROOT, entry.path), "utf8"));
     const schema = SCHEMA_MAP[entry.schema];
-    const items = entry.isArray && Array.isArray(raw) ? raw : [raw];
+    const source =
+      entry.arrayKey && typeof raw === "object" && raw !== null
+        ? (raw as Record<string, unknown>)[entry.arrayKey]
+        : raw;
+    const items = entry.isArray && Array.isArray(source) ? source : [source];
 
     let failures = 0;
     for (const item of items) {

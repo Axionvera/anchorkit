@@ -14,12 +14,11 @@ import {
   getPublicKeyFromSecret,
   redactSecrets,
 } from "../src";
+import { FRIENDBOT_PUBLIC_KEY, makeFakeSecret } from "./fixtures";
 
-const WELL_KNOWN_FRIENDBOT: string = FRIENDBOT_PUBLIC_KEY;
-// Generated fresh per test run — never a real secret that has held funds.
-const SAMPLE_KEYPAIR = Keypair.random();
-const SECRET_KEY_SAMPLE = SAMPLE_KEYPAIR.secret();
-const SECRET_KEY_SAMPLE_PUBLIC = SAMPLE_KEYPAIR.publicKey();
+const WELL_KNOWN_FRIENDBOT = FRIENDBOT_PUBLIC_KEY;
+const SECRET_KEY_SAMPLE = "SCZANGBA5YHTNYVVV4C3U252E2B6P6F5T3U6MM63WBSBZATAQI3EBTQ4";
+const SECRET_KEY_SAMPLE_PUBLIC = "GC2BKLYOOYPDEFJKLKY6FNNRQMGFLVHJKQRGNSSRRGSMPGF32LHCQVGF";
 
 describe("Stellar public key validation", () => {
   it("accepts a valid 56-char G-prefixed base32 public key", () => {

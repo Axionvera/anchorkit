@@ -24,7 +24,9 @@ import type {
   DepositRequestMetadata,
   WithdrawalRequestMetadata,
   AnchorAssetConfig,
+  AnchorKitErrorCategory,
 } from '@anchorkit/types';
+import { redactSecrets } from '@anchorkit/types';
 
 /** Stable error codes for anchor validation failures (UI may branch on these). */
 export type AnchorValidationErrorCode =
@@ -39,6 +41,8 @@ export type AnchorValidationErrorCode =
 
 /** A single typed, user-safe validation error. */
 export interface ValidationError {
+  /** Shared error category. */
+  category?: AnchorKitErrorCategory;
   /** Stable code (safe to branch on in UI). */
   code: AnchorValidationErrorCode;
   /** Human-readable, user-safe message (never contains secrets). */
@@ -58,11 +62,12 @@ function toValidationErrors(
   error: z.ZodError,
 ): ValidationError[] {
   if (error.issues.length === 0) {
-    return [{ code, message: 'Validation failed.' }];
+    return [{ category: 'VALIDATION', code, message: 'Validation failed.' }];
   }
   return error.issues.map((issue) => ({
+    category: 'VALIDATION',
     code,
-    message: issue.message,
+    message: redactSecrets(issue.message),
     field: issue.path.join('.') || undefined,
   }));
 }

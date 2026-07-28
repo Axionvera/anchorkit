@@ -99,10 +99,10 @@ AnchorKit/
 
 ### Prerequisites
 
-| Tool | Min | Notes |
-| --- | --- | --- |
-| Node.js | 20.x | Required for all packages + web |
-| pnpm | 9.x | Required package manager; install via `npm i -g pnpm@9` if needed |
+| Tool            | Min   | Notes                                                                                                 |
+| --------------- | ----- | ----------------------------------------------------------------------------------------------------- |
+| Node.js         | 20.x  | Required for all packages + web                                                                       |
+| pnpm            | 9.x   | Required package manager; install via `npm i -g pnpm@9` if needed                                     |
 | Rust (optional) | 1.81+ | Only for `contracts/treasury-escrow` tests and builds; needs `wasm32-unknown-unknown` target + clippy |
 
 ### Install and run
@@ -146,8 +146,11 @@ pnpm contract:test
 AnchorKit is testnet-first and secret-safe by design:
 
 1. **No mainnet by default.** `DEFAULT_ENV_CONFIG.allowMainnet = false`. Any
-   attempt to call mainnet Horizon/Soroban without an explicit env override
-   throws a typed error.
+   attempt to reach mainnet Horizon — via `loadAccount`, `getAccountStatus`,
+   `diagnoseAccount`, or payment-readiness checks — without an explicit
+   `allowMainnet: true` env override throws a typed `MAINNET_DISABLED` error
+   before any network call is made. (Soroban RPC access is not yet
+   implemented in the toolkit, so there is nothing to gate there yet.)
 2. **Secret keys are redacted everywhere.** Logs, errors, UI, and even many
    internal code paths use `secretKeyToRedactedString(...)` / `redactSecrets(str)`.
    See [docs/SECRET_KEY_HANDLING.md](./docs/SECRET_KEY_HANDLING.md) for the R0–R6
@@ -162,29 +165,33 @@ AnchorKit is testnet-first and secret-safe by design:
 
 All of these live under [`./docs/`](./docs/).
 
-| Topic | File |
-| --- | --- |
-| Project overview | [`PROJECT_OVERVIEW.md`](./docs/PROJECT_OVERVIEW.md) |
-| Local setup | [`LOCAL_SETUP.md`](./docs/LOCAL_SETUP.md) |
-| Architecture / package boundaries | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md) |
-| Stellar testnet usage | [`STELLAR_TESTNET_USAGE.md`](./docs/STELLAR_TESTNET_USAGE.md) |
-| Security notes | [`SECURITY_NOTES.md`](./docs/SECURITY_NOTES.md) |
+| Topic                                    | File                                                                        |
+| ---------------------------------------- | --------------------------------------------------------------------------- |
+| Project overview                         | [`PROJECT_OVERVIEW.md`](./docs/PROJECT_OVERVIEW.md)                         |
+| End-to-end developer journey             | [`DEVELOPER_JOURNEY.md`](./docs/DEVELOPER_JOURNEY.md)                       |
+| Local setup                              | [`LOCAL_SETUP.md`](./docs/LOCAL_SETUP.md)                                   |
+| Architecture / package boundaries        | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                                 |
+| Stellar testnet usage                    | [`STELLAR_TESTNET_USAGE.md`](./docs/STELLAR_TESTNET_USAGE.md)               |
+| Security notes                           | [`SECURITY_NOTES.md`](./docs/SECURITY_NOTES.md)                             |
+| Security threat model                    | [`SECURITY_THREAT_MODEL.md`](./docs/SECURITY_THREAT_MODEL.md)               |
 | Security & architecture readiness review | [`SECURITY_ARCHITECTURE_REVIEW.md`](./docs/SECURITY_ARCHITECTURE_REVIEW.md) |
-| Secret key handling rules R0–R6 | [`SECRET_KEY_HANDLING.md`](./docs/SECRET_KEY_HANDLING.md) |
-| Account utilities | [`ACCOUNT_UTILITIES.md`](./docs/ACCOUNT_UTILITIES.md) |
-| Payment intent utilities | [`PAYMENT_INTENT_UTILITIES.md`](./docs/PAYMENT_INTENT_UTILITIES.md) |
-| Anchor utilities | [`ANCHOR_UTILITIES.md`](./docs/ANCHOR_UTILITIES.md) |
-| Soroban treasury escrow contract | [`SOROBAN_ESCROW_CONTRACT.md`](./docs/SOROBAN_ESCROW_CONTRACT.md) |
-| Escrow storage migration guide | [`ESCROW_MIGRATION.md`](./docs/ESCROW_MIGRATION.md) |
-| Shared fixture framework | [`fixtures.md`](./docs/fixtures.md) |
-| Contributor guide | [`CONTRIBUTOR_GUIDE.md`](./docs/CONTRIBUTOR_GUIDE.md) |
-| Maintainer guide | [`MAINTAINER_GUIDE.md`](./docs/MAINTAINER_GUIDE.md) |
-| Issue writing guide | [`ISSUE_WRITING_GUIDE.md`](./docs/ISSUE_WRITING_GUIDE.md) |
-| GrantFox contribution workflow | [`GRANTFOX_WORKFLOW.md`](./docs/GRANTFOX_WORKFLOW.md) |
-| Advanced issue standard | [`ISSUE_STANDARD.md`](./docs/ISSUE_STANDARD.md) |
-| Maintainer review checklist | [`MAINTAINER_REVIEW_CHECKLIST.md`](./docs/MAINTAINER_REVIEW_CHECKLIST.md) |
-| Automation runbook | [`AUTOMATION_RUNBOOK.md`](./docs/AUTOMATION_RUNBOOK.md) |
-| Roadmap | [`ROADMAP.md`](./docs/ROADMAP.md) |
+| Secret key handling rules R0–R6          | [`SECRET_KEY_HANDLING.md`](./docs/SECRET_KEY_HANDLING.md)                   |
+| Account utilities                        | [`ACCOUNT_UTILITIES.md`](./docs/ACCOUNT_UTILITIES.md)                       |
+| Payment intent utilities                 | [`PAYMENT_INTENT_UTILITIES.md`](./docs/PAYMENT_INTENT_UTILITIES.md)         |
+| Anchor utilities                         | [`ANCHOR_UTILITIES.md`](./docs/ANCHOR_UTILITIES.md)                         |
+| Soroban treasury escrow contract         | [`SOROBAN_ESCROW_CONTRACT.md`](./docs/SOROBAN_ESCROW_CONTRACT.md)           |
+| Shared error taxonomy                    | [`ERROR_TAXONOMY.md`](./docs/ERROR_TAXONOMY.md)                             |
+| Escrow storage migration guide           | [`ESCROW_MIGRATION.md`](./docs/ESCROW_MIGRATION.md)                         |
+| Shared test fixtures                     | [`FIXTURE_FRAMEWORK.md`](./docs/FIXTURE_FRAMEWORK.md)                       |
+| Status severity mapping                  | [`STATUS_SEVERITY_MAPPING.md`](./docs/STATUS_SEVERITY_MAPPING.md)           |
+| Contributor guide                        | [`CONTRIBUTOR_GUIDE.md`](./docs/CONTRIBUTOR_GUIDE.md)                       |
+| Maintainer guide                         | [`MAINTAINER_GUIDE.md`](./docs/MAINTAINER_GUIDE.md)                         |
+| Issue writing guide                      | [`ISSUE_WRITING_GUIDE.md`](./docs/ISSUE_WRITING_GUIDE.md)                   |
+| GrantFox contribution workflow           | [`GRANTFOX_WORKFLOW.md`](./docs/GRANTFOX_WORKFLOW.md)                       |
+| Advanced issue standard                  | [`ISSUE_STANDARD.md`](./docs/ISSUE_STANDARD.md)                             |
+| Maintainer review checklist              | [`MAINTAINER_REVIEW_CHECKLIST.md`](./docs/MAINTAINER_REVIEW_CHECKLIST.md)   |
+| Automation runbook                       | [`AUTOMATION_RUNBOOK.md`](./docs/AUTOMATION_RUNBOOK.md)                     |
+| Roadmap                                  | [`ROADMAP.md`](./docs/ROADMAP.md)                                           |
 
 ## 🦊 GrantFox readiness
 

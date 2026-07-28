@@ -71,7 +71,7 @@ export const MemoTypeSchema = z.enum(["none", "text", "id", "hash", "return"]);
 export const MemoInputSchema = z
   .object({
     type: MemoTypeSchema,
-    value: z.string().max(28, "Memo value exceeds 28 byte limit for text memo"),
+    value: z.string(),
   })
   .superRefine((data, ctx) => {
     if (data.type === "text") {
@@ -164,7 +164,8 @@ export const PaymentAmountSchema = z
         message: `Amount must be at least ${DEFAULT_ENV_CONFIG.minimumPaymentAmount}`,
       });
     }
-    if (num > max) {
+    const integerPart = val.split(".")[0] ?? "0";
+    if (integerPart.length > 12 || num > max) {
       ctx.addIssue({
         code: z.ZodIssueCode.too_big,
         maximum: max,
