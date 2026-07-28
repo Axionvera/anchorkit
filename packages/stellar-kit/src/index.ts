@@ -15,6 +15,7 @@ export * from "./receipt";
 export * from "./balances";
 export * from "./diagnostics";
 export * from "./assetRegistry";
+export * from "./assetDisplay";
 export * from "./severity";
 export * from "./soroban";
 export * from "./vault";
