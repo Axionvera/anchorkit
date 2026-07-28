@@ -21,8 +21,8 @@ Copy this table into your PR description (under "Issue scope"), with one
 row per acceptance criterion from the issue, in the same order they appear
 in the issue body.
 
-| Acceptance Criterion | Status | Implementation Evidence | Tests | Notes |
-| --- | --- | --- | --- | --- |
+| Acceptance Criterion                  | Status             | Implementation Evidence                                                | Tests                                                      | Notes                                                                |
+| ------------------------------------- | ------------------ | ---------------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------- |
 | _Paste the exact criterion text here_ | ✅ / 🟡 / ❌ / N/A | File(s) + function/component name, or a link to the specific diff hunk | Test file + test name, or "manual — see Testing performed" | Anything a reviewer needs to know that doesn't fit the other columns |
 
 ### Columns
@@ -44,12 +44,12 @@ in the issue body.
 
 ## Status legend
 
-| Symbol | Meaning |
-| --- | --- |
-| ✅ Done | Fully implemented and tested per the criterion as written. |
-| 🟡 Partial | Some but not all of the criterion is delivered. The Notes column must explain what's missing and why. |
-| ❌ Not done | Attempted but not delivered, or explicitly out of scope for this PR. The Notes column must explain the reason. |
-| N/A | The criterion doesn't apply to this change (e.g. it was already satisfied before this PR, or the issue itself is ambiguous and this row covers a criterion that turned out to be a duplicate of another). Explain briefly in Notes. |
+| Symbol      | Meaning                                                                                                                                                                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅ Done     | Fully implemented and tested per the criterion as written.                                                                                                                                                                          |
+| 🟡 Partial  | Some but not all of the criterion is delivered. The Notes column must explain what's missing and why.                                                                                                                               |
+| ❌ Not done | Attempted but not delivered, or explicitly out of scope for this PR. The Notes column must explain the reason.                                                                                                                      |
+| N/A         | The criterion doesn't apply to this change (e.g. it was already satisfied before this PR, or the issue itself is ambiguous and this row covers a criterion that turned out to be a duplicate of another). Explain briefly in Notes. |
 
 A PR does not need every row to be ✅ to be mergeable — partial delivery is
 normal for `hard`-labelled issues. What matters is that **every row has an
@@ -86,11 +86,11 @@ Issue acceptance criteria:
 Completion table for a PR that implements the first two but leaves the
 third for a follow-up:
 
-| Acceptance Criterion | Status | Implementation Evidence | Tests | Notes |
-| --- | --- | --- | --- | --- |
-| Deposit metadata is validated with a Zod schema. | ✅ Done | `packages/anchor-utils/src/schemas.ts` → `DepositMetadataSchema` | `packages/anchor-utils/src/schemas.test.ts` → `"rejects missing asset_code"`, `"accepts valid deposit metadata"` | |
-| Invalid callback URLs are rejected in production. | ✅ Done | `packages/anchor-utils/src/validators.ts` → `validateCallbackUrl` | `packages/anchor-utils/src/validators.test.ts` → `"rejects http:// in prod"` | localhost still allowed in dev, per existing `SECURITY_NOTES.md` guidance |
-| Status transitions cannot skip states. | ❌ Not done | — | — | Requires a transition-DAG change touching `contracts/treasury-escrow`; scoped out to keep this PR reviewable. Tracked in #<follow-up-issue-number>. |
+| Acceptance Criterion                              | Status      | Implementation Evidence                                           | Tests                                                                                                            | Notes                                                                                                                                               |
+| ------------------------------------------------- | ----------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deposit metadata is validated with a Zod schema.  | ✅ Done     | `packages/anchor-utils/src/schemas.ts` → `DepositMetadataSchema`  | `packages/anchor-utils/src/schemas.test.ts` → `"rejects missing asset_code"`, `"accepts valid deposit metadata"` |                                                                                                                                                     |
+| Invalid callback URLs are rejected in production. | ✅ Done     | `packages/anchor-utils/src/validators.ts` → `validateCallbackUrl` | `packages/anchor-utils/src/validators.test.ts` → `"rejects http:// in prod"`                                     | localhost still allowed in dev, per existing `SECURITY_NOTES.md` guidance                                                                           |
+| Status transitions cannot skip states.            | ❌ Not done | —                                                                 | —                                                                                                                | Requires a transition-DAG change touching `contracts/treasury-escrow`; scoped out to keep this PR reviewable. Tracked in #<follow-up-issue-number>. |
 
 ## Where this applies
 
