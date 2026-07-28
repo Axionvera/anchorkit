@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { AnchorTransactionStatus, MilestoneStatus, TransactionReceiptStatus } from "@anchorkit/types";
+import type { AnchorTransactionStatus, MilestoneStatus, TransactionReceiptStatus, CapabilityState } from "@anchorkit/types";
 import {
   badgeClasses,
   alertClasses,
@@ -186,5 +186,35 @@ export function DataRow({ label, value }: { label: string; value: React.ReactNod
       <dt className="text-ink-500 shrink-0 dark:text-ink-400">{label}</dt>
       <dd className="text-right text-ink-900 dark:text-ink-100">{value}</dd>
     </div>
+  );
+}
+
+export const CAPABILITY_BADGE_STYLES: Record<CapabilityState, string> = {
+  implemented: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
+  mock: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900",
+  "testnet-only": "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
+  experimental: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900",
+  unavailable: "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
+};
+
+export const CAPABILITY_BADGE_LABELS: Record<CapabilityState, string> = {
+  implemented: "Implemented",
+  mock: "Mock only",
+  "testnet-only": "Testnet only",
+  experimental: "Experimental",
+  unavailable: "Unavailable",
+};
+
+export function CapabilityBadge({ state }: { state: CapabilityState }) {
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
+        CAPABILITY_BADGE_STYLES[state]
+      )}
+    >
+      <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" />
+      {CAPABILITY_BADGE_LABELS[state]}
+    </span>
   );
 }

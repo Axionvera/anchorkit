@@ -498,3 +498,35 @@ export * from "./escrowEvents";
 // ─── Shared error taxonomy ──────────────────────────────────────────────────
 export * from "./errors";
 
+
+// ─── Capability states ──────────────────────────────────────────────────────
+export type CapabilityState =
+  | "implemented"
+  | "mock"
+  | "testnet-only"
+  | "experimental"
+  | "unavailable";
+
+export const CAPABILITY_STATES: readonly CapabilityState[] = [
+  "implemented",
+  "mock",
+  "testnet-only",
+  "experimental",
+  "unavailable",
+] as const;
+
+export type CapabilityModuleId =
+  | "accounts"
+  | "payments"
+  | "anchors"
+  | "escrow"
+  | "diagnostics"
+  | "network-config";
+
+export interface ModuleCapability {
+  id: CapabilityModuleId;
+  label: string;
+  state: CapabilityState;
+  description: string;
+  docsHref?: string;
+}
