@@ -15,3 +15,6 @@ export * from "./anchors";
 export * from "./escrow";
 export * from "./diagnostics";
 export * from "./invalid";
+
+// ─── Package capability metadata ────────────────────────────────────────────
+export * from "./capabilities";
