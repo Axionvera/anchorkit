@@ -2,28 +2,20 @@ import { describe, it, expect } from "vitest";
 import { Keypair } from "@stellar/stellar-base";
 import { diagnoseAccount, diagnoseAccountInfo, computeReserve } from "../src/diagnostics";
 import type { AccountInfo } from "@anchorkit/types";
+import {
+  FUNDED_ACCOUNT,
+  FUNDED_ACCOUNT_INFO,
+  UNFUNDED_ACCOUNT,
+  UNFUNDED_ACCOUNT_INFO,
+  NETWORK_ERROR_ACCOUNT_INFO,
+} from "./fixtures";
 
-const fundedKey = Keypair.random().publicKey();
-const unfundedKey = Keypair.random().publicKey();
+const fundedKey = FUNDED_ACCOUNT;
+const unfundedKey = UNFUNDED_ACCOUNT;
 
-const fundedInfo: AccountInfo = {
-  publicKey: fundedKey as AccountInfo["publicKey"],
-  status: "funded",
-  sequence: "123",
-  subentryCount: 3,
-  balances: { native: "100", assets: [] },
-};
-
-const unfundedInfo: AccountInfo = {
-  publicKey: unfundedKey as AccountInfo["publicKey"],
-  status: "unfunded",
-};
-
-const networkErrorInfo: AccountInfo = {
-  publicKey: fundedKey as AccountInfo["publicKey"],
-  status: "unknown",
-  error: "request timed out",
-};
+const fundedInfo = FUNDED_ACCOUNT_INFO;
+const unfundedInfo = UNFUNDED_ACCOUNT_INFO;
+const networkErrorInfo = NETWORK_ERROR_ACCOUNT_INFO;
 
 describe("computeReserve", () => {
   it("computes minimum balance from subentry count", () => {

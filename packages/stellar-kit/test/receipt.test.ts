@@ -20,10 +20,10 @@ import {
   receiptStatusBadge,
   receiptStatusToUserMessage,
 } from "../src/receipt";
+import { FRIENDBOT_PUBLIC_KEY, SAMPLE_TX_HASH } from "./fixtures";
 
-const TX_HASH = "b".repeat(64) as StellarTransactionHash;
-const ACCOUNT =
-  "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR" as StellarPublicKey;
+const TX_HASH = SAMPLE_TX_HASH as unknown as StellarTransactionHash;
+const ACCOUNT = FRIENDBOT_PUBLIC_KEY as StellarPublicKey;
 
 describe("receiptStatusToUserMessage", () => {
   const statuses: TransactionReceiptStatus[] = [

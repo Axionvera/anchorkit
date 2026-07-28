@@ -9,10 +9,11 @@ import {
 } from "../src/balances";
 import { estimateTransactionReadinessSync } from "../src/intent";
 import type { AccountInfo, PaymentIntent, StellarAsset } from "@anchorkit/types";
+import { BALANCE_MODEL_UNKNOWN, NATIVE_ASSET, makeFakeKeypair } from "./fixtures";
 
-const key = () => Keypair.random().publicKey() as AccountInfo["publicKey"];
+const key = () => makeFakeKeypair().publicKey as AccountInfo["publicKey"];
 
-const NATIVE: StellarAsset = { type: "native", code: "XLM", issuer: null };
+const NATIVE: StellarAsset = NATIVE_ASSET;
 
 function fundedInfo(native: string, subentryCount = 0): AccountInfo {
   return {

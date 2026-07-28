@@ -6,9 +6,15 @@ import {
   mapReadinessToErrorCode,
 } from "../src/intent";
 import type { ReadinessState, ReadinessWarning } from "@anchorkit/types";
+import {
+  FRIENDBOT_PUBLIC_KEY,
+  FRIENDBOT_PUBLIC_KEY_2,
+  BALANCE_MODEL_KNOWN,
+  BALANCE_MODEL_UNKNOWN,
+} from "./fixtures";
 
-const SRC = "GA2C5RFPE6GCKMY3K7AIGZ5ZBBX26Z5B3E6G7V4MMSZ5L2R5YHMBFQJJ";
-const DST = "GBMFNDXCRSOD7Y7FW5WJ6TZ6MMHCYQJK76Y5QM5T2DJG7QX4LM4LMFTO";
+const SRC = FRIENDBOT_PUBLIC_KEY_2;
+const DST = FRIENDBOT_PUBLIC_KEY;
 
 function intent(overrides: Partial<Parameters<typeof createPaymentIntent>[0]> = {}) {
   return createPaymentIntent({
@@ -89,14 +95,7 @@ describe("readiness engine — funding/unfunded", () => {
   it("flags insufficient native funds as a blocking error", () => {
     const r = estimateTransactionReadinessSync(intent({ amount: "999.0000000" }), {
       network: "testnet",
-      sourceBalances: {
-        state: "known",
-        total: "10.0000000",
-        reserve: "2.0000000",
-        spendable: "10.0000000",
-        unavailable: "0.0000000",
-        explanation: "Min balance 2 XLM + 1 subentry.",
-      },
+      sourceBalances: BALANCE_MODEL_KNOWN,
     });
     expect(r.ready).toBe(false);
     const bal = r.stages.find((s) => s.id === "balance");
