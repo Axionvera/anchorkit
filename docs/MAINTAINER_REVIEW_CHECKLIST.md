@@ -17,13 +17,12 @@ item or marks it as needing changes.
 - [ ] References the original issue with `Closes #NNN` in the PR body.
 - [ ] Acceptance criteria on the issue are checked off individually in the PR description,
       each with a file/line or commit reference.
-- [ ] `pnpm lint` passes locally.
-- [ ] `pnpm typecheck` passes locally.
-- [ ] `pnpm test` passes locally.
+- [ ] `pnpm verify` passes locally (format, lint, typecheck, test, build — see
+      [LOCAL_VERIFICATION.md](./LOCAL_VERIFICATION.md)).
 - [ ] `pnpm check:boundaries` passes locally (required if any `packages/*/src` import changed —
       see [ARCHITECTURE.md §3](./ARCHITECTURE.md#3-dependency-direction)).
 - [ ] `pnpm contract:test` passes locally (if anything under `contracts/` changed).
-- [ ] `pnpm format:check` passes or `pnpm format` was applied.
+  Optionally use `pnpm verify:full` for verify + examples + boundaries + contract tests.
 
 ### Stellar network correctness
 

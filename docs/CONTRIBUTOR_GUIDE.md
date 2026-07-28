@@ -38,7 +38,9 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
 2. Comment on the issue to apply. Wait for an assignment before starting work.
 3. Fork the repo, create a branch, run `pnpm install`.
 4. Implement, add tests, update docs if needed.
-5. Run `pnpm lint && pnpm typecheck && pnpm test && pnpm contract:test` locally.
+5. Run `pnpm verify` locally (format, lint, typecheck, test, build). See
+   [LOCAL_VERIFICATION.md](./LOCAL_VERIFICATION.md). If you changed `contracts/`,
+   also run `pnpm contract:test` or `pnpm verify:full`.
 6. Open a PR referencing the issue number (e.g. `Closes #42`).
 7. Respond to maintainer review and update your branch.
 
@@ -48,6 +50,12 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
 - Keep commits small and rebased on `main`. One PR should close one issue scope when possible.
 - PR title should summarise the change; the body should reference the issue, explain design
   choices, and list any risks.
+- Every PR must use the
+  [PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) — GitHub pre-fills it
+  automatically when you open a PR. Complete every section: issue reference, affected
+  packages/apps, testing performed, screenshots for `apps/web` UI changes, security impact,
+  and documentation impact. Do not delete sections that don't apply — mark them N/A instead so
+  reviewers know they were considered.
 - For GrantFox issues, paste the
   [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) self-check into your
   PR description.

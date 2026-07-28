@@ -48,3 +48,4 @@ test_snapshots
 # Misc
 *.tsbuildinfo
 .cache
+.pnpm-store

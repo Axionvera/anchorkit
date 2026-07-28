@@ -82,6 +82,17 @@ pnpm contract:test
 
 ## 5. Lint / typecheck / build
 
+Prefer the single local verification command before opening a PR:
+
+```bash
+pnpm verify
+```
+
+That runs format check, lint, typecheck, tests, and build. See
+[LOCAL_VERIFICATION.md](./LOCAL_VERIFICATION.md) for details and `pnpm verify:full`.
+
+Or run each step individually:
+
 ```bash
 pnpm lint
 pnpm typecheck

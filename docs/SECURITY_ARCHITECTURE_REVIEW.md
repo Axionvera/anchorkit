@@ -1,381 +1,1385 @@
-# AnchorKit Security & Architecture Readiness Review
+# AnchorKit Security and Architecture Readiness Review
 
-> Performed against the MVP codebase (v0.1.x, testnet-only). This review is
-> intended to surface risks, gaps, and high-priority follow-ups as the project
-> scales toward production readiness.
-
----
-
-## Table of contents
-
-1. [Executive summary](#1-executive-summary)
-2. [Package-by-package findings](#2-package-by-package-findings)
-3. [Cross-cutting concerns](#3-cross-cutting-concerns)
-4. [Consolidated risk register](#4-consolidated-risk-register)
-5. [Missing test coverage](#5-missing-test-coverage)
-6. [Documentation gaps](#6-documentation-gaps)
-7. [Recommended follow-up issues](#7-recommended-follow-up-issues)
-
----
+> **Review date:** 28 July 2026
+> **Project stage:** AnchorKit `0.1.x` MVP
+> **Intended environment:** Stellar testnet and local developer demonstrations
+> **Overall verdict:** **Conditionally ready for testnet development, but not ready for production custody, mainnet value, or unattended treasury operation**
 
 ## 1. Executive summary
 
-AnchorKit demonstrates a **strong security foundation** for an MVP. The project
-enforces testnet-first defaults, redacts secret keys consistently, and avoids
-logging sensitive data. The Soroban escrow contract has solid overflow protection
-and admin-only guards on most functions.
+AnchorKit has a strong foundation for a testnet-focused developer toolkit.
+
+The monorepo now includes:
+
+- documented package boundaries;
+- a package-boundary checker;
+- testnet-first configuration;
+- explicit mainnet gating;
+- secret-redaction utilities;
+- runtime validation;
+- typed transaction-readiness models;
+- account diagnostics;
+- reusable fixtures;
+- package, web, integration, and contract tests;
+- contract storage-version tracking;
+- scoped-auth contract tests;
+- write-once escrow evidence;
+- contributor and maintainer guidance.
+
+Several weaknesses identified by the earlier readiness review have been fixed.
+
+Most importantly, `submit_evidence` in the Soroban escrow contract now:
+
+- requires administrator authorisation;
+- rejects unauthorised evidence submission;
+- prevents evidence replacement;
+- prevents evidence swapping after approval;
+- preserves the original evidence hash;
+- has scoped-auth regression tests.
+
+The earlier unauthenticated evidence-submission problem must therefore no longer be listed as an open critical vulnerability.
+
+AnchorKit remains an MVP and reference implementation. It is not ready for:
+
+- custody of real user funds;
+- production mainnet deployment;
+- unattended payment submission;
+- production anchor callback processing;
+- production treasury custody;
+- complete escrow dispute handling;
+- single-administrator control of real value.
+
+The highest-priority remaining risks are:
+
+1. disputed milestones have no resolution path;
+2. the escrow uses a single administrator;
+3. milestone release records state but does not transfer assets;
+4. generated web secrets can be repeatedly revealed;
+5. package exports are broader than the documented stable API;
+6. package-boundary enforcement does not cover the entire repository;
+7. some important modules lack dedicated test coverage;
+8. production callback, custody, deployment, and incident-response controls are incomplete.
+
+## 2. Review scope and method
+
+This review covers:
+
+```text
+apps/web
+packages/types
+packages/config
+packages/fixtures
+packages/validators
+packages/stellar-kit
+packages/anchor-utils
+contracts/treasury-escrow
+examples
+scripts
+tests
+documentation
+public package exports
+contributor workflow
+```
+
+The assessment was based on:
+
+- static source review;
+- package entry-point review;
+- test-file inventory;
+- targeted security searches;
+- the architecture boundary map;
+- the package-boundary checker;
+- contract code and Rust tests;
+- security and maintainer documentation.
+
+The following were not performed:
+
+- an independent smart-contract audit;
+- penetration testing;
+- dependency vulnerability scanning;
+- live mainnet tests;
+- live anchor integration tests;
+- deployed Soroban contract testing;
+- formal verification;
+- fuzz testing;
+- load testing;
+- review of private central automation infrastructure.
+
+The TypeScript test suite was not executed during this documentation work because the checkout did not have installed dependencies. This review therefore distinguishes between:
+
+- controls observed in source;
+- test files observed in the repository;
+- tests actually executed during this review.
 
-However, the review identified **one critical contract vulnerability**, several
-medium-severity gaps across packages, and significant test coverage holes that
-should be addressed before any mainnet consideration.
+No claim is made that the complete suite passed locally.
 
-> **Status note (issue #52):** CF-T1 (no mainnet-safety test coverage) and
-> SK-S3 (mainnet guard only at the intent layer) are addressed — see their
-> rows below for details. Remaining findings are unchanged.
+## 3. Readiness overview
 
-### Severity distribution
+| Area                    | Status                    | Assessment                                                           |
+| ----------------------- | ------------------------- | -------------------------------------------------------------------- |
+| Architecture boundaries | Mostly ready              | Documented and partially enforced automatically                      |
+| Secret redaction        | Strong for MVP            | Reusable redaction and several tests exist                           |
+| Secure key custody      | Not ready                 | No HSM, secure storage, signer policy, or recovery                   |
+| Testnet safety          | Strong for MVP            | Testnet default and mainnet guards exist                             |
+| Mainnet readiness       | Not ready                 | Production deployment controls are missing                           |
+| Payment preparation     | Ready for demonstrations  | Typed validation and readiness models exist                          |
+| Payment submission      | Not production ready      | Live submission and uncertain-result handling remain incomplete      |
+| Anchor lifecycle        | Ready for mock/test flows | Validation and lifecycle helpers exist                               |
+| Production anchors      | Not ready                 | Callback authentication and live protocol integration are incomplete |
+| Escrow authorisation    | Improved                  | Privileged operations are administrator-gated                        |
+| Escrow dispute handling | Not ready                 | No resolution transition exists                                      |
+| Escrow custody          | Not ready                 | Release does not move tokens                                         |
+| Public API governance   | Needs improvement         | Broad barrels expose a large API surface                             |
+| Test coverage           | Moderate                  | Stronger than before, but important gaps remain                      |
+| Documentation           | Strong                    | Extensive, but point-in-time reviews can become stale                |
+| Contributor workflow    | Strong                    | Standards, review rules, and automation guidance exist               |
+| Production readiness    | Not ready                 | The project remains testnet-first developer tooling                  |
 
-| Severity | Count | Areas |
-| --- | --- | --- |
-| **Critical** | 1 | Escrow contract: missing auth on `submit_evidence` |
-| **High** | 2 | Escrow: disputed milestones permanently stuck; evidence overwrite |
-| **Medium** | 12 | Config tests missing, secret schema public, barrel exports, type casts, mainnet gating asymmetry |
-| **Low** | 14 | Redundant regex, duplicated URL logic, missing events, naming inconsistencies |
+## 4. Confirmed strengths
 
-### Positive highlights
+### 4.1 Architecture boundaries
 
-- Zero `console.log` calls in production source code across all packages and the web app.
-- Secret redaction is thorough and well-tested (`redactSecrets`, `secretKeyToRedactedString`, `formatRedactedSecret`).
-- Error sanitization strips secrets from error causes before propagation.
-- Consistent validation pattern: `validate` -> `is` -> `assert` triple using Zod schemas.
-- Every web page displays explicit testnet-only warnings.
-- Escrow contract uses `saturating_add` and `overflow-checks = true`.
-- The `diagnoseAccount` function supports dependency injection for testability.
+AnchorKit documents package ownership for:
 
----
+- `types`;
+- `config`;
+- `fixtures`;
+- `validators`;
+- `stellar-kit`;
+- `anchor-utils`;
+- `apps/web`;
+- examples;
+- the Soroban contract.
 
-## 2. Package-by-package findings
+The intended dependency direction prevents lower-level packages from importing higher-level presentation or domain packages.
 
-### 2.1 `@anchorkit/stellar-kit`
+The repository includes:
 
-#### Security
+```text
+scripts/check-package-boundaries.mts
+```
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| SK-S1 | MEDIUM | `test/keys.test.ts:17-18` | Hardcoded well-known test secret key (`SCZANGBA5YHT...`) may trigger secret scanners in CI. `logging.test.ts` already follows the safer pattern of generating fake secrets at runtime. |
-| SK-S2 | LOW | `src/errors.ts:39` | Redundant `SA[A-Z2-7]{54}` regex pattern — already covered by `S[A-Z2-7]{55}`. |
-| SK-S3 | MEDIUM | `src/intent.ts:118,163` / `src/accounts.ts:28` | ✅ **Fixed** (issue #52). Mainnet guard previously existed only at the intent layer. `loadAccount`/`getAccountStatus`/`diagnoseAccount` now gate via `assertNetworkAllowed` inside `accounts.ts#createServer`, before any Horizon call. URL builders (`explorer.ts`) remain intentionally ungated since they never touch the network. |
-| SK-S4 | MEDIUM | `src/assets.ts:48,56,65,73` | Double-cast through `unknown` (`as unknown as SafeParseReturnType<string, StellarAsset>`) masks a type system mismatch in `parseAssetString` — the function signature claims `string` input but internally constructs objects for Zod parsing. |
-| SK-S5 | LOW | `src/payments.ts:25-28` | `normalizeAmount` uses `Number()` without guarding `Infinity`/`NaN`. `Number("Infinity").toFixed(7)` throws `RangeError`. |
-| SK-S6 | LOW | `src/payments.ts:30-36` | `compareAmounts` returns `0` (equal) for non-numeric input because `NaN < NaN` and `NaN > NaN` are both `false`. |
+with the root command:
 
-#### Architecture
+```bash
+pnpm check:boundaries
+```
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| SK-A1 | MEDIUM | `src/index.ts` | Barrel `export *` exposes all internals as public API with no distinction between public and private modules. |
-| SK-A2 | MEDIUM | `src/errors.ts:8-16` | `createStellarError` manually assigns `.code` and `.name` to a plain `Error` instead of using a proper `class StellarKitError extends Error`. `error.constructor.name` is `"Error"`, not `"StellarKitError"`. |
-| SK-A3 | LOW | `src/transactions.ts` vs `src/explorer.ts` | Duplicated Stellar Expert URL-building logic across two modules. |
+The checker verifies selected package dependencies and rejects some deep imports and package-to-web imports.
 
-#### Test gaps
+### 4.2 Testnet-first configuration
 
-| # | Priority | Module | Description |
-|---|----------|--------|-------------|
-| SK-T1 | HIGH | `errors.ts` | `mapHorizonError` and `sanitizeCause` have zero unit tests. |
-| SK-T2 | HIGH | `intent.ts` | No tests for `createPaymentIntent`, `validatePaymentIntent`, `isPaymentIntentValid`, or any readiness functions. |
-| SK-T3 | MEDIUM | `accounts.ts` | Pure helpers (`isAccountFunded`, `isAccountUnfunded`, URL builders) untested. |
-| SK-T4 | MEDIUM | assertions | `assertPublicKeyValid`, `assertSecretKeyValid`, etc. not tested for thrown error shape. |
+The default configuration includes:
 
----
+```text
+allowMainnet: false
+```
 
-### 2.2 `@anchorkit/anchor-utils`
+Network-aware account utilities call `assertNetworkAllowed` before reaching Horizon.
 
-#### Security
+Relevant test files include:
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| AU-S1 | MEDIUM | `package.json:28-34` | `@anchorkit/config` and `@anchorkit/stellar-kit` listed as production dependencies but never imported — phantom deps inflate install and may leak config. |
-| AU-S2 | LOW | `src/fixtures.ts:66,114` | Unsafe double-cast (`as unknown as BrandedType`) bypasses branded type safety in test fixtures. |
+```text
+packages/config/test/mainnet-safety.test.ts
+packages/stellar-kit/test/mainnet-safety.test.ts
+```
 
-#### Architecture
+This is stronger than relying only on web warnings.
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| AU-A1 | MEDIUM | `src/index.ts:21-67 + 241-268` | Two parallel validation APIs (raw Zod wrappers and engine wrappers) for the same data — confusing consumer surface. |
-| AU-A2 | MEDIUM | `src/index.ts:216-230` | `advanceAnchorTransactionStatus` silently wraps to `"pending_user"` on unknown status, duplicating and conflicting with `nextStatus` in `lifecycle.ts`. |
-| AU-A3 | MEDIUM | `src/lifecycle.ts:125-138` | `lifecycleStepLabel` lacks exhaustiveness check (no `never` pattern) unlike sibling functions. |
-| AU-A4 | LOW | `src/fixtures.ts:8` / `src/index.ts:232` | Circular dependency between `index.ts` and `fixtures.ts`. |
-| AU-A5 | LOW | `src/fixtures.ts:97-103` | `buildWithdrawalLifecycle` exports intentionally-invalid lifecycle without clear naming or warning. |
+### 4.3 Secret redaction
 
-#### Test gaps
+Secret redaction is implemented in:
 
-| # | Priority | Description |
-|---|----------|-------------|
-| AU-T1 | HIGH | `validatePaymentRailConfig`, `validateAnchorRequest`, `isAnchorTransactionStatus` have zero test coverage. |
-| AU-T2 | MEDIUM | `createMockAnchorTransactionRecord` edge cases untested (default status, ID generation, metadata propagation). |
+- shared error utilities;
+- Stellar error mapping;
+- diagnostics;
+- logging;
+- validation errors;
+- web error mapping.
 
----
+The web scan found no use of:
 
-### 2.3 `@anchorkit/config`
+- `localStorage`;
+- `sessionStorage`;
+- IndexedDB;
+- cookies;
+- direct web `console.log`;
+- direct web `console.warn`;
+- direct web `console.error`.
 
-#### Security
+The secret-validation input uses `type="password"`.
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| CF-S1 | LOW-MEDIUM | `src/index.ts:74-76` | `allowMainnet` is a plain boolean with no audit trail, warning log, or confirmation prompt. A one-line flip enables mainnet with no friction. |
-| CF-S2 | LOW | `src/index.ts:6-28` | Horizon/RPC URLs are hardcoded with no override mechanism for custom endpoints. |
+Tests exist for:
 
-#### Test gaps
+- embedded secret redaction;
+- log redaction;
+- structured-error redaction;
+- web-safe error mapping.
 
-| # | Priority | Description |
-|---|----------|-------------|
-| CF-T1 | **HIGH** | ✅ **Fixed** (issue #52). `assertNetworkAllowed()` and `isMainnetAllowed()` are now covered by `packages/config/test/mainnet-safety.test.ts`, plus end-to-end gating tests in `packages/stellar-kit/test/mainnet-safety.test.ts` (`loadAccount`, `getAccountStatus`, `diagnoseAccount`, `estimateTransactionReadiness`). |
+### 4.4 Runtime validation
 
----
+The validators package provides schemas for:
 
-### 2.4 `@anchorkit/validators`
+- public keys;
+- secret keys;
+- transaction hashes;
+- assets;
+- amounts;
+- memos;
+- payment intents;
+- receipts;
+- anchor metadata;
+- escrow data.
 
-#### Security
+Untrusted input is generally validated before it reaches network or domain logic.
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| VL-S1 | HIGH | `src/schemas/stellar.ts:39-50` | `StellarSecretKeySchema` is exported from the public API, enabling any consumer to parse and handle raw secret keys without redaction. Should return `RedactedSecretKey` or be removed from public exports. |
-| VL-S2 | MEDIUM | `src/schemas/anchor.ts:89-104` | `CallbackUrlSchema` allows `http://localhost` regardless of network. On mainnet, HTTP callbacks for real payment confirmations would be unencrypted. |
-| VL-S3 | LOW-MEDIUM | `src/schemas/stellar.ts:139-140` | `PaymentAmountSchema` uses `Number()` for large values — precision loss at ~15-17 significant digits. The `Number.isNaN` check is dead code (regex already ensures numeric strings). |
-| VL-S4 | LOW | `src/schemas/stellar.ts:91-98` | Memo ID validation accepts arbitrarily large integers. Stellar memo IDs are uint64 (max `18446744073709551615`). |
-| VL-S5 | LOW | `src/schemas/anchor.ts:28-29` | `feeFixed` and `feePercent` fields have no range validation — `"99999"` passes. |
+The validation engine redacts sensitive content before producing user-facing errors.
 
-#### Architecture
+### 4.5 Transaction readiness and diagnostics
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| VL-A1 | MEDIUM | `src/validationEngine.ts:16-22` | Circular import: `validationEngine.ts` imports from `./index` (the barrel that also re-exports it). Should import from `./schemas/*` directly. |
-| VL-A2 | MEDIUM | `src/schemas/stellar.ts:10` | Schemas depend on `DEFAULT_ENV_CONFIG` singleton for boundary values. Consumers cannot override `minimumPaymentAmount`/`maximumPaymentAmount` per-call. |
-| VL-A3 | LOW | `src/schemas/anchor.ts:18` | `AnchorAssetConfigSchema` uses `z.string().min(1).max(12)` for `code` instead of the validated `AssetCodeSchema` from `stellar.ts` — accepts special characters. |
+AnchorKit models:
 
----
+- valid input;
+- readiness stages;
+- warnings;
+- blocked states;
+- unsafe-network states;
+- account diagnostic states;
+- receipt outcomes.
 
-### 2.5 `apps/web`
+This helps prevent a syntactically valid request from being presented as a confirmed transaction.
 
-#### Security
+### 4.6 Escrow evidence security
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| WEB-S1 | MEDIUM | `app/accounts/page.tsx:86,117-123` | Secret key can be re-revealed infinitely via toggle, contradicting the "Secret is only shown once" UI copy. |
-| WEB-S2 | LOW | `app/layout.tsx:9` | `metadataBase` hardcoded to `http://localhost:3000` — would break on deployment. |
-| WEB-S3 | LOW | `next.config.js` | No Content-Security-Policy, X-Frame-Options, or security headers configured. |
+The earlier evidence-authorisation vulnerability is fixed.
 
-#### Architecture
+`submit_evidence` now:
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| WEB-A1 | MEDIUM | All page files | Every page is `"use client"` — zero server components, no streaming, no static generation. |
-| WEB-A2 | MEDIUM | Missing files | No `error.tsx` boundaries. If Horizon calls or event parsing throw, Next.js shows a generic error page with no recovery. |
-| WEB-A3 | MEDIUM | Missing files | No `loading.tsx` or `not-found.tsx` files. |
-| WEB-A4 | LOW | `app/payments/page.tsx:39-50` | Six `as any` casts bypass TypeScript checking, including in payment intent construction. |
+```text
+requires administrator authentication
+rejects evidence replacement
+records evidence once
+emits an evidence event
+preserves evidence after approval
+```
 
-#### Positive findings
+Scoped-auth tests verify that:
 
-- **Zero `console.log`/`console.warn`/`console.error`** in the entire web directory.
-- **No `.env` files**, no `process.env` or `NEXT_PUBLIC_*` references.
-- Secret key validation input uses `type="password"`.
-- `reactStrictMode: true` is enabled.
+- an unauthorised caller cannot submit evidence;
+- an intruder cannot unlock the approval gate;
+- evidence cannot be overwritten;
+- evidence cannot be replaced after approval;
+- the administrator can still submit evidence;
+- duplicate release remains impossible.
 
----
+These scoped-auth tests are valuable because blanket `mock_all_auths()` cannot detect a missing `require_auth()` call.
 
-### 2.6 `contracts/treasury-escrow`
+### 4.7 Contract storage versioning
 
-#### Security
+The contract records:
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| CR-S1 | **CRITICAL** | `src/lib.rs:176-202` | **`submit_evidence` has no authorization check.** Any external account can call it on any milestone, overwriting the evidence hash. An attacker can force Draft/Active milestones into `EvidenceSubmitted` status, or silently replace evidence on disputed milestones. |
-| CR-S2 | HIGH | `src/lib.rs:233-262` | **Disputed milestones are permanently stuck.** No `resolve_dispute` or `cancel_milestone` function exists. `DisputeResolutionRequired = 12` error variant is defined (`lib.rs:69`) but never used. |
-| CR-S3 | HIGH | `src/lib.rs:187-195` | Evidence can be silently overwritten on `Disputed` milestones by any caller (combined with CR-S1). |
-| CR-S4 | MEDIUM | `src/lib.rs:192-194` | `submit_evidence` on a `Draft` milestone skips `Active` status, bypassing amount finalization via `assign_amount`. |
-| CR-S5 | LOW | `src/lib.rs:155-174` | `assign_amount` is the only state-changing function that does not emit an event — breaks auditability. |
+```text
+CURRENT_STORAGE_VERSION
+```
 
-#### Architecture
+and exposes:
 
-| # | Severity | File:Line | Description |
-|---|----------|-----------|-------------|
-| CR-A1 | LOW | `src/lib.rs:333` | `read_summary` iterates `1..=count` with `has()` checks — O(n) with no pagination. |
-| CR-A2 | INFO | `src/lib.rs:145` | `u32::MAX` count overflow silently loses milestones in summary (extremely unlikely but a silent data-loss edge case). |
+```text
+storage_version()
+```
 
-#### Test gaps
+Tests cover:
 
-| # | Priority | Description |
-|---|----------|-------------|
-| CR-T1 | HIGH | `submit_evidence` called by non-admin — the missing auth is never exercised. |
-| CR-T2 | HIGH | Submitting evidence on a Disputed milestone — the silent overwrite is untested. |
-| CR-T3 | MEDIUM | `initialize` called twice — `AlreadyInitialized` error never tested. |
-| CR-T4 | MEDIUM | `assign_amount` and `create_milestone` with amount=0 — `InvalidAmount` error never tested. |
-| CR-T5 | MEDIUM | `dispute_milestone` on a Draft milestone — `DisputeWithoutEvidence` error never tested. |
+- version after initialisation;
+- zero before initialisation;
+- version persistence after state changes.
 
-#### Positive findings
+This is a useful foundation for future contract migrations.
 
-- `overflow-checks = true` in release profile.
-- `saturating_add` used for milestone count and summary aggregations.
-- Admin-only enforcement on 8 of 9 state-changing functions.
-- Event emission on 8 of 9 state-changing functions.
+### 4.8 Fixtures and examples
 
----
+AnchorKit now includes a dedicated:
 
-## 3. Cross-cutting concerns
+```text
+@anchorkit/fixtures
+```
 
-### 3.1 Mainnet safety
+package containing reusable data for:
 
-The testnet-first default (`DEFAULT_ENV_CONFIG.allowMainnet = false`) is correctly
-implemented at the config layer.
+- accounts;
+- anchors;
+- assets;
+- diagnostics;
+- escrow;
+- payments;
+- invalid states.
 
-✅ **Fixed (issue #52):** the guard was previously enforced only at the
-`intent.ts` level in stellar-kit. It is now also enforced in `accounts.ts`
-(`createServer`, used by `loadAccount`/`getAccountStatus`/`diagnoseAccount`),
-which is the sole entry point stellar-kit uses to reach Horizon. URL builders
-in `explorer.ts` remain intentionally ungated since they only construct
-strings and never make network calls.
+This reduces the need for runtime packages to own shared test data.
 
-### 3.2 Secret handling
+The repository also includes JSON examples, a registry, and example-validation tooling.
 
-Secret redaction is well-implemented across the codebase. The main risk is that
-`StellarSecretKeySchema` is publicly exported from `@anchorkit/validators`,
-enabling consumers to parse and handle raw secrets without going through the
-redaction layer.
+## 5. Architecture risks
 
-**Recommendation:** Either remove `StellarSecretKeySchema` from public exports,
-or have it return `RedactedSecretKey` instead of `StellarSecretKey`.
+### AR-1: Broad barrel exports
 
-### 3.3 Package boundary discipline
+**Severity:** Medium
 
-The monorepo uses workspace packages (`types`, `config`, `validators`,
-`stellar-kit`, `anchor-utils`) with clear naming. However:
+Broad `export *` patterns exist in package entry points, including:
 
-- `anchor-utils` has phantom dependencies on `config` and `stellar-kit` (never imported).
-- `validationEngine.ts` has a circular import with its barrel.
-- `stellar-kit` uses `export *` for everything, exposing internals.
+```text
+packages/types/src/index.ts
+packages/validators/src/index.ts
+packages/stellar-kit/src/index.ts
+packages/anchor-utils/src/index.ts
+packages/fixtures/src/index.ts
+```
 
-**Recommendation:** Audit phantom deps, fix circular imports, and consider
-explicit named exports instead of barrel `export *`.
+This makes it difficult to distinguish:
 
-### 3.4 Error handling patterns
+- stable public APIs;
+- experimental APIs;
+- deprecated APIs;
+- internal helpers.
 
-- `stellar-kit` uses a brand-on-Error pattern (`createStellarError`) instead of
-  proper Error subclasses. `error.constructor.name` is `"Error"`, not
-  `"StellarKitError"`.
-- The escrow contract defines `DisputeResolutionRequired` but never uses it.
-- The web app has no error boundaries (`error.tsx`).
+A helper can become a public contract simply because it was added to an exported module.
 
----
+#### Recommendation
 
-## 4. Consolidated risk register
+Create public API governance that:
 
-### Critical and high
+1. classifies stable and experimental exports;
+2. prefers explicit exports for security-sensitive packages;
+3. requires review when package-root exports change;
+4. adds API snapshots or export manifests;
+5. documents deprecation before removal.
 
-| # | Package | Severity | Description | Recommended action |
-|---|---------|----------|-------------|-------------------|
-| 1 | escrow | **CRITICAL** | `submit_evidence` has no auth check | Add `require_admin()` or explicit caller identity recording |
-| 2 | escrow | HIGH | Disputed milestones permanently stuck | Implement `resolve_dispute` function |
-| 3 | escrow | HIGH | Evidence overwritten on Disputed milestones | Restrict `submit_evidence` status guard to exclude Disputed |
-| 4 | validators | HIGH | `StellarSecretKeySchema` publicly exports raw secret handling | Remove from public API or return redacted form |
+### AR-2: Root integration tests use private source imports
 
-### Medium
+**Severity:** Medium
 
-| # | Package | Description |
-|---|---------|-------------|
-| 5 | config | ✅ Fixed (#52) — Zero tests for `assertNetworkAllowed()` |
-| 6 | stellar-kit | ✅ Fixed (#52) — `intent.ts` and `accounts.ts` mainnet guard asymmetry |
-| 7 | stellar-kit | `errors.ts` and `intent.ts` have zero test coverage |
-| 8 | anchor-utils | `validatePaymentRailConfig` and `validateAnchorRequest` untested |
-| 9 | anchor-utils | Dual validation APIs (Zod wrappers + engine wrappers) |
-| 10 | anchor-utils | `advanceAnchorTransactionStatus` silent wrap-around |
-| 11 | validators | Circular import in `validationEngine.ts` |
-| 12 | validators | Schemas hardwired to `DEFAULT_ENV_CONFIG` singleton |
-| 13 | web | No `error.tsx` boundaries |
-| 14 | web | Secret re-reveal contradicts "shown once" UI copy |
-| 15 | escrow | `submit_evidence` on Draft bypasses Active status |
-| 16 | stellar-kit | `parseAssetString` type signature mismatch |
+The scan found:
 
----
+```text
+tests/transaction-readiness.test.ts
+```
 
-## 5. Missing test coverage
+importing from:
 
-### Packages with zero or near-zero tests
+```text
+../packages/stellar-kit/src
+../packages/types/src
+```
 
-| Package | Status |
-|---------|--------|
-| `@anchorkit/config` | ✅ Fixed (#52) — was zero test files; see `test/mainnet-safety.test.ts`. |
-| `@anchorkit/stellar-kit` `errors.ts` | No dedicated test file. `mapHorizonError` and `sanitizeCause` untested. |
-| `@anchorkit/stellar-kit` `intent.ts` | No test file. All payment intent functions untested. |
+These imports bypass public package entry points.
 
-### Functions with no test coverage
+The tests may therefore pass while package-root exports are incomplete or broken.
 
-| Package | Function(s) |
-|---------|-------------|
-| `stellar-kit` | `createStellarError`, `sanitizeCause`, `mapHorizonError`, `createPaymentIntent`, `validatePaymentIntent`, `isPaymentIntentValid`, `estimateTransactionReadinessSync`, `estimateTransactionReadiness`, `loadAccount`, `getAccountStatus`, `isAccountFunded`, `isAccountUnfunded` |
-| `anchor-utils` | `validatePaymentRailConfig`, `isPaymentRailConfigValid`, `validateAnchorRequest`, `isAnchorTransactionStatus` |
-| `config` | `getNetworkConfig`, `assertNetworkAllowed`, `isMainnetAllowed`, `getDefaultNetworkConfig` |
-| `escrow` | `submit_evidence` auth, evidence overwrite, `initialize` double-call, `assign_amount` zero, `dispute_milestone` without evidence |
+#### Recommendation
 
----
+Use:
 
-## 6. Documentation gaps
+```typescript
+import { ... } from "@anchorkit/stellar-kit";
+import type { ... } from "@anchorkit/types";
+```
 
-| Area | Gap |
-|------|-----|
-| Escrow contract | No documentation of the `Disputed` terminal state or the missing resolution path |
-| `AUTOMATION_RUNBOOK.md` | Recently added — covers automation workflows |
-| Mainnet safety | ✅ Fixed (#52) — see § 3.1 above for which layers enforce the guard |
-| Secret key handling | R0-R6 rules exist but `StellarSecretKeySchema` public export contradicts the spirit of the rules |
-| Package boundaries | No document explaining which packages are public vs internal API |
+in integration tests.
 
----
+### AR-3: Boundary enforcement does not cover the whole repository
 
-## 7. Recommended follow-up issues
+**Severity:** Medium
 
-Based on this review, the following issues should be created (priority order):
+The package-boundary checker currently scans package `src` directories.
 
-1. **[CRITICAL] Add auth check to `submit_evidence` in escrow contract**
-   - Add `require_admin()` or implement caller identity tracking
-   - Add tests for non-admin calls
+It does not fully cover:
 
-2. **[HIGH] Implement dispute resolution for escrow milestones**
-   - Add `resolve_dispute` function (admin cancels or re-approves)
-   - Implement the already-defined `DisputeResolutionRequired` error path
-   - Add event emission for dispute resolution
+```text
+packages/*/test
+apps/web
+tests
+scripts
+examples/*.ts
+package.json dependency declarations
+```
 
-3. **[HIGH] Restrict evidence overwrite on disputed milestones**
-   - Update status guard in `submit_evidence` to reject `Disputed` status
-   - Add test coverage
+It may also miss:
 
-4. **[HIGH] Add tests for `@anchorkit/config`** — ✅ Done (#52)
-   - Test `assertNetworkAllowed()` with testnet (pass) and mainnet (throw)
-   - Test `getNetworkConfig()` with valid and invalid inputs
-   - Test `isMainnetAllowed()` boundary values
+- multiline imports;
+- dynamic imports;
+- CommonJS `require`;
+- package manifest drift.
 
-5. **[MEDIUM] Add tests for `stellar-kit` `errors.ts` and `intent.ts`**
-   - Test `mapHorizonError` with various Horizon error shapes
-   - Test `sanitizeCause` with secrets in error messages
-   - Test `createPaymentIntent` happy path and validation failures
-   - Test `estimateTransactionReadiness` with mainnet guard
+This explains why root-test deep imports were not rejected.
 
-6. **[MEDIUM] Remove or restrict `StellarSecretKeySchema` from public exports**
-   - Either return `RedactedSecretKey` or remove from barrel export
+#### Recommendation
 
-7. **[MEDIUM] Add error boundaries to web app**
-   - Add `app/error.tsx` as global error boundary
-   - Add per-route boundaries for pages with network calls
+Extend boundary enforcement to all TypeScript code and package manifests.
 
-8. **[MEDIUM] Fix circular import in validators**
-   - `validationEngine.ts` should import from `./schemas/*` directly
+### AR-4: Manifest and source dependencies can drift
 
-9. **[MEDIUM] Remove phantom dependencies from anchor-utils**
-   - Remove `@anchorkit/config` and `@anchorkit/stellar-kit` from production deps
+**Severity:** Low to medium
 
-10. **[LOW] Emit event for `assign_amount` in escrow contract**
-    - Add event emission consistent with other state-changing functions
+A package may declare internal dependencies it no longer uses.
 
----
+Unused production dependencies:
 
-*This review covers the AnchorKit MVP codebase as of July 2026. It is intended
-as a point-in-time assessment. Re-review is recommended after the high-priority
-items are addressed.*
+- increase installation surface;
+- increase maintenance work;
+- make future coupling easier;
+- weaken package ownership.
+
+#### Recommendation
+
+Add a periodic internal-dependency audit and remove unused production dependencies.
+
+### AR-5: Parallel validation APIs
+
+**Severity:** Medium
+
+`anchor-utils` exposes:
+
+- direct Zod-style wrappers;
+- standard AnchorKit validation results;
+- convenience validation functions.
+
+Multiple interfaces for the same data can produce inconsistent error behaviour.
+
+#### Recommendation
+
+Define one preferred application-facing validation API.
+
+Document which APIs:
+
+- return Zod results;
+- return AnchorKit validation results;
+- are low-level;
+- are recommended for normal consumers.
+
+### AR-6: Contract and TypeScript model drift
+
+**Severity:** Medium
+
+Rust and TypeScript share conceptual escrow models without generated bindings.
+
+They can drift in:
+
+- status values;
+- event names;
+- event fields;
+- error codes;
+- storage versions;
+- milestone structure.
+
+#### Recommendation
+
+Add contract-interface validation or generated bindings and compare:
+
+- Rust event definitions;
+- TypeScript schemas;
+- example payloads;
+- parser expectations.
+
+## 6. Security gaps
+
+### SG-1: No escrow dispute-resolution path
+
+**Severity:** High
+
+A milestone can enter `Disputed`, but there is no:
+
+- `resolve_dispute`;
+- `cancel_milestone`;
+- refund transition;
+- re-approval transition;
+- recorded resolution decision.
+
+The `DisputeResolutionRequired` error exists but is not part of an implemented resolution process.
+
+A disputed milestone can remain permanently stuck.
+
+#### Recommendation
+
+Define a dispute-resolution state machine covering:
+
+- authorised resolver;
+- resolution outcomes;
+- evidence replacement;
+- cancellation or refund;
+- release after resolution;
+- timestamps;
+- events;
+- reversibility;
+- TypeScript and web mappings.
+
+### SG-2: Single-administrator escrow
+
+**Severity:** High for real value
+
+All privileged contract actions depend on one administrator address.
+
+There is no:
+
+- administrator rotation;
+- multisig;
+- threshold approval;
+- role separation;
+- timelock;
+- emergency pause;
+- recovery authority.
+
+Loss or compromise of the administrator key can control or block every milestone.
+
+#### Recommendation
+
+Before real value is used, implement:
+
+- administrator rotation;
+- threshold or multisig authority;
+- separate evidence, approval, and release roles;
+- emergency pause;
+- compromise-recovery procedures.
+
+### SG-3: Release does not transfer assets
+
+**Severity:** High if described as custody
+
+`release_milestone` updates milestone state but does not transfer a token or asset.
+
+A `Released` milestone is therefore not proof that funds moved.
+
+#### Recommendation
+
+Continue presenting the contract as a state-machine example until an audited transfer design exists.
+
+A production implementation must define:
+
+- asset type;
+- decimals;
+- recipient validation;
+- contract funding;
+- balance checks;
+- atomic transfer and state update;
+- transfer failure behaviour;
+- replay protection.
+
+### SG-4: Generated secret can be revealed repeatedly
+
+**Severity:** Medium
+
+The accounts page warns that a generated secret is shown once or redacted after initial display, but it includes a reveal/hide toggle.
+
+This creates a mismatch between the security message and actual behaviour.
+
+Repeated reveal increases exposure to:
+
+- shoulder surfing;
+- screen recording;
+- malicious extensions;
+- screenshots;
+- browser automation.
+
+#### Recommendation
+
+Use one clear model:
+
+1. show once and irreversibly redact; or
+2. allow repeated reveal and change the warning.
+
+For a security-focused toolkit, one-time display is preferable.
+
+### SG-5: Public raw-secret validation
+
+**Severity:** Medium
+
+`StellarSecretKeySchema` is exported publicly.
+
+Structural validation of a secret is legitimate, but a convenience export makes it easier for consumers to handle raw secrets without using redaction controls.
+
+#### Recommendation
+
+Make raw-secret handling explicit by:
+
+- moving it to a clearly named security API;
+- documenting mandatory no-log and no-storage rules beside it;
+- reducing convenience re-exports;
+- adding public API tests.
+
+The original secret may still be required for legitimate cryptographic derivation, so replacing every result with only a redacted value would be incorrect.
+
+### SG-6: Mainnet is enabled through configuration
+
+**Severity:** Medium for production
+
+The testnet default is strong, but mainnet can ultimately be enabled through:
+
+```text
+allowMainnet: true
+```
+
+There is no production:
+
+- deployment approval;
+- environment attestation;
+- audit event;
+- protected configuration;
+- organisation policy gate.
+
+#### Recommendation
+
+Before mainnet deployment:
+
+- separate testnet and mainnet builds;
+- protect production configuration;
+- require explicit deployment approval;
+- prevent public demos from enabling mainnet;
+- record non-secret mainnet activation.
+
+### SG-7: Production callback trust is incomplete
+
+**Severity:** Medium
+
+HTTPS validation is a good baseline, with localhost exceptions for development.
+
+Production callbacks would also require:
+
+- domain allow-lists;
+- signed messages;
+- replay prevention;
+- timestamp validation;
+- idempotency;
+- retries;
+- timeout limits;
+- redirect controls;
+- audit logs.
+
+#### Recommendation
+
+Keep live callback processing out of production status until these controls are implemented and tested.
+
+### SG-8: No production custody controls
+
+**Severity:** High for production
+
+AnchorKit does not implement:
+
+- secure wallet storage;
+- HSM-backed signing;
+- hardware-wallet integration;
+- spend policies;
+- withdrawal approval;
+- key rotation;
+- secure recovery;
+- custody incident response.
+
+#### Recommendation
+
+Continue stating that AnchorKit is not production custody software.
+
+Any custody design should be treated as a separate security architecture project.
+
+## 7. Payment and readiness risks
+
+### 7.1 Readiness is not submission
+
+A consumer may mistake a `ready` result for a submitted or confirmed transaction.
+
+Maintain separate states for:
+
+```text
+valid
+ready to construct
+constructed
+signed
+submitted
+submission uncertain
+confirmed
+failed
+```
+
+The web UI and documentation should never use readiness language as proof of network confirmation.
+
+### 7.2 Amount precision
+
+Stellar amounts should remain decimal strings.
+
+Conversions to JavaScript `Number` can cause:
+
+- precision loss;
+- `Infinity`;
+- `NaN`;
+- incorrect comparisons;
+- formatting exceptions.
+
+Add or preserve tests for:
+
+- very large amounts;
+- minimum valid values;
+- maximum decimals;
+- `Infinity`;
+- `NaN`;
+- scientific notation;
+- signs;
+- leading and trailing zeros.
+
+Use arbitrary-precision or decimal-string arithmetic where calculations are required.
+
+### 7.3 Network failure behaviour
+
+Production payment submission would require integration tests for:
+
+- Horizon timeout;
+- Soroban RPC timeout;
+- rate limiting;
+- malformed responses;
+- transient 5xx responses;
+- duplicate submission;
+- uncertain submission;
+- transaction expiry;
+- network mismatch.
+
+## 8. Anchor lifecycle risks
+
+### 8.1 Mock lifecycle is not full protocol compliance
+
+The current lifecycle is useful developer tooling, but it should not be described as a complete implementation of every Stellar anchor protocol.
+
+Continue using language such as:
+
+```text
+SEP-style
+mock lifecycle
+developer demonstration
+```
+
+unless protocol compliance is implemented and tested end to end.
+
+### 8.2 Multiple transition helpers can diverge
+
+Several lifecycle and status helpers exist.
+
+Duplicated transition logic can disagree about:
+
+- valid next states;
+- terminal states;
+- unknown states;
+- refunds;
+- failures.
+
+#### Recommendation
+
+Use one canonical transition table to derive:
+
+- allowed transitions;
+- next-state behaviour;
+- terminal-state checks;
+- labels;
+- fixtures;
+- tests.
+
+### 8.3 Invalid fixtures need clear separation
+
+Invalid fixtures are useful for tests but should not appear to be recommended examples.
+
+Keep them in an explicitly invalid namespace and record the expected failure.
+
+## 9. Escrow contract assessment
+
+### 9.1 Current controls
+
+The contract currently provides:
+
+- initialisation protection;
+- administrator authentication;
+- positive-amount validation;
+- non-zero milestone IDs;
+- duplicate milestone prevention;
+- evidence requirements;
+- write-once evidence;
+- dispute-state checks;
+- ready-for-release checks;
+- duplicate-release prevention;
+- persistent storage;
+- summary calculation;
+- storage versioning;
+- contract events;
+- scoped-auth tests.
+
+### 9.2 Remaining contract risks
+
+| ID    | Severity | Finding                                          |
+| ----- | -------- | ------------------------------------------------ |
+| EC-1  | High     | No dispute-resolution path                       |
+| EC-2  | High     | Single administrator                             |
+| EC-3  | High     | Release does not transfer assets                 |
+| EC-4  | Medium   | No emergency pause                               |
+| EC-5  | Medium   | No `assign_amount` event was observed            |
+| EC-6  | Medium   | Summary calculation scans milestone IDs linearly |
+| EC-7  | Medium   | No milestone pagination                          |
+| EC-8  | Medium   | TypeScript and Rust models can drift             |
+| EC-9  | Medium   | Older lifecycle tests use blanket auth mocking   |
+| EC-10 | Low      | Some error paths appear reserved but unused      |
+
+### 9.3 Recommended contract tests
+
+Add or confirm tests for:
+
+- initialising twice;
+- creating a milestone with zero amount;
+- assigning zero amount;
+- disputing before evidence;
+- assigning after lifecycle progression;
+- every privileged method under scoped unauthorised auth;
+- every state-changing event;
+- non-sequential milestone IDs;
+- large milestone counts;
+- storage migrations;
+- dispute resolution when implemented;
+- token transfer when implemented.
+
+`mock_all_auths()` may be used for ordinary lifecycle tests, but it must not be the only strategy for security-sensitive entry points.
+
+## 10. Test coverage assessment
+
+### 10.1 Test-file inventory observed
+
+| Area                    |     Files observed |
+| ----------------------- | -----------------: |
+| `packages/types`        |                  1 |
+| `packages/config`       |                  3 |
+| `packages/validators`   |                  2 |
+| `packages/stellar-kit`  |                 16 |
+| `packages/anchor-utils` |                  3 |
+| `packages/fixtures`     |                  1 |
+| `apps/web/test`         |                  2 |
+| root `tests`            |                  2 |
+| `scripts`               |                  1 |
+| Soroban contract        | 1 Rust test module |
+
+This is substantially stronger than the earlier repository state.
+
+### 10.2 Missing or weak coverage
+
+#### TC-1: Public export snapshots
+
+No dedicated public API snapshot was identified.
+
+Add export manifests for:
+
+```text
+types
+config
+validators
+stellar-kit
+anchor-utils
+fixtures
+```
+
+#### TC-2: Root deep imports
+
+The root transaction-readiness test imports private package source paths.
+
+Replace them with public package imports and make boundary automation cover root tests.
+
+#### TC-3: Web security flows
+
+Only two web test files were observed.
+
+Add tests for:
+
+- one-time secret display;
+- reveal prevention;
+- password inputs;
+- mainnet warnings;
+- readiness versus submission wording;
+- callback navigation;
+- escrow mock warnings;
+- error recovery.
+
+#### TC-4: Stellar error mapping
+
+No dedicated `errors.test.ts` was observed for `stellar-kit`.
+
+Cover:
+
+- Horizon errors;
+- unknown errors;
+- secret-bearing causes;
+- stack sanitisation;
+- fallback user messages.
+
+#### TC-5: Payment intent
+
+No dedicated `intent.test.ts` was observed.
+
+Cover:
+
+- valid creation;
+- invalid destination;
+- invalid amount;
+- unsupported asset;
+- unsafe network;
+- readiness warnings;
+- configuration overrides.
+
+#### TC-6: Boundary checker
+
+No dedicated boundary-checker test was observed.
+
+Add fixtures for:
+
+- upward imports;
+- private deep imports;
+- web imports;
+- root-test imports;
+- manifest violations;
+- multiline imports.
+
+#### TC-7: Security-document drift
+
+The earlier readiness review retained a fixed critical finding.
+
+Add a maintainer rule requiring reviews to record:
+
+- review date;
+- reviewed revision;
+- open findings;
+- fixed findings;
+- next review trigger.
+
+## 11. Documentation assessment
+
+### 11.1 Strong documentation areas
+
+AnchorKit documents:
+
+- architecture;
+- security notes;
+- threat modelling;
+- secret handling;
+- account diagnostics;
+- payment readiness;
+- transaction receipts;
+- validation governance;
+- feature flags;
+- fixtures;
+- escrow events;
+- contract migration;
+- contributor workflow;
+- maintainer review;
+- automation operations.
+
+The README already links to this review.
+
+### 11.2 Documentation gaps
+
+#### DG-1: Production-readiness gate
+
+There is no single checklist defining the minimum requirements for:
+
+- mainnet;
+- custody;
+- live payment submission;
+- live callbacks;
+- deployed escrow;
+- incident response;
+- external audit.
+
+#### DG-2: Public API stability
+
+Package ownership is documented, but stable-export and deprecation rules need a dedicated policy.
+
+#### DG-3: Dispute-resolution design
+
+The missing escrow resolution path is documented, but no approved future transition diagram exists.
+
+#### DG-4: Deployment security
+
+More guidance is needed for:
+
+- Content Security Policy;
+- security headers;
+- environment isolation;
+- production secrets;
+- monitoring;
+- mainnet approval;
+- incident handling.
+
+#### DG-5: Test evidence
+
+Reviews should state separately:
+
+- test files observed;
+- tests run;
+- CI results;
+- tests not run locally.
+
+This review uses that distinction.
+
+## 12. Contributor and maintainer workflow
+
+### Strengths
+
+The repository includes:
+
+- issue standards;
+- contributor guidance;
+- maintainer review checklists;
+- GrantFox workflow documentation;
+- architecture boundaries;
+- boundary automation;
+- issue-batch validation;
+- an automation runbook;
+- security reporting instructions.
+
+### Risks and recommendations
+
+#### CW-1: Advanced issues may be oversized
+
+Require advanced issues to identify:
+
+- owning package;
+- downstream consumers;
+- security-sensitive files;
+- public API changes;
+- tests;
+- documentation;
+- excluded work.
+
+#### CW-2: Security fixes need regression tests
+
+Every security fix should include a test that fails before the fix.
+
+The scoped-auth evidence tests are a good example.
+
+#### CW-3: Documentation commands must be verified
+
+Documentation work can expose implementation defects, such as conflicting package scripts.
+
+Every documented command should be checked against current source before merge.
+
+## 13. Consolidated risk register
+
+| ID   | Area               | Severity | Status         | Finding                                                        |
+| ---- | ------------------ | -------- | -------------- | -------------------------------------------------------------- |
+| R-01 | Escrow             | High     | Open           | No dispute-resolution path                                     |
+| R-02 | Escrow             | High     | Open           | Single administrator                                           |
+| R-03 | Escrow             | High     | Open           | Release does not transfer assets                               |
+| R-04 | Custody            | High     | MVP limitation | No production signer or custody model                          |
+| R-05 | Web secrets        | Medium   | Open           | Generated secret can be revealed repeatedly                    |
+| R-06 | Public API         | Medium   | Open           | Broad barrel exports                                           |
+| R-07 | Boundaries         | Medium   | Open           | Checker does not cover the full repository                     |
+| R-08 | Tests              | Medium   | Open           | Root integration test uses private imports                     |
+| R-09 | Callbacks          | Medium   | Open           | Production trust model incomplete                              |
+| R-10 | Mainnet            | Medium   | Open           | Production activation governance missing                       |
+| R-11 | Contract audit     | Medium   | Open           | `assign_amount` event coverage should be reviewed              |
+| R-12 | Errors             | Medium   | Open           | Dedicated Stellar error tests not observed                     |
+| R-13 | Intent             | Medium   | Open           | Dedicated payment-intent tests not observed                    |
+| R-14 | Web tests          | Medium   | Open           | Limited route-level security coverage                          |
+| R-15 | Review drift       | Medium   | Addressed      | Obsolete findings replaced by current assessment               |
+| R-16 | Evidence auth      | Critical | Fixed          | Evidence submission now requires admin auth                    |
+| R-17 | Evidence integrity | High     | Fixed          | Evidence is write-once                                         |
+| R-18 | Mainnet calls      | Medium   | Fixed          | Account calls enforce network permission                       |
+| R-19 | Contract migration | Medium   | Partial        | Version marker exists; migration execution remains future work |
+
+## 14. Recommended follow-up issues
+
+### Priority 0: Before real value
+
+#### 1. Implement escrow dispute resolution
+
+Acceptance should include:
+
+- valid resolution outcomes;
+- authorisation;
+- timestamps;
+- resolution events;
+- TypeScript types;
+- parser updates;
+- scoped-auth tests;
+- lifecycle tests;
+- documentation.
+
+#### 2. Design production escrow authority and custody
+
+Cover:
+
+- administrator rotation;
+- multisig or threshold control;
+- role separation;
+- emergency pause;
+- token custody;
+- atomic release;
+- external security audit.
+
+This should be treated as a production architecture initiative rather than a small patch.
+
+### Priority 1: Security and architecture
+
+#### 3. Enforce one-time generated-secret display
+
+Cover:
+
+- irreversible redaction;
+- corrected UI copy;
+- web tests;
+- browser threat documentation.
+
+#### 4. Expand package-boundary enforcement
+
+Cover:
+
+- package tests;
+- root tests;
+- web source;
+- scripts;
+- examples;
+- package manifests;
+- checker tests.
+
+#### 5. Add public API governance
+
+Cover:
+
+- stable exports;
+- experimental exports;
+- explicit package exports;
+- snapshots;
+- deprecation rules.
+
+#### 6. Define production callback security
+
+Cover:
+
+- allow-lists;
+- signatures;
+- replay prevention;
+- idempotency;
+- retries;
+- redirects;
+- audit events;
+- integration tests.
+
+### Priority 2: Tests and resilience
+
+#### 7. Add Stellar error tests
+
+Cover:
+
+- Horizon errors;
+- unknown failures;
+- secret-bearing errors;
+- safe fallbacks.
+
+#### 8. Add payment-intent tests
+
+Cover:
+
+- valid creation;
+- invalid input;
+- network guards;
+- unsupported assets;
+- readiness stages.
+
+#### 9. Add web security tests
+
+Cover:
+
+- secret display;
+- mainnet warnings;
+- callback navigation;
+- readiness wording;
+- error recovery.
+
+#### 10. Complete escrow edge-case tests
+
+Cover:
+
+- duplicate initialisation;
+- zero amounts;
+- dispute before evidence;
+- all privileged calls under scoped auth;
+- events;
+- summary scaling.
+
+### Priority 3: Documentation and operations
+
+#### 11. Add a production-readiness checklist
+
+Include:
+
+- external audit;
+- custody;
+- mainnet;
+- callback security;
+- contract migration;
+- monitoring;
+- incident response;
+- rollback.
+
+#### 12. Add review-expiry metadata
+
+Security reviews should record:
+
+- date;
+- reviewed revision;
+- unresolved findings;
+- fixed findings;
+- next review trigger.
+
+## 15. Minimum production gates
+
+AnchorKit should not be described as production ready until these gates are complete.
+
+### Architecture
+
+- [ ] Boundary enforcement covers the full repository.
+- [ ] Public exports are explicitly governed.
+- [ ] Contract bindings prevent Rust-TypeScript drift.
+- [ ] Deployment architecture is documented.
+
+### Secrets and custody
+
+- [ ] A secure signing and custody model exists.
+- [ ] Key rotation and recovery are defined.
+- [ ] Repeated browser secret reveal is removed.
+- [ ] Incident-response procedures exist.
+
+### Mainnet
+
+- [ ] Mainnet activation is deployment-controlled.
+- [ ] Production configuration is protected and auditable.
+- [ ] Production endpoints are configurable and monitored.
+- [ ] Mainnet integration tests exist.
+
+### Payments
+
+- [ ] Construction, signing, submission, and confirmation are separate.
+- [ ] Uncertain submission states are handled.
+- [ ] Decimal arithmetic avoids JavaScript precision risk.
+- [ ] Duplicate-submission controls exist.
+
+### Anchors
+
+- [ ] Live protocol compliance is tested.
+- [ ] Callback authentication exists.
+- [ ] Retry and idempotency policies exist.
+- [ ] Production integrations are documented.
+
+### Escrow
+
+- [ ] Dispute resolution exists.
+- [ ] Administrator rotation or threshold authority exists.
+- [ ] Emergency pause exists.
+- [ ] Token transfer is atomic with release state.
+- [ ] Contract migration is tested.
+- [ ] Independent audit is complete.
+
+### Testing and operations
+
+- [ ] Full CI suite passes.
+- [ ] Every security fix has a regression test.
+- [ ] Boundary-checker tests exist.
+- [ ] Web security flows have route-level tests.
+- [ ] Contract property or fuzz tests exist.
+- [ ] Dependency scanning is enabled.
+- [ ] Monitoring and alerting exist.
+- [ ] Rollback procedures are documented.
+
+## 16. Final assessment
+
+AnchorKit is in a substantially stronger state than the earlier review suggested.
+
+The repository demonstrates:
+
+- testnet-first controls;
+- secret redaction;
+- mainnet guards;
+- runtime validation;
+- transaction-readiness models;
+- reusable fixtures;
+- architecture documentation;
+- boundary automation;
+- extensive Stellar utility tests;
+- scoped-auth contract tests;
+- write-once escrow evidence;
+- storage-version awareness;
+- strong contributor documentation.
+
+The fixed evidence-authorisation flaw must no longer be represented as open.
+
+The most important remaining limitations are:
+
+- no dispute resolution;
+- single-admin escrow authority;
+- no real token custody or transfer;
+- no production signer model;
+- incomplete callback trust;
+- broad public exports;
+- incomplete repository-wide boundary enforcement;
+- limited web security testing.
+
+The appropriate readiness statement is:
+
+> AnchorKit is suitable for testnet development, local demonstrations, documentation examples, and continued open-source development. It is not suitable for custody of real assets, production mainnet deployment, or unattended treasury operation without substantial additional engineering and an independent security review.
+
+## 17. Evidence reviewed
+
+### Architecture
+
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+- `scripts/check-package-boundaries.mts`
+- package entry points under `packages/*/src/index.ts`
+- root `package.json`
+
+### Security
+
+- [`SECURITY_NOTES.md`](./SECURITY_NOTES.md)
+- [`SECRET_KEY_HANDLING.md`](./SECRET_KEY_HANDLING.md)
+- [`SECURITY_THREAT_MODEL.md`](./SECURITY_THREAT_MODEL.md)
+- [`MAINTAINER_REVIEW_CHECKLIST.md`](./MAINTAINER_REVIEW_CHECKLIST.md)
+- root [`SECURITY.md`](../SECURITY.md)
+
+### Packages and web
+
+- `packages/types`
+- `packages/config`
+- `packages/fixtures`
+- `packages/validators`
+- `packages/stellar-kit`
+- `packages/anchor-utils`
+- `apps/web/app`
+- `apps/web/components`
+- `apps/web/test`
+
+### Contract
+
+- `contracts/treasury-escrow/src/lib.rs`
+- `contracts/treasury-escrow/src/test.rs`
+- [`SOROBAN_ESCROW_CONTRACT.md`](./SOROBAN_ESCROW_CONTRACT.md)
+- [`ESCROW_MIGRATION.md`](./ESCROW_MIGRATION.md)
+
+### Tests and examples
+
+- package test directories;
+- root `tests`;
+- `examples`;
+- validation and boundary scripts.
+
+## 18. Review maintenance
+
+Refresh this document when:
+
+- a high-severity finding is fixed;
+- payment submission is added;
+- mainnet behaviour changes;
+- live anchor integration is added;
+- the escrow contract changes;
+- signing or custody is introduced;
+- package exports materially change;
+- the dependency graph changes;
+- an external audit is completed;
+- the project moves beyond `0.1.x`.
+
+Furthermore, A fixed vulnerability must not remain listed as an open current finding.
+
+Retain it in the risk register as `Fixed` only when the historical context remains useful.
