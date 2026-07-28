@@ -1,12 +1,15 @@
 use super::*;
-use soroban_sdk::{testutils::Address as _, Address, Env, String as SorobanString};
+use soroban_sdk::{
+    testutils::{Address as _, MockAuth, MockAuthInvoke},
+    Address, BytesN, Env, IntoVal, String as SorobanString,
+};
 
-fn setup_contract(env: &Env) -> (Address, TreasuryEscrowContractClient<'_>) {
+fn setup_contract(env: &Env) -> (Address, Address, TreasuryEscrowContractClient<'_>) {
     let admin = Address::generate(env);
     let contract_id = env.register(TreasuryEscrowContract, ());
     let client = TreasuryEscrowContractClient::new(env, &contract_id);
     client.initialize(&admin);
-    (admin, client)
+    (admin, contract_id, client)
 }
 
 fn status_to_u32(s: MilestoneStatus) -> u32 {
@@ -17,7 +20,7 @@ fn status_to_u32(s: MilestoneStatus) -> u32 {
 fn happy_path_milestone_lifecycle_through_release() {
     let env = Env::default();
     env.mock_all_auths();
-    let (admin, client) = setup_contract(&env);
+    let (admin, _contract_id, client) = setup_contract(&env);
 
     let title = SorobanString::from_str(&env, "Milestone 1: deliverable A");
     let id: u32 = client.create_milestone(&1u32, &title, &1_000_000i128);
@@ -32,7 +35,7 @@ fn happy_path_milestone_lifecycle_through_release() {
     assert_eq!(ms.amount, 5_000_000);
 
     let ev: [u8; 32] = [0xABu8; 32];
-    client.submit_evidence(&id, &ev.into());
+    client.submit_evidence(&id, &BytesN::from_array(&env, &ev));
     let ms = client.read_milestone(&id);
     assert_eq!(ms.status, status_to_u32(MilestoneStatus::EvidenceSubmitted));
     assert!(ms.evidence_hash.is_some());
@@ -66,13 +69,13 @@ fn happy_path_milestone_lifecycle_through_release() {
 fn duplicate_release_is_rejected_with_duplicate_release_error() {
     let env = Env::default();
     env.mock_all_auths();
-    let (_, client) = setup_contract(&env);
+    let (_, _contract_id, client) = setup_contract(&env);
 
     let title = SorobanString::from_str(&env, "Duplicate release check");
     let id: u32 = client.create_milestone(&1u32, &title, &100i128);
     client.assign_amount(&id, &100i128);
     let ev: [u8; 32] = [0x01u8; 32];
-    client.submit_evidence(&id, &ev.into());
+    client.submit_evidence(&id, &BytesN::from_array(&env, &ev));
     client.approve_milestone(&id);
     client.mark_ready_for_release(&id);
     client.release_milestone(&id);
@@ -88,13 +91,13 @@ fn duplicate_release_is_rejected_with_duplicate_release_error() {
 fn release_before_ready_is_blocked_with_release_before_approval_error() {
     let env = Env::default();
     env.mock_all_auths();
-    let (_, client) = setup_contract(&env);
+    let (_, _contract_id, client) = setup_contract(&env);
 
     let title = SorobanString::from_str(&env, "Premature release");
     let id: u32 = client.create_milestone(&1u32, &title, &100i128);
     client.assign_amount(&id, &100i128);
     let ev: [u8; 32] = [0x02u8; 32];
-    client.submit_evidence(&id, &ev.into());
+    client.submit_evidence(&id, &BytesN::from_array(&env, &ev));
 
     let res = client.try_release_milestone(&id);
     assert_eq!(
@@ -106,37 +109,68 @@ fn release_before_ready_is_blocked_with_release_before_approval_error() {
 #[test]
 fn non_admin_cannot_call_admin_only_functions() {
     let env = Env::default();
-    let (_, client) = setup_contract(&env);
+    let (_, contract_id, client) = setup_contract(&env);
+    let title = SorobanString::from_str(&env, "guarded");
 
-    let admin2 = Address::generate(&env);
-    env.set_auths(&[(admin2.clone(), Vec::new(&env))]);
+    // Create a milestone as the real admin first, so the rejections below are
+    // provably about authorisation and not about a missing milestone.
+    env.mock_all_auths();
+    client.create_milestone(&1u32, &title, &100i128);
 
-    let title = SorobanString::from_str(&env, "unauth create");
-    let res = client.try_create_milestone(&1u32, &title, &100i128);
-    assert!(res.is_err());
+    let intruder = Address::generate(&env);
 
-    let admin3 = Address::generate(&env);
-    env.set_auths(&[(admin3, Vec::new(&env))]);
-    let res_assign = client.try_assign_amount(&1u32, &200i128);
-    assert!(res_assign.is_err());
+    env.mock_auths(&[MockAuth {
+        address: &intruder,
+        invoke: &MockAuthInvoke {
+            contract: &contract_id,
+            fn_name: "create_milestone",
+            args: (2u32, title.clone(), 100i128).into_val(&env),
+            sub_invokes: &[],
+        },
+    }]);
+    assert!(client
+        .try_create_milestone(&2u32, &title, &100i128)
+        .is_err());
 
-    let admin4 = Address::generate(&env);
-    env.set_auths(&[(admin4, Vec::new(&env))]);
-    let res_release = client.try_release_milestone(&1u32);
-    assert!(res_release.is_err());
+    env.mock_auths(&[MockAuth {
+        address: &intruder,
+        invoke: &MockAuthInvoke {
+            contract: &contract_id,
+            fn_name: "assign_amount",
+            args: (1u32, 200i128).into_val(&env),
+            sub_invokes: &[],
+        },
+    }]);
+    assert!(client.try_assign_amount(&1u32, &200i128).is_err());
+
+    env.mock_auths(&[MockAuth {
+        address: &intruder,
+        invoke: &MockAuthInvoke {
+            contract: &contract_id,
+            fn_name: "release_milestone",
+            args: (1u32,).into_val(&env),
+            sub_invokes: &[],
+        },
+    }]);
+    assert!(client.try_release_milestone(&1u32).is_err());
+
+    // The milestone is untouched: no intruder call mutated state.
+    let ms = client.read_milestone(&1u32);
+    assert_eq!(ms.amount, 100);
+    assert_eq!(ms.status, status_to_u32(MilestoneStatus::Draft));
 }
 
 #[test]
 fn dispute_blocks_approval_until_explicitly_resolved() {
     let env = Env::default();
     env.mock_all_auths();
-    let (_, client) = setup_contract(&env);
+    let (_, _contract_id, client) = setup_contract(&env);
 
     let title = SorobanString::from_str(&env, "Disputed milestone");
     let id: u32 = client.create_milestone(&1u32, &title, &100i128);
     client.assign_amount(&id, &100i128);
     let ev: [u8; 32] = [0x03u8; 32];
-    client.submit_evidence(&id, &ev.into());
+    client.submit_evidence(&id, &BytesN::from_array(&env, &ev));
 
     let reason = SorobanString::from_str(&env, "Evidence is insufficient");
     client.dispute_milestone(&id, &reason);
@@ -159,7 +193,7 @@ fn dispute_blocks_approval_until_explicitly_resolved() {
 fn evidence_is_required_before_approval() {
     let env = Env::default();
     env.mock_all_auths();
-    let (_, client) = setup_contract(&env);
+    let (_, _contract_id, client) = setup_contract(&env);
 
     let title = SorobanString::from_str(&env, "No evidence");
     let id: u32 = client.create_milestone(&1u32, &title, &100i128);
@@ -176,7 +210,7 @@ fn evidence_is_required_before_approval() {
 fn invalid_milestone_ids_are_rejected() {
     let env = Env::default();
     env.mock_all_auths();
-    let (_, client) = setup_contract(&env);
+    let (_, _contract_id, client) = setup_contract(&env);
 
     let title = SorobanString::from_str(&env, "bad id");
     let res = client.try_create_milestone(&0u32, &title, &100i128);
@@ -202,7 +236,7 @@ fn invalid_milestone_ids_are_rejected() {
 fn escrow_summary_tallies_multiple_milestones() {
     let env = Env::default();
     env.mock_all_auths();
-    let (_, client) = setup_contract(&env);
+    let (_, _contract_id, client) = setup_contract(&env);
 
     let t1 = SorobanString::from_str(&env, "MS1");
     let t2 = SorobanString::from_str(&env, "MS2");
@@ -216,13 +250,13 @@ fn escrow_summary_tallies_multiple_milestones() {
     client.assign_amount(&3u32, &400i128);
 
     let ev: [u8; 32] = [0x11u8; 32];
-    client.submit_evidence(&1u32, &ev.into());
+    client.submit_evidence(&1u32, &BytesN::from_array(&env, &ev));
     client.approve_milestone(&1u32);
     client.mark_ready_for_release(&1u32);
     client.release_milestone(&1u32);
 
     let ev2: [u8; 32] = [0x22u8; 32];
-    client.submit_evidence(&2u32, &ev2.into());
+    client.submit_evidence(&2u32, &BytesN::from_array(&env, &ev2));
     let reason = SorobanString::from_str(&env, "rework needed");
     client.dispute_milestone(&2u32, &reason);
 
@@ -239,7 +273,7 @@ fn escrow_summary_tallies_multiple_milestones() {
 fn storage_version_returns_current_version_after_initialization() {
     let env = Env::default();
     env.mock_all_auths();
-    let (_, client) = setup_contract(&env);
+    let (_, _contract_id, client) = setup_contract(&env);
 
     let version = client.storage_version();
     assert_eq!(version, CURRENT_STORAGE_VERSION);
@@ -272,7 +306,7 @@ fn initialize_event_includes_storage_version() {
 fn storage_version_is_persistent_across_reads() {
     let env = Env::default();
     env.mock_all_auths();
-    let (_, client) = setup_contract(&env);
+    let (_, _contract_id, client) = setup_contract(&env);
 
     assert_eq!(client.storage_version(), 1);
 
@@ -282,4 +316,177 @@ fn storage_version_is_persistent_across_reads() {
 
     client.assign_amount(&1u32, &200i128);
     assert_eq!(client.storage_version(), 1);
+}
+
+// --- Admin misuse (issue #9) -------------------------------------------------
+//
+// These tests deliberately avoid `env.mock_all_auths()`. Blanket mocking makes
+// every `require_auth()` succeed, which is structurally unable to detect a
+// missing authorisation check — the reason the `submit_evidence` gap survived.
+
+fn evidence(env: &Env, byte: u8) -> BytesN<32> {
+    BytesN::from_array(env, &[byte; 32])
+}
+
+/// Sets up a contract with one Active milestone, returning scoped-auth handles.
+fn setup_with_milestone(env: &Env) -> (Address, Address, TreasuryEscrowContractClient<'_>) {
+    let (admin, contract_id, client) = setup_contract(env);
+    env.mock_all_auths();
+    let title = SorobanString::from_str(env, "deliverable");
+    client.create_milestone(&1u32, &title, &100i128);
+    client.assign_amount(&1u32, &100i128);
+    (admin, contract_id, client)
+}
+
+#[test]
+fn unauthenticated_submit_evidence_is_rejected() {
+    let env = Env::default();
+    let (_, contract_id, client) = setup_with_milestone(&env);
+
+    let intruder = Address::generate(&env);
+    let ev = evidence(&env, 0x99);
+
+    env.mock_auths(&[MockAuth {
+        address: &intruder,
+        invoke: &MockAuthInvoke {
+            contract: &contract_id,
+            fn_name: "submit_evidence",
+            args: (1u32, ev.clone()).into_val(&env),
+            sub_invokes: &[],
+        },
+    }]);
+
+    assert!(client.try_submit_evidence(&1u32, &ev).is_err());
+
+    // The milestone was not advanced and no evidence was recorded.
+    let ms = client.read_milestone(&1u32);
+    assert!(ms.evidence_hash.is_none());
+    assert_eq!(ms.status, status_to_u32(MilestoneStatus::Active));
+}
+
+#[test]
+fn intruder_cannot_unlock_the_approval_gate() {
+    // Before the fix, an unauthenticated submit_evidence satisfied the
+    // `evidence_hash.is_some()` precondition that approve_milestone requires.
+    let env = Env::default();
+    let (_, contract_id, client) = setup_with_milestone(&env);
+
+    let intruder = Address::generate(&env);
+    let ev = evidence(&env, 0x01);
+    env.mock_auths(&[MockAuth {
+        address: &intruder,
+        invoke: &MockAuthInvoke {
+            contract: &contract_id,
+            fn_name: "submit_evidence",
+            args: (1u32, ev.clone()).into_val(&env),
+            sub_invokes: &[],
+        },
+    }]);
+    let _ = client.try_submit_evidence(&1u32, &ev);
+
+    // The approval gate is still shut, for the right reason.
+    env.mock_all_auths();
+    assert_eq!(
+        client.try_approve_milestone(&1u32).err().unwrap().unwrap(),
+        EscrowError::EvidenceRequired
+    );
+}
+
+#[test]
+fn evidence_cannot_be_overwritten_once_recorded() {
+    let env = Env::default();
+    let (_, _contract_id, client) = setup_with_milestone(&env);
+
+    let first = evidence(&env, 0xAA);
+    client.submit_evidence(&1u32, &first);
+
+    let second = evidence(&env, 0xBB);
+    assert_eq!(
+        client
+            .try_submit_evidence(&1u32, &second)
+            .err()
+            .unwrap()
+            .unwrap(),
+        EscrowError::EvidenceAlreadySubmitted
+    );
+
+    // The original hash still stands.
+    let ms = client.read_milestone(&1u32);
+    assert_eq!(ms.evidence_hash, Some(first));
+}
+
+#[test]
+fn evidence_cannot_be_swapped_after_approval() {
+    // The dangerous ordering: admin reviews evidence, approves, and only then
+    // is the evidence replaced — the approval would attest to something else.
+    let env = Env::default();
+    let (_, _contract_id, client) = setup_with_milestone(&env);
+
+    let reviewed = evidence(&env, 0x10);
+    client.submit_evidence(&1u32, &reviewed);
+    client.approve_milestone(&1u32);
+
+    assert_eq!(
+        client
+            .try_submit_evidence(&1u32, &evidence(&env, 0x20))
+            .err()
+            .unwrap()
+            .unwrap(),
+        EscrowError::EvidenceAlreadySubmitted
+    );
+
+    let ms = client.read_milestone(&1u32);
+    assert_eq!(ms.evidence_hash, Some(reviewed));
+    assert_eq!(ms.status, status_to_u32(MilestoneStatus::Approved));
+}
+
+#[test]
+fn admin_can_still_submit_evidence() {
+    // Guards against a false positive: the gate must not block the admin.
+    let env = Env::default();
+    let (admin, contract_id, client) = setup_with_milestone(&env);
+
+    let ev = evidence(&env, 0x77);
+    env.mock_auths(&[MockAuth {
+        address: &admin,
+        invoke: &MockAuthInvoke {
+            contract: &contract_id,
+            fn_name: "submit_evidence",
+            args: (1u32, ev.clone()).into_val(&env),
+            sub_invokes: &[],
+        },
+    }]);
+
+    client.submit_evidence(&1u32, &ev);
+    let ms = client.read_milestone(&1u32);
+    assert_eq!(ms.evidence_hash, Some(ev));
+    assert_eq!(ms.status, status_to_u32(MilestoneStatus::EvidenceSubmitted));
+}
+
+#[test]
+fn duplicate_release_is_impossible_under_scoped_auth() {
+    // AC #1 re-verified without blanket auth mocking.
+    let env = Env::default();
+    let (admin, contract_id, client) = setup_with_milestone(&env);
+
+    client.submit_evidence(&1u32, &evidence(&env, 0x33));
+    client.approve_milestone(&1u32);
+    client.mark_ready_for_release(&1u32);
+    client.release_milestone(&1u32);
+
+    env.mock_auths(&[MockAuth {
+        address: &admin,
+        invoke: &MockAuthInvoke {
+            contract: &contract_id,
+            fn_name: "release_milestone",
+            args: (1u32,).into_val(&env),
+            sub_invokes: &[],
+        },
+    }]);
+
+    assert_eq!(
+        client.try_release_milestone(&1u32).err().unwrap().unwrap(),
+        EscrowError::DuplicateRelease
+    );
+    assert_eq!(client.read_summary().released_amount, 100);
 }
