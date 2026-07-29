@@ -353,3 +353,6 @@ export function anchorValidationUiState(
 
 export * from "./capabilities";
 
+// ─── Anchor rails capability matrix (issue #54) ──────────────────────────────
+export * from "./railCapability";
+

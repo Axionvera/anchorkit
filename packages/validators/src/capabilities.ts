@@ -34,6 +34,12 @@ export const VALIDATORS_PACKAGE_CAPABILITIES: PackageCapability = {
       state: "implemented",
       description: "Uniform ValidationResult type and engine validators that never throw, with mapped error codes.",
     },
+    {
+      id: "rail-capability-schemas",
+      label: "Rail Capability Schemas",
+      state: "implemented",
+      description: "Zod schemas for AnchorRailCapability, AnchorAssetCapability, and AnchorCapabilityMatrix.",
+    },
   ],
   docsHref: "/docs#validators",
 };

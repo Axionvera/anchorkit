@@ -274,3 +274,6 @@ export function resolveConfigSourceMetadata(
 
 // ─── Module capabilities ────────────────────────────────────────────────────
 export * from "./capabilities";
+
+// ─── Anchor rails configuration and capability matrix (issue #54) ────────────
+export * from "./railConfig";
