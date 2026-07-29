@@ -2,7 +2,7 @@
 
 Closes #ISSUE_NUMBER_HERE
 
-Describe what this PR delivers in 1-3 sentences.
+Describe what this PR delivers in 1-3 sentences. For implementation-heavy issues, self-check the scope against [docs/MEANINGFUL_IMPLEMENTATION_CHECKLIST.md](../docs/MEANINGFUL_IMPLEMENTATION_CHECKLIST.md).
 
 ## Issue scope
 
