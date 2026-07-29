@@ -35,6 +35,8 @@ maintainer):
 
 ## Testing performed
 
+If any CI check is failing, summarize the failure and the fix or evidence that it is unrelated. See [docs/FAILING_CI_RESPONSE_GUIDE.md](../docs/FAILING_CI_RESPONSE_GUIDE.md).
+
 Describe what you ran and how you verified the change (commands run, manual steps in the
 dashboard, contract test output, etc.). This is required even when the checklist below is filled
 in — the checklist confirms _that_ something was tested, this explains _how_.
