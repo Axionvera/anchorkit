@@ -31,6 +31,8 @@ Use the acceptance criteria completion table and issue approval readiness checkl
 
 ## Communication During The Payment Period
 
+For a concise conduct checklist, see [PAYMENT_PERIOD_CONDUCT.md](./PAYMENT_PERIOD_CONDUCT.md).
+
 Keep payment-period communication calm, sparse, and verifiable:
 
 - Ask once in the merged PR if the official claim or payment step is unclear.
