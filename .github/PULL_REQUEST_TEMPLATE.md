@@ -7,7 +7,9 @@ Describe what this PR delivers in 1-3 sentences.
 ## Issue scope
 
 Fill in a completion table mapping every Acceptance Criterion from the issue to its status,
-implementation evidence, and tests. See
+implementation evidence, and tests.
+
+For cross-package issues, use [docs/ACCEPTANCE_CRITERIA_TRACEABILITY.md](../docs/ACCEPTANCE_CRITERIA_TRACEABILITY.md) to map each criterion to affected packages, tests, docs, examples, and behavior. See
 [docs/ACCEPTANCE_CRITERIA_COMPLETION.md](../docs/ACCEPTANCE_CRITERIA_COMPLETION.md) for the full
 format, status legend, and a worked example.
 
