@@ -8,6 +8,7 @@ const docsNav = [
   {
     group: "Getting started",
     items: [
+      { title: "End-to-end developer journey", file: "DEVELOPER_JOURNEY.md" },
       { title: "Project overview", file: "PROJECT_OVERVIEW.md" },
       { title: "Local setup", file: "LOCAL_SETUP.md" },
       { title: "Local verification", file: "LOCAL_VERIFICATION.md" },
@@ -86,21 +87,26 @@ export default function DocsPage() {
         <ol className="mt-3 space-y-2 text-sm text-ink-700 dark:text-ink-200">
           <li>
             <span className="font-medium">1. </span>
+            Read <span className="font-mono text-stellar-600 dark:text-stellar-400">DEVELOPER_JOURNEY.md</span> for
+            a complete end-to-end walkthrough — accounts → payments → anchors → escrow.
+          </li>
+          <li>
+            <span className="font-medium">2. </span>
             Read LOCAL_SETUP.md to install pnpm, Rust, and the Soroban CLI, then run the dev
             dashboard locally.
           </li>
           <li>
-            <span className="font-medium">2. </span>
+            <span className="font-medium">3. </span>
             Skim ARCHITECTURE.md to understand the monorepo layout (apps/web, packages/*,
             contracts/*).
           </li>
           <li>
-            <span className="font-medium">3. </span>
+            <span className="font-medium">4. </span>
             Read SECURITY_NOTES.md and SECRET_KEY_HANDLING.md before wiring any live transaction
             submission or wallet integrations.
           </li>
           <li>
-            <span className="font-medium">4. </span>
+            <span className="font-medium">5. </span>
             If you are contributing via GrantFox, read GRANTFOX_WORKFLOW.md, ISSUE_STANDARD.md, and
             MAINTAINER_REVIEW_CHECKLIST.md before opening your first PR.
           </li>
