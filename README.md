@@ -8,6 +8,7 @@ All of these live under `./docs/`.
 | End-to-end developer journey             | `DEVELOPER_JOURNEY.md`                |
 | Local setup                              | `LOCAL_SETUP.md`                      |
 | Local verification (pnpm verify)         | `LOCAL_VERIFICATION.md`               |
+| Example / fixture validation             | `examples.md`                         |
 | Architecture / package boundaries        | `ARCHITECTURE.md`                     |
 | Stellar testnet usage                    | `STELLAR_TESTNET_USAGE.md`            |
 | Security notes                           | `SECURITY_NOTES.md`                   |
