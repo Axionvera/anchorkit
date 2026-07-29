@@ -40,7 +40,9 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
 4. Implement, add tests, update docs if needed.
 5. Run `pnpm verify` locally (format, lint, typecheck, test, build). See
    [LOCAL_VERIFICATION.md](./LOCAL_VERIFICATION.md). If you changed `contracts/`,
-   also run `pnpm contract:test` or `pnpm verify:full`.
+   also run `pnpm contract:test` or `pnpm verify:full`. Record affected packages, tests added,
+   commands run, CI status, and no-test justifications using
+   [TEST_EVIDENCE_REQUIREMENT.md](./TEST_EVIDENCE_REQUIREMENT.md).
 6. Open a PR referencing the issue number (e.g. `Closes #42`).
 7. Respond to maintainer review and update your branch.
 
