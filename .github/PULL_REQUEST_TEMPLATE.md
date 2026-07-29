@@ -143,3 +143,7 @@ Any out-of-scope follow-up issues or known follow-up work. List them here and (i
 ## Acceptance Criteria Audit
 
 For multi-criterion issues, use or link the audit table in [docs/ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md](../docs/ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md) and mark incomplete criteria explicitly.
+
+## GrantFox payment expectations
+
+For `GrantFox OSS` / `Maybe Rewarded` issues, remember that merge does not guarantee payment. Before asking about a reward, self-review acceptance criteria, scope, test evidence, CI status, and any documented claim step in [docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md](../docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md).
