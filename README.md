@@ -16,6 +16,7 @@ All of these live under `./docs/`.
 | Secret key handling rules R0–R6          | `SECRET_KEY_HANDLING.md`              |
 | Account utilities                        | `ACCOUNT_UTILITIES.md`                |
 | Payment intent utilities                 | `PAYMENT_INTENT_UTILITIES.md`         |
+| Transaction summary builder              | `transaction-summary.md`              |
 | Anchor utilities                         | `ANCHOR_UTILITIES.md`                 |
 | Mock anchor API contract                 | `MOCK_ANCHOR_API_CONTRACT.md`         |
 | Soroban treasury escrow contract         | `SOROBAN_ESCROW_CONTRACT.md`          |

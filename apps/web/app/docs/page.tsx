@@ -27,6 +27,7 @@ const docsNav = [
       { title: "Payment intent utilities", file: "PAYMENT_INTENT_UTILITIES.md" },
       { title: "Transaction readiness", file: "transaction-readiness.md" },
       { title: "Transaction receipts", file: "transaction-receipts.md" },
+      { title: "Transaction summary", file: "transaction-summary.md" },
     ],
   },
   {

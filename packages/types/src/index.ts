@@ -251,6 +251,101 @@ export interface TransactionReceipt {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Pre-submit review-before-action summary for payment, anchor, and escrow
+ * preview screens (issue #90).
+ *
+ * Distinct from `TransactionReceipt` (post-submit outcome) and
+ * `TransactionReadiness` / `TransactionReadinessPipeline` (validation engines).
+ * Use this when presenting a consistent review surface before the user acts.
+ */
+export type TransactionSummaryOperation =
+  | "payment"
+  | "anchor_deposit"
+  | "anchor_withdrawal"
+  | "escrow_release"
+  | "other";
+
+export const TRANSACTION_SUMMARY_OPERATIONS: readonly TransactionSummaryOperation[] = [
+  "payment",
+  "anchor_deposit",
+  "anchor_withdrawal",
+  "escrow_release",
+  "other",
+] as const;
+
+/** Where a summary was derived from. */
+export type TransactionSummarySource = "payment" | "anchor" | "escrow" | "other";
+
+export type TransactionSummaryPartyRole =
+  | "source"
+  | "destination"
+  | "admin"
+  | "anchor"
+  | "other";
+
+export interface TransactionSummaryParty {
+  role: TransactionSummaryPartyRole;
+  /** Human-readable role label for UI. */
+  label: string;
+  /** Stellar account when known. */
+  publicKey?: StellarPublicKey;
+  /** Optional extra detail (rail destination, email, etc.). */
+  detail?: string;
+}
+
+/**
+ * Fee estimate for review UX.
+ *
+ * AnchorKit does not yet estimate Stellar protocol base fees. Values here are
+ * optional decimal strings sourced from anchor config / records when available.
+ */
+export interface TransactionSummaryFeeEstimate {
+  /** Decimal string fee amount when known. */
+  amount?: string;
+  /** Asset the fee is denominated in, when known. */
+  assetCode?: string;
+  /** How the estimate was derived. */
+  source: "anchor_config" | "anchor_record" | "unavailable" | "manual";
+  /** Human-readable limitation or derivation note. */
+  note?: string;
+}
+
+export interface TransactionSummaryRiskNote {
+  code: string;
+  message: string;
+  severity: "error" | "warning" | "info";
+}
+
+export interface TransactionSummary {
+  /** Stable summary id for UI keys / demos. */
+  id: string;
+  /** Operation being reviewed. */
+  operation: TransactionSummaryOperation;
+  /** Domain the summary was built from. */
+  source: TransactionSummarySource;
+  /** Network the action would target. */
+  network: StellarNetwork;
+  /** Human-readable headline for the review panel. */
+  headline: string;
+  /** Optional longer supporting detail. */
+  detail?: string;
+  /** Parties involved (source, destination, admin, etc.). */
+  parties: TransactionSummaryParty[];
+  /** Decimal amount string when applicable. */
+  amount?: string;
+  /** Asset being moved when applicable. */
+  asset?: StellarAsset;
+  /** Memo attached to the Stellar payment, when present. */
+  memo?: MemoInput;
+  /** Fee estimate when known; often unavailable for payments. */
+  feeEstimate?: TransactionSummaryFeeEstimate;
+  /** Risk / review notes (may reuse readiness warnings). */
+  riskNotes: TransactionSummaryRiskNote[];
+  /** Additional context (rail id, milestone id, etc.). */
+  metadata?: Record<string, unknown>;
+}
+
 export type AnchorTransactionStatus =
   | "pending_user"
   | "pending_anchor"

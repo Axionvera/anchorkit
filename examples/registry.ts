@@ -27,6 +27,7 @@ export interface ExampleEntry {
     | "Milestone"
     | "StellarPublicKeyArray"
     | "TransactionReceipt"
+    | "TransactionSummary"
     | "AnchorMockDepositRequest"
     | "AnchorMockDepositResponse"
     | "AnchorMockWithdrawalRequest"
@@ -110,6 +111,14 @@ export const EXAMPLE_REGISTRY: ExampleEntry[] = [
     expect: "valid",
     isArray: true,
     arrayKey: "receipts",
+  },
+  {
+    id: "transaction-summaries",
+    path: "examples/transaction-summaries.example.json",
+    schema: "TransactionSummary",
+    expect: "valid",
+    isArray: true,
+    arrayKey: "summaries",
   },
   {
     id: "anchors-mock-api-deposit-request",

@@ -17,6 +17,7 @@ import {
   evaluateTransactionReadinessSync,
   getStellarExpertAccountUrl,
   isPublicKeyValid,
+  paymentIntentToSummary,
   transactionReadinessStateToUiState,
 } from "@anchorkit/stellar-kit";
 import type { TransactionReadinessPipeline } from "@anchorkit/stellar-kit";
@@ -31,6 +32,7 @@ import type {
 } from "@anchorkit/types";
 import { DEFAULT_NETWORK } from "@anchorkit/config";
 import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
+import { TransactionSummaryPanel } from "@/components/TransactionSummaryPanel";
 import { useDebouncedLoading } from "@/lib/useDebouncedLoading";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
@@ -99,6 +101,15 @@ export default function PaymentsPage() {
         simulateDest === "funded" ? true : simulateDest === "unfunded" ? false : undefined,
     });
   }, [intent, network, simulateSource, simulateDest]);
+
+  const paymentSummary = useMemo(() => {
+    if (!intent) return null;
+    return paymentIntentToSummary({
+      intent,
+      network,
+      riskNotes: readiness?.warnings,
+    });
+  }, [intent, network, readiness]);
 
   const readinessLoading = useDebouncedLoading(intent);
 
@@ -382,6 +393,11 @@ export default function PaymentsPage() {
           )}
         </Card>
       </div>
+
+      <TransactionSummaryPanel
+        summary={paymentSummary}
+        title="Payment review summary"
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="space-y-4">

@@ -29,6 +29,12 @@ export const VALIDATORS_PACKAGE_CAPABILITIES: PackageCapability = {
       description: "Zod schema for TransactionReceipt validation across payment, anchor, and escrow domains.",
     },
     {
+      id: "summary-schemas",
+      label: "Summary Schemas",
+      state: "implemented",
+      description: "Zod schema for TransactionSummary validation across payment, anchor, and escrow review screens.",
+    },
+    {
       id: "validation-engine",
       label: "Validation Engine",
       state: "implemented",

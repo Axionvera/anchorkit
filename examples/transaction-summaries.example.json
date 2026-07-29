@@ -1,0 +1,148 @@
+{
+  "description": "Transaction summary fixtures covering payment, anchor, and escrow review cases (issue #90).",
+  "network": "testnet",
+  "summaries": [
+    {
+      "id": "fixture_summary_payment",
+      "operation": "payment",
+      "source": "payment",
+      "network": "testnet",
+      "headline": "Review payment",
+      "detail": "Send 25.0000000 XLM on testnet.",
+      "parties": [
+        {
+          "role": "source",
+          "label": "Source",
+          "publicKey": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR"
+        },
+        {
+          "role": "destination",
+          "label": "Destination",
+          "publicKey": "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U"
+        }
+      ],
+      "amount": "25.0000000",
+      "asset": { "type": "native", "code": "XLM", "issuer": null },
+      "memo": { "type": "text", "value": "Invoice #90" },
+      "feeEstimate": {
+        "source": "unavailable",
+        "note": "Stellar protocol fee estimation is not available in AnchorKit MVP; review Horizon fee stats before mainnet use."
+      },
+      "riskNotes": []
+    },
+    {
+      "id": "fixture_summary_anchor_deposit",
+      "operation": "anchor_deposit",
+      "source": "anchor",
+      "network": "testnet",
+      "headline": "Review anchor deposit",
+      "detail": "Deposit 100.0000000 USDC via rail bank_account.",
+      "parties": [
+        {
+          "role": "source",
+          "label": "Stellar account",
+          "publicKey": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR"
+        }
+      ],
+      "amount": "100.0000000",
+      "asset": {
+        "type": "issued",
+        "code": "USDC",
+        "issuer": "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U"
+      },
+      "feeEstimate": {
+        "amount": "0.1000000",
+        "assetCode": "USDC",
+        "source": "anchor_config",
+        "note": "Fixed fee from anchor asset configuration."
+      },
+      "riskNotes": [
+        {
+          "code": "ANCHOR_MOCK_ONLY",
+          "message": "Anchor flows are mock-only in the MVP dashboard.",
+          "severity": "warning"
+        }
+      ],
+      "metadata": { "railId": "sepa_eu", "railType": "bank_account" }
+    },
+    {
+      "id": "fixture_summary_anchor_withdrawal",
+      "operation": "anchor_withdrawal",
+      "source": "anchor",
+      "network": "testnet",
+      "headline": "Review anchor withdrawal",
+      "detail": "Withdraw 50.0000000 USDC via rail bank_account.",
+      "parties": [
+        {
+          "role": "source",
+          "label": "Stellar account",
+          "publicKey": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR"
+        },
+        {
+          "role": "destination",
+          "label": "Off-ramp destination",
+          "detail": "DE89370400440532013000"
+        }
+      ],
+      "amount": "50.0000000",
+      "memo": { "type": "text", "value": "WD-1" },
+      "feeEstimate": {
+        "source": "unavailable",
+        "note": "No anchor asset fee configuration was provided."
+      },
+      "riskNotes": [],
+      "metadata": { "railId": "sepa_eu", "railType": "bank_account" }
+    },
+    {
+      "id": "fixture_summary_escrow_release",
+      "operation": "escrow_release",
+      "source": "escrow",
+      "network": "testnet",
+      "headline": "Review escrow release",
+      "detail": "Release milestone \"Design delivery\" (500.0000000 XLM). Status: ready_for_release.",
+      "parties": [
+        {
+          "role": "admin",
+          "label": "Escrow admin",
+          "publicKey": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR"
+        },
+        {
+          "role": "destination",
+          "label": "Release recipient",
+          "publicKey": "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U"
+        }
+      ],
+      "amount": "500.0000000",
+      "asset": { "type": "native", "code": "XLM", "issuer": null },
+      "feeEstimate": {
+        "source": "unavailable",
+        "note": "Stellar protocol fee estimation is not available in AnchorKit MVP; review Horizon fee stats before mainnet use."
+      },
+      "riskNotes": [
+        {
+          "code": "ESCROW_MOCK_ONLY",
+          "message": "Escrow release is simulated in the MVP dashboard.",
+          "severity": "warning"
+        }
+      ],
+      "metadata": {
+        "milestoneId": "ms_1",
+        "milestoneStatus": "ready_for_release"
+      }
+    },
+    {
+      "id": "fixture_summary_other",
+      "operation": "other",
+      "source": "other",
+      "network": "testnet",
+      "headline": "Review transaction",
+      "detail": "Generic review summary with no domain-specific mapping.",
+      "parties": [],
+      "feeEstimate": {
+        "source": "unavailable",
+        "note": "Stellar protocol fee estimation is not available in AnchorKit MVP; review Horizon fee stats before mainnet use."
+      },
+      "riskNotes": []
+    }
+  ]
+}
