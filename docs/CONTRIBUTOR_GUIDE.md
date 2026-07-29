@@ -18,6 +18,13 @@ technical, constructive, and respectful.
 Start with the [DEVELOPER_JOURNEY.md](./DEVELOPER_JOURNEY.md) walkthrough to understand how the
 monorepo modules fit together before diving into an issue.
 
+## Applying for an issue
+
+Before commenting on any issue, read the [ISSUE_APPLICATION_GUIDE.md](./ISSUE_APPLICATION_GUIDE.md).
+It covers how to write an application comment, the assignment-before-work rule, how to keep the
+issue thread useful while you're assigned, and how to link your PR back to the issue — for both
+regular issues and GrantFox campaign issues.
+
 ## GrantFox campaign contributors
 
 If you are contributing through a GrantFox campaign, read
@@ -40,7 +47,9 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
 4. Implement, add tests, update docs if needed.
 5. Run `pnpm verify` locally (format, lint, typecheck, test, build). See
    [LOCAL_VERIFICATION.md](./LOCAL_VERIFICATION.md). If you changed `contracts/`,
-   also run `pnpm contract:test` or `pnpm verify:full`.
+   also run `pnpm contract:test` or `pnpm verify:full`. Record affected packages, tests added,
+   commands run, CI status, and no-test justifications using
+   [TEST_EVIDENCE_REQUIREMENT.md](./TEST_EVIDENCE_REQUIREMENT.md).
 6. Open a PR referencing the issue number (e.g. `Closes #42`).
 7. Respond to maintainer review and update your branch.
 
@@ -56,8 +65,9 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
   packages/apps, testing performed, screenshots for `apps/web` UI changes, security impact,
   and documentation impact. Do not delete sections that don't apply — mark them N/A instead so
   reviewers know they were considered.
-- For GrantFox issues, paste the
-  [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) self-check into your
+- For GrantFox issues, review the criteria in
+  [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) and
+  [REVIEWER_QUALITY_CHECKLIST.md](./REVIEWER_QUALITY_CHECKLIST.md), and paste the self-check into your
   PR description.
 
 ## Tests are expected
@@ -65,6 +75,13 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
 - For any TypeScript utility change: add or update a Vitest test under `packages/*/test/`.
 - For any contract state transition change: add a Rust test under `contracts/treasury-escrow/src/test.rs`.
 - For UI-only changes: add a short note on how you tested manually.
+
+## Security awareness
+
+Before working on any module listed as **CRITICAL** or **HIGH** in the
+[security module map](./SECURITY_MODULE_MAP.md), read the relevant section of
+[SECURITY_THREAT_MODEL.md](./SECURITY_THREAT_MODEL.md) and the R0–R6 rules in
+[SECRET_KEY_HANDLING.md](./SECRET_KEY_HANDLING.md).
 
 ## Documentation
 

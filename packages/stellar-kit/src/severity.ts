@@ -21,6 +21,7 @@ import type {
   SeverityLevel,
   StatusSeverity,
   TransactionReceiptStatus,
+  ValidationUIState,
 } from "@anchorkit/types";
 
 // ─── Badge tone → Tailwind class fragments ──────────────────────────────────
@@ -202,6 +203,56 @@ const READINESS_SEVERITY: Record<ReadinessState, StatusSeverity> = {
   },
 };
 
+// ─── Validation UI state severity ───────────────────────────────────────────
+
+const VALIDATION_UI_STATE_SEVERITY: Record<ValidationUIState, StatusSeverity> = {
+  loading: {
+    level: "info",
+    label: "Checking",
+    tone: "blue",
+    headline: "Checking…",
+    detail: "Validating your input. This should only take a moment.",
+    action: "wait",
+    docLink: "./docs/VALIDATION_UI_STATES.md",
+  },
+  invalid: {
+    level: "error",
+    label: "Invalid",
+    tone: "red",
+    headline: "Fix the highlighted fields",
+    detail: "One or more fields do not meet the required format or rules.",
+    action: "review_details",
+    docLink: "./docs/VALIDATION_UI_STATES.md",
+  },
+  warning: {
+    level: "warning",
+    label: "Needs review",
+    tone: "amber",
+    headline: "Ready with warnings",
+    detail: "You can continue, but review the warnings first.",
+    action: "review_details",
+    docLink: "./docs/VALIDATION_UI_STATES.md",
+  },
+  ready: {
+    level: "success",
+    label: "Ready",
+    tone: "green",
+    headline: "Ready to submit",
+    detail: "All validation checks passed.",
+    action: "none",
+    docLink: "./docs/VALIDATION_UI_STATES.md",
+  },
+  blocked: {
+    level: "blocked",
+    label: "Blocked",
+    tone: "red",
+    headline: "Cannot proceed",
+    detail: "An external condition (e.g. network safety or an unavailable check) is preventing submission.",
+    action: "review_details",
+    docLink: "./docs/VALIDATION_UI_STATES.md",
+  },
+};
+
 // ─── Account status severity ────────────────────────────────────────────────
 
 const ACCOUNT_SEVERITY: Record<AccountStatus, StatusSeverity> = {
@@ -338,6 +389,11 @@ export function getMilestoneSeverity(status: MilestoneStatus): StatusSeverity {
   return MILESTONE_SEVERITY[status];
 }
 
+/** Look up the severity mapping for a generic validation UI state. */
+export function getValidationUiStateSeverity(state: ValidationUIState): StatusSeverity {
+  return VALIDATION_UI_STATE_SEVERITY[state];
+}
+
 // ─── Badge helpers ──────────────────────────────────────────────────────────
 
 /** Get the Tailwind class string for a badge tone. */
@@ -377,6 +433,10 @@ export function getStatusSeverity(
   status: MilestoneStatus
 ): StatusSeverity;
 export function getStatusSeverity(
+  domain: "validationUi",
+  status: ValidationUIState
+): StatusSeverity;
+export function getStatusSeverity(
   domain: string,
   status: string
 ): StatusSeverity | null;
@@ -404,6 +464,10 @@ export function getStatusSeverity(
     case "milestone":
       return status in MILESTONE_SEVERITY
         ? MILESTONE_SEVERITY[status as MilestoneStatus]
+        : null;
+    case "validationUi":
+      return status in VALIDATION_UI_STATE_SEVERITY
+        ? VALIDATION_UI_STATE_SEVERITY[status as ValidationUIState]
         : null;
     default:
       return null;

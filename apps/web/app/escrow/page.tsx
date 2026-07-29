@@ -3,10 +3,19 @@
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Alert, Button, Card, DataRow, Input, Label, MilestoneStatusBadge } from "@/components/ui";
+import { EvidenceHashDisplay } from "@/components/EvidenceHashDisplay";
+import { MilestoneActionPanel } from "@/components/MilestoneActionPanel";
 import { parseEscrowEvents, escrowReleaseToReceipt } from "@anchorkit/stellar-kit";
 import { escrowEventExample } from "@/lib/escrowEventExample";
 import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
-import type { EscrowEventV1, EscrowSummary, Milestone, MilestoneStatus } from "@anchorkit/types";
+import { getMilestoneUiInfo } from "@anchorkit/types";
+import type {
+  EscrowEventV1,
+  EscrowSummary,
+  Milestone,
+  MilestoneStatus,
+  MilestoneAction,
+} from "@anchorkit/types";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
 const LIFECYCLE: MilestoneStatus[] = [
@@ -57,6 +66,8 @@ export default function EscrowPage() {
     } as Milestone;
   }, [step, title, amount, disputeReason, now]);
 
+  const milestoneUi = useMemo(() => getMilestoneUiInfo(demoMilestone, true), [demoMilestone]);
+
   const summary: EscrowSummary = useMemo(
     () => ({
       admin: FRIENDBOT,
@@ -69,6 +80,24 @@ export default function EscrowPage() {
     }),
     [step, amount]
   );
+
+  const handleAction = (action: MilestoneAction) => {
+    const status = LIFECYCLE[step];
+    if (!status) return;
+    const idx = LIFECYCLE.indexOf(status);
+    const transitions: Partial<Record<MilestoneStatus, MilestoneStatus>> = {
+      draft: "active",
+      active: "evidence_submitted",
+      evidence_submitted: action === "approve" ? "approved" : "disputed",
+      approved: "ready_for_release",
+      ready_for_release: "released",
+    };
+    const next = transitions[status];
+    if (next) {
+      const nextIdx = LIFECYCLE.indexOf(next);
+      if (nextIdx >= 0) setStep(nextIdx);
+    }
+  };
 
   return (
     <PageShell
@@ -110,13 +139,13 @@ export default function EscrowPage() {
             </div>
             <div className="flex gap-2">
               <Button variant="secondary" onClick={() => setStep((s) => Math.max(0, s - 1))}>
-                ← Back
+                &larr; Back
               </Button>
               <Button
                 variant="primary"
                 onClick={() => setStep((s) => Math.min(LIFECYCLE.length - 1, s + 1))}
               >
-                Advance step →
+                Advance step &rarr;
               </Button>
             </div>
           </div>
@@ -136,13 +165,7 @@ export default function EscrowPage() {
                 />
                 <DataRow
                   label="Evidence hash"
-                  value={
-                    demoMilestone.evidenceHash ? (
-                      <span className="text-mono-sm hash-clip">{demoMilestone.evidenceHash}</span>
-                    ) : (
-                      <span className="text-ink-500 dark:text-ink-400">Not submitted</span>
-                    )
-                  }
+                  value={<EvidenceHashDisplay milestone={demoMilestone} />}
                 />
                 <DataRow
                   label="Approved at"
@@ -150,7 +173,7 @@ export default function EscrowPage() {
                     demoMilestone.approvedAt ? (
                       <span className="text-mono-xs">{demoMilestone.approvedAt}</span>
                     ) : (
-                      <span className="text-ink-500">—</span>
+                      <span className="text-ink-500">&mdash;</span>
                     )
                   }
                 />
@@ -160,7 +183,7 @@ export default function EscrowPage() {
                     demoMilestone.releasedAt ? (
                       <span className="text-mono-xs">{demoMilestone.releasedAt}</span>
                     ) : (
-                      <span className="text-ink-500">—</span>
+                      <span className="text-ink-500">&mdash;</span>
                     )
                   }
                 />
@@ -175,33 +198,8 @@ export default function EscrowPage() {
               </dl>
             </div>
 
-            <div className="mt-4 space-y-2">
-              {step === 2 && (
-                <Alert tone="info" title="Evidence hash submitted">
-                  Contract emits <span className="text-mono-xs">(milestone, evidence)</span> event.
-                </Alert>
-              )}
-              {step === 3 && (
-                <Alert tone="success" title="Approval passed">
-                  Admin-only gate enforced. Evidence hash must be present before approval.
-                </Alert>
-              )}
-              {step === 4 && (
-                <Alert tone="error" title="Milestone disputed">
-                  Further approvals are blocked (ApprovalAfterDispute). The MVP contract has no
-                  dispute-resolution entry point, so this state is terminal.
-                </Alert>
-              )}
-              {step === 5 && (
-                <Alert tone="info" title="Marked ready for release">
-                  Status transitions Approved → ReadyForRelease. Release is still gated.
-                </Alert>
-              )}
-              {step === 6 && (
-                <Alert tone="success" title="Milestone released">
-                  Duplicate release is prevented at the contract level (DuplicateRelease error).
-                </Alert>
-              )}
+            <div className="mt-4">
+              <MilestoneActionPanel uiInfo={milestoneUi} isAdmin={true} onAction={handleAction} />
             </div>
           </div>
         </div>
@@ -263,6 +261,10 @@ export default function EscrowPage() {
               <div className="text-mono-xs text-ink-500">docs/SOROBAN_ESCROW_CONTRACT.md</div>
             </li>
             <li className="rounded-md border border-ink-200 p-3 dark:border-ink-800">
+              <div className="font-medium">Milestone UI state model</div>
+              <div className="text-mono-xs text-ink-500">docs/MILESTONE_UI_STATE.md</div>
+            </li>
+            <li className="rounded-md border border-ink-200 p-3 dark:border-ink-800">
               <div className="font-medium">Test run command</div>
               <div className="text-mono-xs text-ink-500">
                 <code>pnpm contract:test</code> (cargo test under the hood)
@@ -292,7 +294,7 @@ function eventSummary(e: EscrowEventV1): string {
     case "milestone_created":
       return `Milestone "${e.title}" created for ${e.amount} XLM`;
     case "evidence_submitted":
-      return `Evidence submitted (${e.evidenceHash.slice(0, 10)}…)`;
+      return `Evidence submitted (${e.evidenceHash.slice(0, 10)}\u2026)`;
     case "approved":
       return "Milestone approved";
     case "disputed":
@@ -327,7 +329,8 @@ function EscrowEventLog({ events }: { events: EscrowEventV1[] }) {
           </div>
           <div className="mt-1 text-ink-600 dark:text-ink-300">{eventSummary(e)}</div>
           <div className="mt-1 text-mono-xs text-ink-400">
-            {e.timestamp} · {e.caller.slice(0, 6)}… · contract {e.contractId.slice(0, 6)}…
+            {e.timestamp} &middot; {e.caller.slice(0, 6)}&hellip; &middot; contract{" "}
+            {e.contractId.slice(0, 6)}&hellip;
           </div>
         </li>
       ))}

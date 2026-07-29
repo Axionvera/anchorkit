@@ -7,12 +7,14 @@ import type {
   SeverityLevel,
   TransactionReceiptStatus,
 } from "@anchorkit/types";
+import { VALIDATION_UI_STATES } from "@anchorkit/types";
 import {
   getReceiptSeverity,
   getAnchorSeverity,
   getReadinessSeverity,
   getAccountSeverity,
   getMilestoneSeverity,
+  getValidationUiStateSeverity,
   getStatusSeverity,
   badgeClasses,
   alertClasses,
@@ -28,6 +30,7 @@ import {
   READINESS_SEVERITY_ENTRIES,
   ACCOUNT_SEVERITY_ENTRIES,
   MILESTONE_SEVERITY_ENTRIES,
+  VALIDATION_UI_STATE_SEVERITY_ENTRIES,
 } from "./fixtures";
 
 // ─── Receipt severity ───────────────────────────────────────────────────────
@@ -170,6 +173,43 @@ describe("getMilestoneSeverity", () => {
   });
 });
 
+// ─── Validation UI state severity ───────────────────────────────────────────
+
+describe("getValidationUiStateSeverity", () => {
+  it.each(VALIDATION_UI_STATE_SEVERITY_ENTRIES)(
+    "maps %s to %s",
+    (state, expectedLevel) => {
+      const result = getValidationUiStateSeverity(state);
+      expect(result.level).toBe(expectedLevel);
+      expect(result.label).toBeTruthy();
+      expect(result.headline).toBeTruthy();
+      expect(result.detail).toBeTruthy();
+    },
+  );
+
+  it("loading maps to info with blue tone", () => {
+    const result = getValidationUiStateSeverity("loading");
+    expect(result.level).toBe("info");
+    expect(result.tone).toBe("blue");
+  });
+
+  it("ready maps to success with green tone", () => {
+    const result = getValidationUiStateSeverity("ready");
+    expect(result.level).toBe("success");
+    expect(result.tone).toBe("green");
+    expect(result.action).toBe("none");
+  });
+
+  it("warning and blocked map to visually distinct tones", () => {
+    const warning = getValidationUiStateSeverity("warning");
+    const blocked = getValidationUiStateSeverity("blocked");
+    expect(warning.tone).toBe("amber");
+    expect(blocked.tone).toBe("red");
+    expect(warning.tone).not.toBe(blocked.tone);
+    expect(warning.level).not.toBe(blocked.level);
+  });
+});
+
 // ─── Unified getStatusSeverity ──────────────────────────────────────────────
 
 describe("getStatusSeverity", () => {
@@ -201,6 +241,12 @@ describe("getStatusSeverity", () => {
     const result = getStatusSeverity("milestone", "disputed");
     expect(result).not.toBeNull();
     expect(result!.level).toBe("error");
+  });
+
+  it("dispatches to validationUi mapping", () => {
+    const result = getStatusSeverity("validationUi", "blocked");
+    expect(result).not.toBeNull();
+    expect(result!.level).toBe("blocked");
   });
 
   it("returns null for unknown domain", () => {
@@ -305,6 +351,14 @@ describe("severity mapping completeness", () => {
       expect(result.level).toBeTruthy();
     }
   });
+
+  it("covers all validation UI states", () => {
+    for (const state of VALIDATION_UI_STATES) {
+      const result = getValidationUiStateSeverity(state);
+      expect(result).toBeDefined();
+      expect(result.level).toBeTruthy();
+    }
+  });
 });
 
 // ─── Consistency checks ────────────────────────────────────────────────────
@@ -317,6 +371,7 @@ describe("severity mapping consistency", () => {
       ...READINESS_SEVERITY_ENTRIES,
       ...ACCOUNT_SEVERITY_ENTRIES,
       ...MILESTONE_SEVERITY_ENTRIES,
+      ...VALIDATION_UI_STATE_SEVERITY_ENTRIES,
     ];
     for (const [status] of entries) {
       const result = getStatusSeverity("receipt" as any, status as any);

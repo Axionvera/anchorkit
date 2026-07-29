@@ -14,6 +14,7 @@ import type {
   SeverityLevel,
   StatusSeverity,
   TransactionReceiptStatus,
+  ValidationUIState,
 } from "@anchorkit/types";
 
 // ─── Receipt severity entries ───────────────────────────────────────────────
@@ -65,6 +66,16 @@ export const MILESTONE_SEVERITY_ENTRIES: readonly [MilestoneStatus, SeverityLeve
   ["disputed", "error"],
   ["ready_for_release", "success"],
   ["released", "success"],
+] as const;
+
+// ─── Validation UI state severity entries ───────────────────────────────────
+
+export const VALIDATION_UI_STATE_SEVERITY_ENTRIES: readonly [ValidationUIState, SeverityLevel][] = [
+  ["loading", "info"],
+  ["invalid", "error"],
+  ["warning", "warning"],
+  ["ready", "success"],
+  ["blocked", "blocked"],
 ] as const;
 
 // ─── Badge tone → severity level (for badge class testing) ──────────────────

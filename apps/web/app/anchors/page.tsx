@@ -11,9 +11,11 @@ import {
   Input,
   Label,
   Select,
+  ValidationStateAlert,
 } from "@/components/ui";
 import {
   anchorStatusToUserMessage,
+  anchorValidationUiState,
   buildDepositLifecycle,
   buildWithdrawalLifecycle,
   createMockAnchorTransactionRecord,
@@ -31,7 +33,9 @@ import {
 } from "@anchorkit/anchor-utils";
 import { anchorRecordToReceipt } from "@anchorkit/stellar-kit";
 import { validateCallbackUrl } from "@anchorkit/validators";
+import type { ValidationResult } from "@anchorkit/validators";
 import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
+import { useDebouncedLoading } from "@/lib/useDebouncedLoading";
 import type {
   AnchorAssetConfig,
   AnchorTransactionKind,
@@ -115,6 +119,11 @@ export default function AnchorsPage() {
     type: "ACH",
   };
 
+  const depositFormatValid = isDepositRequestValid(depositDraft);
+  const withdrawFormatValid = isWithdrawalRequestValid(withdrawDraft);
+  const assetCfgValid = isAnchorAssetConfigValid(assetCfg);
+  const cbUrlValid = isCallbackUrlValid(cbUrl);
+
   const mockRecord = useMemo(
     () =>
       createMockAnchorTransactionRecord({
@@ -133,6 +142,10 @@ export default function AnchorsPage() {
   );
 
   const mockReceipt = useMemo(() => anchorRecordToReceipt(mockRecord, "testnet"), [mockRecord]);
+
+  const validationLoading = useDebouncedLoading(
+    JSON.stringify({ depositDraft, withdrawDraft, assetCfg, cbUrl })
+  );
 
   return (
     <PageShell
@@ -177,19 +190,21 @@ export default function AnchorsPage() {
             </div>
           </div>
           <div className="mt-4">
-            {isDepositRequestValid(depositDraft) ? (
-              <Alert tone="success" title="Valid deposit metadata">
-                Accepted by <span className="text-mono-xs">parseDepositRequestMetadata</span>
-              </Alert>
-            ) : (
-              <Alert tone="error" title="Invalid deposit metadata">
-                {(() => {
+            <ValidationStateAlert
+              state={validationLoading ? "loading" : depositFormatValid ? "ready" : "invalid"}
+              title={depositFormatValid ? "Valid deposit metadata" : "Invalid deposit metadata"}
+            >
+              {validationLoading ? undefined : depositFormatValid ? (
+                <>
+                  Accepted by <span className="text-mono-xs">parseDepositRequestMetadata</span>
+                </>
+              ) : (
+                (() => {
                   const r = parseDepositRequestMetadata(depositDraft);
-                  if (!r.success) return r.error.issues.map((i) => i.message).join("; ");
-                  return "";
-                })()}
-              </Alert>
-            )}
+                  return r.success ? "" : r.error.issues.map((i) => i.message).join("; ");
+                })()
+              )}
+            </ValidationStateAlert>
           </div>
         </Card>
 
@@ -224,19 +239,23 @@ export default function AnchorsPage() {
             </div>
           </div>
           <div className="mt-4">
-            {isWithdrawalRequestValid(withdrawDraft) ? (
-              <Alert tone="success" title="Valid withdrawal metadata">
-                Accepted by <span className="text-mono-xs">parseWithdrawalRequestMetadata</span>
-              </Alert>
-            ) : (
-              <Alert tone="error" title="Invalid withdrawal metadata">
-                {(() => {
+            <ValidationStateAlert
+              state={validationLoading ? "loading" : withdrawFormatValid ? "ready" : "invalid"}
+              title={
+                withdrawFormatValid ? "Valid withdrawal metadata" : "Invalid withdrawal metadata"
+              }
+            >
+              {validationLoading ? undefined : withdrawFormatValid ? (
+                <>
+                  Accepted by <span className="text-mono-xs">parseWithdrawalRequestMetadata</span>
+                </>
+              ) : (
+                (() => {
                   const r = parseWithdrawalRequestMetadata(withdrawDraft);
-                  if (!r.success) return r.error.issues.map((i) => i.message).join("; ");
-                  return "";
-                })()}
-              </Alert>
-            )}
+                  return r.success ? "" : r.error.issues.map((i) => i.message).join("; ");
+                })()
+              )}
+            </ValidationStateAlert>
           </div>
         </Card>
       </div>
@@ -291,30 +310,34 @@ export default function AnchorsPage() {
                 Withdrawals
               </label>
             </div>
-            {isAnchorAssetConfigValid(assetCfg) ? (
-              <Alert tone="success" title="Anchor asset config valid">
-                Passes AnchorAssetConfigSchema.
-              </Alert>
-            ) : (
-              <Alert tone="error" title="Anchor asset config invalid">
-                Check code length, issuer public key format, and required boolean fields.
-              </Alert>
-            )}
+            <ValidationStateAlert
+              state={validationLoading ? "loading" : assetCfgValid ? "ready" : "invalid"}
+              title={assetCfgValid ? "Anchor asset config valid" : "Anchor asset config invalid"}
+            >
+              {validationLoading
+                ? undefined
+                : assetCfgValid
+                  ? "Passes AnchorAssetConfigSchema."
+                  : "Check code length, issuer public key format, and required boolean fields."}
+            </ValidationStateAlert>
           </div>
           <div className="space-y-3">
             <div>
               <Label>Callback / webhook URL</Label>
               <Input value={cbUrl} onChange={(e) => setCbUrl(e.target.value)} />
             </div>
-            {isCallbackUrlValid(cbUrl) ? (
-              <Alert tone="success" title="Callback URL valid">
-                HTTPS required in production. localhost is allowed for tests.
-              </Alert>
-            ) : (
-              <Alert tone="warning" title="Callback URL should be HTTPS in production">
-                Plain HTTP is only accepted for localhost.
-              </Alert>
-            )}
+            <ValidationStateAlert
+              state={validationLoading ? "loading" : cbUrlValid ? "ready" : "warning"}
+              title={
+                cbUrlValid ? "Callback URL valid" : "Callback URL should be HTTPS in production"
+              }
+            >
+              {validationLoading
+                ? undefined
+                : cbUrlValid
+                  ? "HTTPS required in production. localhost is allowed for tests."
+                  : "Plain HTTP is only accepted for localhost."}
+            </ValidationStateAlert>
             <div>
               <Label>Preview a mock anchor record</Label>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -437,15 +460,23 @@ export default function AnchorsPage() {
           </div>
         </div>
         <div className="mt-4 space-y-2">
-          <ValidationPanel
+          <EngineValidationAlert
             title="Deposit (engine)"
             result={validateAnchorRequest("deposit", depositDraft)}
+            loading={validationLoading}
+            blocked={!assetCfg.depositEnabled}
           />
-          <ValidationPanel
+          <EngineValidationAlert
             title="Withdrawal (engine)"
             result={validateAnchorRequest("withdrawal", withdrawDraft)}
+            loading={validationLoading}
+            blocked={!assetCfg.withdrawalEnabled}
           />
-          <ValidationPanel title="Callback URL (engine)" result={validateCallbackUrl(cbUrl)} />
+          <EngineValidationAlert
+            title="Callback URL (engine)"
+            result={validateCallbackUrl(cbUrl)}
+            loading={validationLoading}
+          />
         </div>
       </Card>
 
@@ -517,31 +548,47 @@ export default function AnchorsPage() {
   );
 }
 
-function ValidationPanel({
+/**
+ * Renders a `@anchorkit/validators` `ValidationResult` through the shared
+ * {@link ValidationStateAlert}, deriving its state via
+ * `anchorValidationUiState` (loading/invalid/ready, plus "blocked" when the
+ * anchor asset config disables the operation) instead of a page-local
+ * success/error switch.
+ */
+function EngineValidationAlert({
   title,
   result,
+  loading,
+  blocked,
 }: {
   title: string;
-  result: { ok: boolean; errors?: { code: string; message: string; field?: string }[] };
+  result: ValidationResult<unknown>;
+  loading?: boolean;
+  blocked?: boolean;
 }) {
-  if (result.ok) {
-    return (
-      <Alert tone="success" title={title}>
-        Validation passed.
-      </Alert>
-    );
-  }
+  const state = anchorValidationUiState(result, { loading, blocked });
+  const issueCount = !result.ok ? result.errors.length : 0;
+
   return (
-    <Alert tone="error" title={`${title} — ${result.errors?.length ?? 0} issue(s)`}>
-      <ul className="list-disc pl-4">
-        {result.errors?.map((e, i) => (
-          <li key={i}>
-            <span className="text-mono-xs">[{e.code}]</span> {e.message}
-            {e.field ? ` (${e.field})` : ""}
-          </li>
-        ))}
-      </ul>
-    </Alert>
+    <ValidationStateAlert
+      state={state}
+      title={!loading && !result.ok ? `${title} — ${issueCount} issue(s)` : title}
+    >
+      {loading ? undefined : blocked ? (
+        "This operation is currently disabled for this asset in the config above."
+      ) : result.ok ? (
+        "Validation passed."
+      ) : (
+        <ul className="list-disc pl-4">
+          {result.errors.map((e, i) => (
+            <li key={i}>
+              <span className="text-mono-xs">[{e.code}]</span> {e.message}
+              {e.field ? ` (${e.field})` : ""}
+            </li>
+          ))}
+        </ul>
+      )}
+    </ValidationStateAlert>
   );
 }
 

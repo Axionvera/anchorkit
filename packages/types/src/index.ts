@@ -156,6 +156,28 @@ export interface ReadinessIssue {
  */
 export type ReadinessState = "ready" | "warnings" | "unsafe-network" | "blocked";
 
+/**
+ * Generic, domain-agnostic UI validation lifecycle state for forms (e.g. the
+ * payment intent builder and anchor deposit/withdrawal forms).
+ *
+ * Unlike {@link TransactionReadinessState} and {@link ReadinessState} (which
+ * describe the outcome of a specific readiness pipeline), `ValidationUIState`
+ * is the shared vocabulary a form's UI renders against. Domain pipelines map
+ * their own outcomes onto this state rather than being replaced by it:
+ *
+ * - "loading"  — validation/derivation is in flight; no outcome yet.
+ * - "invalid"  — the input is structurally wrong and must be corrected.
+ * - "warning"  — the input is valid but has a non-blocking issue to review.
+ * - "ready"    — validation passed with no issues; safe to submit.
+ * - "blocked"  — valid input, but an external/policy condition (e.g.
+ *                mainnet safety, an unavailable diagnostic) prevents
+ *                proceeding right now.
+ */
+/** All {@link ValidationUIState} values, in priority order (highest first). */
+export const VALIDATION_UI_STATES = ["loading", "invalid", "blocked", "warning", "ready"] as const;
+
+export type ValidationUIState = (typeof VALIDATION_UI_STATES)[number];
+
 /** A single validation stage of the readiness engine. */
 export interface ReadinessStage {
   /** Stable stage id, e.g. "account-source". */
@@ -462,6 +484,71 @@ export interface ConfigSourceMetadata {
   stability?: FeatureStability;
 }
 
+// ─── Asset display metadata ──────────────────────────────────────────────────
+
+/**
+ * Typed state for asset display resolution.
+ *
+ * - `"native"` — XLM, universally supported.
+ * - `"issued"` — valid issued asset from the registry.
+ * - `"unsupported"` — structurally valid but not permitted on the target network.
+ * - `"unknown"` — not in the registry or structurally invalid.
+ */
+export type AssetDisplayState = "native" | "issued" | "unsupported" | "unknown";
+
+export const ASSET_DISPLAY_STATES: readonly AssetDisplayState[] = [
+  "native",
+  "issued",
+  "unsupported",
+  "unknown",
+] as const;
+
+/**
+ * Placeholder icon data for an asset when no image URL is configured.
+ * Renders as a coloured circle with the first character of the asset code.
+ */
+export interface AssetIconPlaceholder {
+  /** Single character drawn inside the icon circle. */
+  character: string;
+  /** Tailwind-compatible background colour class. */
+  bgColor: string;
+}
+
+/**
+ * Configured display metadata for a known asset.
+ */
+export interface AssetDisplayMetadata {
+  /** Human-readable display name (e.g. "Stellar Lumens", "USD Coin"). */
+  displayName: string;
+  /** Short asset code (e.g. "XLM", "USDC"). */
+  code: string;
+  /** Asset issuer public key — `null` for native XLM. */
+  issuer: string | null;
+  /** Icon placeholder for when no image is available. */
+  iconPlaceholder: AssetIconPlaceholder;
+  /** Which networks this asset is known on (from registry). */
+  networks: StellarNetwork[];
+  /** Human-readable trust assumption note. */
+  trustNote: string;
+}
+
+/**
+ * Fully resolved asset display info returned by the resolver.
+ * Combines the resolved display state with the underlying asset and metadata.
+ */
+export interface AssetDisplayInfo {
+  /** Typed resolution state. */
+  state: AssetDisplayState;
+  /** The underlying Stellar asset. */
+  asset: StellarAsset;
+  /** Which network was queried. */
+  network: StellarNetwork;
+  /** Display metadata — present when state is `"native"` or `"issued"`. */
+  metadata: AssetDisplayMetadata | null;
+  /** Error message when state is `"unsupported"`. */
+  error: string | null;
+}
+
 export type StellarErrorCode =
   | "PUBLIC_KEY_INVALID"
   | "SECRET_KEY_INVALID"
@@ -537,8 +624,14 @@ export interface StatusSeverity {
 // ─── Escrow events ──────────────────────────────────────────────────────────
 export * from "./escrowEvents";
 
+// ─── Milestone UI state model ──────────────────────────────────────────────
+export * from "./milestoneUi";
+
 // ─── Shared error taxonomy ──────────────────────────────────────────────────
 export * from "./errors";
+
+// ─── Package capability metadata ────────────────────────────────────────────
+export * from "./capabilities";
 
 // ─── Capability states ──────────────────────────────────────────────────────
 export type CapabilityState =
@@ -569,5 +662,27 @@ export interface ModuleCapability {
   label: string;
   state: CapabilityState;
   description: string;
+  docsHref?: string;
+}
+
+export type PackageName =
+  | "stellar-kit"
+  | "anchor-utils"
+  | "config"
+  | "types"
+  | "validators"
+  | "fixtures";
+
+export interface PackageFeatureCapability {
+  id: string;
+  label: string;
+  state: CapabilityState;
+  description: string;
+}
+
+export interface PackageCapability {
+  packageName: PackageName;
+  overallState: CapabilityState;
+  features: PackageFeatureCapability[];
   docsHref?: string;
 }

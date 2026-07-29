@@ -8,12 +8,19 @@ Before opening your first PR, please read:
 
 - [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 - [docs/CONTRIBUTOR_GUIDE.md](./docs/CONTRIBUTOR_GUIDE.md)
-- [docs/MAINTAINER_REVIEW_CHECKLIST.md](./docs/MAINTAINER_REVIEW_CHECKLIST.md) — your
-  PR reviewer will apply this checklist to every review, so it’s worth reading
+- [docs/MAINTAINER_REVIEW_CHECKLIST.md](./docs/MAINTAINER_REVIEW_CHECKLIST.md) and
+  [docs/REVIEWER_QUALITY_CHECKLIST.md](./docs/REVIEWER_QUALITY_CHECKLIST.md) — your
+  PR reviewer will apply these checklists to every review, so it’s worth reading
   up front.
+- [docs/MEANINGFUL_WORK_EXAMPLES.md](./docs/MEANINGFUL_WORK_EXAMPLES.md) — worked
+  examples of low-effort, partial, under-tested, failing-CI, and acceptable PRs
+  against real AnchorKit code, so "meaningful contribution" isn't left to guesswork.
 - If you are contributing under a GrantFox campaign, also read
-  [docs/GRANTFOX_WORKFLOW.md](./docs/GRANTFOX_WORKFLOW.md) and
-  [docs/ISSUE_STANDARD.md](./docs/ISSUE_STANDARD.md).
+  [docs/GRANTFOX_WORKFLOW.md](./docs/GRANTFOX_WORKFLOW.md),
+  [docs/ISSUE_STANDARD.md](./docs/ISSUE_STANDARD.md), and the
+  [docs/PAYMENT_PERIOD_COMMUNICATION_POLICY.md](./docs/PAYMENT_PERIOD_COMMUNICATION_POLICY.md) —
+  it explains how to communicate about payment once a PR merges, without
+  flooding issues or maintainer channels with repeated follow-ups.
 
 ## Quick start
 
@@ -76,3 +83,7 @@ completion before review starts.
    suite clean.
 4. Maintainers will review using the checklist. Merging is a prerequisite for
    reward consideration but does not itself guarantee reward-readiness.
+5. After merge, follow the
+   [payment-period communication policy](./docs/PAYMENT_PERIOD_COMMUNICATION_POLICY.md):
+   ask once, with evidence, and wait for the documented evaluation process
+   instead of repeating the request.

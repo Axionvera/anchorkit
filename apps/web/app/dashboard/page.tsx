@@ -2,9 +2,14 @@
 
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
-import { Card, Button, CapabilityBadge } from "@/components/ui";
-import { MODULE_CAPABILITIES } from "@anchorkit/config";
-import type { CapabilityModuleId } from "@anchorkit/types";
+import { Card, Button, CapabilityBadge, CapabilityHealthSummary } from "@/components/ui";
+import { MODULE_CAPABILITIES, CONFIG_PACKAGE_CAPABILITIES } from "@anchorkit/config";
+import { STELLAR_KIT_CAPABILITIES } from "@anchorkit/stellar-kit";
+import { ANCHOR_UTILS_CAPABILITIES } from "@anchorkit/anchor-utils";
+import { TYPES_PACKAGE_CAPABILITIES } from "@anchorkit/types";
+import { VALIDATORS_PACKAGE_CAPABILITIES } from "@anchorkit/validators";
+import { FIXTURES_PACKAGE_CAPABILITIES } from "@anchorkit/fixtures";
+import type { CapabilityModuleId, PackageCapability } from "@anchorkit/types";
 
 type ModuleMeta = { href: string; count: string; accent: string };
 
@@ -17,6 +22,24 @@ const MODULE_META: Record<CapabilityModuleId, ModuleMeta> = {
   "network-config": { href: "/network-config", count: "3 networks", accent: "bg-purple-500" },
 };
 
+const PACKAGE_CAPABILITIES: PackageCapability[] = [
+  STELLAR_KIT_CAPABILITIES,
+  ANCHOR_UTILS_CAPABILITIES,
+  CONFIG_PACKAGE_CAPABILITIES,
+  TYPES_PACKAGE_CAPABILITIES,
+  VALIDATORS_PACKAGE_CAPABILITIES,
+  FIXTURES_PACKAGE_CAPABILITIES,
+];
+
+const PACKAGE_ACCENT: Record<string, string> = {
+  "stellar-kit": "bg-blue-500",
+  "anchor-utils": "bg-teal-500",
+  config: "bg-amber-600",
+  types: "bg-indigo-500",
+  validators: "bg-emerald-500",
+  fixtures: "bg-cyan-500",
+};
+
 export default function DashboardPage() {
   return (
     <PageShell
@@ -25,6 +48,8 @@ export default function DashboardPage() {
       subtitle="Jump into the module you are building or testing. Everything is local-first and testnet-only by default."
       warning="Do not paste mainnet secrets into this dashboard. Mainnet is intentionally disabled unless the environment configuration is explicitly overridden."
     >
+      <CapabilityHealthSummary capabilities={MODULE_CAPABILITIES} />
+
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         {MODULE_CAPABILITIES.map((m) => {
           const meta = MODULE_META[m.id];
@@ -63,6 +88,46 @@ export default function DashboardPage() {
           );
         })}
       </div>
+
+      <section>
+        <div className="mb-4 flex items-center gap-3">
+          <h2 className="text-lg font-semibold tracking-tight">Package health</h2>
+          <CapabilityHealthSummary
+            capabilities={PACKAGE_CAPABILITIES.map((pkg) => ({ state: pkg.overallState }))}
+          />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {PACKAGE_CAPABILITIES.map((pkg) => (
+            <Card key={pkg.packageName} className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span
+                  className={`inline-block h-8 w-8 rounded-md ${PACKAGE_ACCENT[pkg.packageName] ?? "bg-ink-500"} opacity-90`}
+                />
+                <CapabilityBadge state={pkg.overallState} />
+              </div>
+              <h3 className="text-base font-semibold tracking-tight">
+                @anchorkit/{pkg.packageName}
+              </h3>
+              <ul className="space-y-1">
+                {pkg.features.map((f) => (
+                  <li key={f.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="text-ink-700 dark:text-ink-300">{f.label}</span>
+                    <CapabilityBadge state={f.state} />
+                  </li>
+                ))}
+              </ul>
+              {pkg.docsHref && (
+                <Link
+                  href={pkg.docsHref}
+                  className="text-mono-xs text-stellar-600 hover:underline dark:text-stellar-400"
+                >
+                  Package docs →
+                </Link>
+              )}
+            </Card>
+          ))}
+        </div>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
