@@ -139,3 +139,7 @@ that is completed by the campaign reviewer after merge.
 ## Risk / follow-ups
 
 Any out-of-scope follow-up issues or known follow-up work. List them here and (if already created) link the follow-up issue numbers.
+
+## Acceptance Criteria Audit
+
+For multi-criterion issues, use or link the audit table in [docs/ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md](../docs/ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md) and mark incomplete criteria explicitly.
