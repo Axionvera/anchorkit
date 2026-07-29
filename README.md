@@ -39,6 +39,7 @@ All of these live under [`./docs/`](./docs/).
 | End-to-end developer journey                      | [`DEVELOPER_JOURNEY.md`](./docs/DEVELOPER_JOURNEY.md)                           |
 | Local setup                                       | [`LOCAL_SETUP.md`](./docs/LOCAL_SETUP.md)                                       |
 | Failing CI response guide                         | [`FAILING_CI_RESPONSE_GUIDE.md`](./docs/FAILING_CI_RESPONSE_GUIDE.md)           |
+| Test evidence PR requirement                      | [`TEST_EVIDENCE_REQUIREMENT.md`](./docs/TEST_EVIDENCE_REQUIREMENT.md)           |
 | Architecture / package boundaries                 | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                                     |
 | Stellar testnet usage                             | [`STELLAR_TESTNET_USAGE.md`](./docs/STELLAR_TESTNET_USAGE.md)                   |
 | Security notes                                    | [`SECURITY_NOTES.md`](./docs/SECURITY_NOTES.md)                                 |
