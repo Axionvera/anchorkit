@@ -586,6 +586,43 @@ All Stellar Expert and Horizon URLs are generated through helpers in
 
 See [explorer-links.md](./explorer-links.md) for the API.
 
+### Package capability metadata
+
+Each major package self-describes its feature readiness through a typed
+`PackageCapability` export. The dashboard renders this at a glance, so
+contributors and evaluators know exactly which capabilities are live,
+mock-only, experimental, or unavailable without reading every file.
+
+```ts
+import { STELLAR_KIT_CAPABILITIES } from "@anchorkit/stellar-kit";
+import { ANCHOR_UTILS_CAPABILITIES } from "@anchorkit/anchor-utils";
+import { CONFIG_PACKAGE_CAPABILITIES, MODULE_CAPABILITIES } from "@anchorkit/config";
+
+// Package-level — per-feature breakdown
+console.log(STELLAR_KIT_CAPABILITIES.packageName);   // "stellar-kit"
+console.log(STELLAR_KIT_CAPABILITIES.overallState);  // "testnet-only"
+for (const f of STELLAR_KIT_CAPABILITIES.features) {
+  console.log(`${f.id}: ${f.state}`);
+  // e.g. "accounts: testnet-only", "soroban: experimental"
+}
+
+// Dashboard module registry — used by apps/web to render status cards
+for (const m of MODULE_CAPABILITIES) {
+  console.log(`${m.label}: ${m.state}`);
+  // e.g. "Accounts: testnet-only", "Payments: mock", "Diagnostics: unavailable"
+}
+```
+
+The shared types (`PackageName`, `PackageFeatureCapability`,
+`PackageCapability`) live in `@anchorkit/types`. The dashboard health
+summary strip on `/dashboard` renders live counts of modules per state
+(e.g. *1 testnet-only · 3 mock · 2 unavailable*) using the
+`CapabilityHealthSummary` component from `apps/web/components/ui`.
+
+See [CAPABILITY_STATES.md](./CAPABILITY_STATES.md) for the full type
+definitions, per-package table, and the procedure for updating a
+package's capability entry.
+
 ## Web dashboard routes
 
 The `apps/web` dashboard surfaces each phase of this journey:
