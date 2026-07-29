@@ -17,5 +17,8 @@ export * from "./milestoneUi";
 export * from "./diagnostics";
 export * from "./invalid";
 
+// ─── Rail capability matrix fixtures (issue #54) ─────────────────────────────
+export * from "./railCapability";
+
 // ─── Package capability metadata ────────────────────────────────────────────
 export * from "./capabilities";

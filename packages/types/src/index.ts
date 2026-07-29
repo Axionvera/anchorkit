@@ -633,6 +633,9 @@ export * from "./errors";
 // ─── Package capability metadata ────────────────────────────────────────────
 export * from "./capabilities";
 
+// ─── Anchor rails capability matrix ─────────────────────────────────────────
+export * from "./railCapability";
+
 // ─── Capability states ──────────────────────────────────────────────────────
 export type CapabilityState =
   | "implemented"

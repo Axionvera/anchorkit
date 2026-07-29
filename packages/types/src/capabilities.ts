@@ -40,6 +40,12 @@ export const TYPES_PACKAGE_CAPABILITIES: PackageCapability = {
       state: "implemented",
       description: "AssetDisplayInfo, AssetDisplayMetadata, and AssetDisplayState types for registry-based asset resolution.",
     },
+    {
+      id: "rail-capability-types",
+      label: "Rail Capability Matrix Types",
+      state: "implemented",
+      description: "AnchorRailCapabilityState, AnchorRailCapability, AnchorAssetCapability, and AnchorCapabilityMatrix types for the anchor rails capability model.",
+    },
   ],
   docsHref: "/docs#types",
 };

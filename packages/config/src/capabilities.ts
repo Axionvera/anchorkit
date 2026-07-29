@@ -70,6 +70,12 @@ export const CONFIG_PACKAGE_CAPABILITIES: PackageCapability = {
       state: "implemented",
       description: "Merge default settings with explicit configuration overrides and resolve metadata sources.",
     },
+    {
+      id: "rail-config",
+      label: "Anchor Rails Configuration",
+      state: "implemented",
+      description: "Default anchor capability matrix with rail definitions, asset configurations, and query helpers for deposit/withdrawal readiness.",
+    },
   ],
   docsHref: "/docs#config",
 };

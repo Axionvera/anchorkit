@@ -52,6 +52,12 @@ export const FIXTURES_PACKAGE_CAPABILITIES: PackageCapability = {
       state: "implemented",
       description: "Intentionally invalid inputs for negative testing of validators and error handling.",
     },
+    {
+      id: "rail-capability-fixtures",
+      label: "Rail Capability Matrix Fixtures",
+      state: "implemented",
+      description: "Pre-built AnchorCapabilityMatrix instances covering valid, all-disabled, and experimental-only configurations for deterministic testing.",
+    },
   ],
   docsHref: "/docs#fixtures",
 };
