@@ -33,10 +33,11 @@ import {
   ALLOWED_TRANSITIONS,
 } from "@anchorkit/anchor-utils";
 import { DEFAULT_ANCHOR_CAPABILITY_MATRIX } from "@anchorkit/config";
-import { anchorRecordToReceipt } from "@anchorkit/stellar-kit";
+import { anchorRecordToReceipt, anchorRequestToSummary } from "@anchorkit/stellar-kit";
 import { validateCallbackUrl } from "@anchorkit/validators";
 import type { ValidationResult } from "@anchorkit/validators";
 import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
+import { TransactionSummaryPanel } from "@/components/TransactionSummaryPanel";
 import { useDebouncedLoading } from "@/lib/useDebouncedLoading";
 import type {
   AnchorAssetConfig,
@@ -144,6 +145,56 @@ export default function AnchorsPage() {
   );
 
   const mockReceipt = useMemo(() => anchorRecordToReceipt(mockRecord, "testnet"), [mockRecord]);
+
+  const depositSummary = useMemo(
+    () =>
+      anchorRequestToSummary({
+        kind: "deposit",
+        request: depositDraft,
+        assetConfig: assetCfg,
+        riskNotes: depositFormatValid
+          ? [
+              {
+                code: "ANCHOR_MOCK_ONLY",
+                message: "Anchor deposit flows are mock-only in the MVP dashboard.",
+                severity: "warning",
+              },
+            ]
+          : [
+              {
+                code: "DEPOSIT_REQUEST_INVALID",
+                message: "Deposit request failed schema validation.",
+                severity: "error",
+              },
+            ],
+      }),
+    [depositDraft, assetCfg, depositFormatValid]
+  );
+
+  const withdrawSummary = useMemo(
+    () =>
+      anchorRequestToSummary({
+        kind: "withdrawal",
+        request: withdrawDraft,
+        assetConfig: assetCfg,
+        riskNotes: withdrawFormatValid
+          ? [
+              {
+                code: "ANCHOR_MOCK_ONLY",
+                message: "Anchor withdrawal flows are mock-only in the MVP dashboard.",
+                severity: "warning",
+              },
+            ]
+          : [
+              {
+                code: "WITHDRAWAL_REQUEST_INVALID",
+                message: "Withdrawal request failed schema validation.",
+                severity: "error",
+              },
+            ],
+      }),
+    [withdrawDraft, assetCfg, withdrawFormatValid]
+  );
 
   const validationLoading = useDebouncedLoading(
     JSON.stringify({ depositDraft, withdrawDraft, assetCfg, cbUrl })
@@ -260,6 +311,11 @@ export default function AnchorsPage() {
             </ValidationStateAlert>
           </div>
         </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <TransactionSummaryPanel summary={depositSummary} title="Deposit review summary" />
+        <TransactionSummaryPanel summary={withdrawSummary} title="Withdrawal review summary" />
       </div>
 
       <Card>

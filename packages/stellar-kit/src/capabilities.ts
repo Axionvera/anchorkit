@@ -35,6 +35,12 @@ export const STELLAR_KIT_CAPABILITIES: PackageCapability = {
       description: "Evaluate multi-stage transaction readiness, identifying network and account-level blockages.",
     },
     {
+      id: "summary",
+      label: "Transaction Summary Builder",
+      state: "implemented",
+      description: "Build review-before-action summaries for payment, anchor, and escrow preview screens.",
+    },
+    {
       id: "severity",
       label: "Severity Mapper",
       state: "implemented",

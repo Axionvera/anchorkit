@@ -46,6 +46,12 @@ export const TYPES_PACKAGE_CAPABILITIES: PackageCapability = {
       state: "implemented",
       description: "AnchorRailCapabilityState, AnchorRailCapability, AnchorAssetCapability, and AnchorCapabilityMatrix types for the anchor rails capability model.",
     },
+    {
+      id: "transaction-summary-types",
+      label: "Transaction Summary Types",
+      state: "implemented",
+      description: "TransactionSummary, parties, fee estimate, and risk-note types for review-before-action preview screens.",
+    },
   ],
   docsHref: "/docs#types",
 };

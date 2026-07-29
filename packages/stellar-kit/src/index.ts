@@ -12,6 +12,7 @@ export { createSafeLogger, safeLog, redactValue } from "./logging";
 export type { LogSink, SafeLogger } from "./logging";
 export * from "./explorer";
 export * from "./receipt";
+export * from "./summary";
 export * from "./balances";
 export * from "./diagnostics";
 export * from "./assetRegistry";

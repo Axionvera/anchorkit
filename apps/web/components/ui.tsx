@@ -31,7 +31,7 @@ export function AnchorStatusBadge({ status }: { status: AnchorTransactionStatus 
     <span
       className={clsx(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone)
+        badgeClasses(tone),
       )}
     >
       <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" />
@@ -47,7 +47,7 @@ export function MilestoneStatusBadge({ status }: { status: MilestoneStatus }) {
     <span
       className={clsx(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone)
+        badgeClasses(tone),
       )}
     >
       {label}
@@ -62,7 +62,7 @@ export function TransactionReceiptBadge({ status }: { status: TransactionReceipt
     <span
       className={clsx(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone)
+        badgeClasses(tone),
       )}
     >
       <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" />
@@ -71,11 +71,7 @@ export function TransactionReceiptBadge({ status }: { status: TransactionReceipt
   );
 }
 
-export function AccountStatusBadge({
-  status,
-}: {
-  status: "funded" | "unfunded" | "unknown" | "error" | "checking";
-}) {
+export function AccountStatusBadge({ status }: { status: "funded" | "unfunded" | "unknown" | "error" | "checking" }) {
   const severity = getAccountSeverity(status === "checking" ? "unknown" : status);
   const label = status === "checking" ? "Checking…" : severity.label;
   const tone = severity.tone;
@@ -84,7 +80,7 @@ export function AccountStatusBadge({
     <span
       className={clsx(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone)
+        badgeClasses(tone),
       )}
     >
       {label}
@@ -105,13 +101,13 @@ export function ValidationStateBadge({ state }: { state: ValidationUIState }) {
     <span
       className={clsx(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone)
+        badgeClasses(tone),
       )}
     >
       <span
         className={clsx(
           "mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80",
-          state === "loading" && "animate-pulse"
+          state === "loading" && "animate-pulse",
         )}
       />
       {label}
@@ -159,13 +155,7 @@ export function Alert({
   );
 }
 
-export function Card({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
       className={clsx(
@@ -186,12 +176,9 @@ export function Button({
   variant?: "primary" | "secondary" | "ghost" | "danger";
 }) {
   const variants = {
-    primary:
-      "bg-stellar-600 text-white hover:bg-stellar-700 border border-stellar-600 disabled:opacity-50",
-    secondary:
-      "bg-white text-ink-800 border border-ink-300 hover:bg-ink-50 disabled:opacity-50 dark:bg-ink-950 dark:text-ink-100 dark:border-ink-700 dark:hover:bg-ink-900",
-    ghost:
-      "bg-transparent text-ink-700 hover:bg-ink-100 border border-transparent dark:text-ink-200 dark:hover:bg-ink-900",
+    primary: "bg-stellar-600 text-white hover:bg-stellar-700 border border-stellar-600 disabled:opacity-50",
+    secondary: "bg-white text-ink-800 border border-ink-300 hover:bg-ink-50 disabled:opacity-50 dark:bg-ink-950 dark:text-ink-100 dark:border-ink-700 dark:hover:bg-ink-900",
+    ghost: "bg-transparent text-ink-700 hover:bg-ink-100 border border-transparent dark:text-ink-200 dark:hover:bg-ink-900",
     danger: "bg-red-600 text-white hover:bg-red-700 border border-red-600 disabled:opacity-50",
   };
   return (
@@ -206,24 +193,133 @@ export function Button({
   );
 }
 
-export function Label({
-  htmlFor,
-  children,
-  required,
-}: {
-  htmlFor?: string;
-  children: React.ReactNode;
-  required?: boolean;
-}) {
+export function Label({ htmlFor, children, required }: { htmlFor?: string; children: React.ReactNode; required?: boolean }) {
   return (
-    <label
-      htmlFor={htmlFor}
-      className="mb-1.5 block text-sm font-medium text-ink-800 dark:text-ink-200"
-    >
+    <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-ink-800 dark:text-ink-200">
       {children}
       {required && <span className="ml-1 text-red-500">*</span>}
     </label>
   );
 }
 
-export function Input(props: React.InputHTMLAttributes<HTMLInputElement>);
+export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      {...props}
+      className={clsx(
+        "w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-stellar-500 focus:ring-2 focus:ring-stellar-500/20 disabled:bg-ink-50 disabled:text-ink-500 dark:border-ink-700 dark:bg-ink-950 dark:text-ink-50 dark:placeholder:text-ink-500 dark:disabled:bg-ink-900",
+        props.className ?? ""
+      )}
+    />
+  );
+}
+
+export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      className={clsx(
+        "w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-stellar-500 focus:ring-2 focus:ring-stellar-500/20 dark:border-ink-700 dark:bg-ink-950 dark:text-ink-50 dark:placeholder:text-ink-500",
+        props.className ?? ""
+      )}
+    />
+  );
+}
+
+export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select
+      {...props}
+      className={clsx(
+        "w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm text-ink-900 focus:border-stellar-500 focus:ring-2 focus:ring-stellar-500/20 dark:border-ink-700 dark:bg-ink-950 dark:text-ink-50",
+        props.className ?? ""
+      )}
+    />
+  );
+}
+
+export function DataRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-2 text-sm">
+      <dt className="text-ink-500 shrink-0 dark:text-ink-400">{label}</dt>
+      <dd className="text-right text-ink-900 dark:text-ink-100">{value}</dd>
+    </div>
+  );
+}
+
+export const CAPABILITY_BADGE_STYLES: Record<CapabilityState, string> = {
+  implemented: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
+  mock: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900",
+  "testnet-only": "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
+  experimental: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900",
+  unavailable: "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
+};
+
+export const CAPABILITY_BADGE_LABELS: Record<CapabilityState, string> = {
+  implemented: "Implemented",
+  mock: "Mock only",
+  "testnet-only": "Testnet only",
+  experimental: "Experimental",
+  unavailable: "Unavailable",
+};
+
+export function CapabilityBadge({ state }: { state: CapabilityState }) {
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
+        CAPABILITY_BADGE_STYLES[state]
+      )}
+    >
+      <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" />
+      {CAPABILITY_BADGE_LABELS[state]}
+    </span>
+  );
+}
+
+export function groupCapabilitiesByState(capabilities: { state: CapabilityState }[]): Record<CapabilityState, number> {
+  const groups: Record<CapabilityState, number> = {
+    implemented: 0,
+    mock: 0,
+    "testnet-only": 0,
+    experimental: 0,
+    unavailable: 0,
+  };
+  for (const cap of capabilities) {
+    groups[cap.state] = (groups[cap.state] || 0) + 1;
+  }
+  return groups;
+}
+
+export function CapabilityHealthSummary({ capabilities }: { capabilities: readonly { state: CapabilityState }[] }) {
+  const groups = groupCapabilitiesByState(capabilities as { state: CapabilityState }[]);
+  const statesOrder: CapabilityState[] = ["implemented", "testnet-only", "mock", "experimental", "unavailable"];
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-ink-200 bg-ink-50/50 p-4 dark:border-ink-800 dark:bg-ink-900/30">
+      <span className="text-mono-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400 mr-2">
+        Module Readiness:
+      </span>
+      <div className="flex flex-wrap gap-2">
+        {statesOrder.map((state) => {
+          const count = groups[state];
+          if (count === 0) return null;
+          return (
+            <span
+              key={state}
+              className={clsx(
+                "inline-flex items-center rounded-lg border px-3 py-1 text-xs font-medium transition-all shadow-sm hover:shadow-md",
+                CAPABILITY_BADGE_STYLES[state]
+              )}
+            >
+              <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-current opacity-85" />
+              <span className="mr-1 font-bold">{count}</span>
+              <span>{CAPABILITY_BADGE_LABELS[state].toLowerCase()}</span>
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+

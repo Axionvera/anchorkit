@@ -5,9 +5,10 @@ import { PageShell } from "@/components/PageShell";
 import { Alert, Button, Card, DataRow, Input, Label, MilestoneStatusBadge } from "@/components/ui";
 import { EvidenceHashDisplay } from "@/components/EvidenceHashDisplay";
 import { MilestoneActionPanel } from "@/components/MilestoneActionPanel";
-import { parseEscrowEvents, escrowReleaseToReceipt } from "@anchorkit/stellar-kit";
+import { parseEscrowEvents, escrowReleaseToReceipt, escrowMilestoneToSummary } from "@anchorkit/stellar-kit";
 import { escrowEventExample } from "@/lib/escrowEventExample";
 import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
+import { TransactionSummaryPanel } from "@/components/TransactionSummaryPanel";
 import { getMilestoneUiInfo } from "@anchorkit/types";
 import type {
   EscrowEventV1,
@@ -18,6 +19,7 @@ import type {
 } from "@anchorkit/types";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
+const DEMO_RECIPIENT = "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U";
 const LIFECYCLE: MilestoneStatus[] = [
   "draft",
   "active",
@@ -67,6 +69,23 @@ export default function EscrowPage() {
   }, [step, title, amount, disputeReason, now]);
 
   const milestoneUi = useMemo(() => getMilestoneUiInfo(demoMilestone, true), [demoMilestone]);
+
+  const releaseSummary = useMemo(
+    () =>
+      escrowMilestoneToSummary({
+        milestone: demoMilestone,
+        adminPublicKey: FRIENDBOT,
+        destinationPublicKey: DEMO_RECIPIENT,
+        riskNotes: [
+          {
+            code: "ESCROW_MOCK_ONLY",
+            message: "Escrow release is simulated in the MVP dashboard; no on-chain transfer runs here.",
+            severity: "warning",
+          },
+        ],
+      }),
+    [demoMilestone]
+  );
 
   const summary: EscrowSummary = useMemo(
     () => ({
@@ -200,6 +219,12 @@ export default function EscrowPage() {
 
             <div className="mt-4">
               <MilestoneActionPanel uiInfo={milestoneUi} isAdmin={true} onAction={handleAction} />
+            </div>
+            <div className="mt-4">
+              <TransactionSummaryPanel
+                summary={releaseSummary}
+                title="Escrow release review summary"
+              />
             </div>
           </div>
         </div>
