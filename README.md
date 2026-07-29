@@ -62,6 +62,7 @@ All of these live under [`./docs/`](./docs/).
 | Acceptance criteria audit template              | [`ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md`](./docs/ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md) |
 | Issue approval readiness checklist             | [`ISSUE_APPROVAL_READINESS.md`](./docs/ISSUE_APPROVAL_READINESS.md)             |
 | GrantFox contribution workflow                    | [`GRANTFOX_WORKFLOW.md`](./docs/GRANTFOX_WORKFLOW.md)                           |
+| Contributor payment expectations                  | [`CONTRIBUTOR_PAYMENT_EXPECTATIONS.md`](./docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md) |
 | Advanced issue standard                           | [`ISSUE_STANDARD.md`](./docs/ISSUE_STANDARD.md)                                 |
 | Maintainer review checklist                       | [`MAINTAINER_REVIEW_CHECKLIST.md`](./docs/MAINTAINER_REVIEW_CHECKLIST.md)       |
 | Reviewer quality checklist                        | [`REVIEWER_QUALITY_CHECKLIST.md`](./docs/REVIEWER_QUALITY_CHECKLIST.md)         |
