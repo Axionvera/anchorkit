@@ -70,6 +70,8 @@ Paste the [MAINTAINER_REVIEW_CHECKLIST.md](./docs/MAINTAINER_REVIEW_CHECKLIST.md
 your PR description and mark each item. Do not fill out Phase 2 (GrantFox reward-readiness) —
 that is completed by the campaign reviewer after merge.
 
+GrantFox reviewers can use [docs/GRANTFOX_REVIEWER_CHECKLIST.md](../docs/GRANTFOX_REVIEWER_CHECKLIST.md) for scope, tests, CI, docs/examples, and acceptance-criteria review.
+
 ### PR self-check
 
 - [ ] References the original issue with `Closes #NNN` in the PR body.
