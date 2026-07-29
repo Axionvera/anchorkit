@@ -6,6 +6,14 @@ import type {
   DepositRequestMetadata,
   PaymentRailConfig,
   WithdrawalRequestMetadata,
+  AnchorMockDepositRequest,
+  AnchorMockDepositResponse,
+  AnchorMockWithdrawalRequest,
+  AnchorMockWithdrawalResponse,
+  AnchorMockStatusResponse,
+  AnchorMockUpdateRequest,
+  AnchorMockUpdateResponse,
+  AnchorMockErrorResponse,
 } from "@anchorkit/types";
 import { ANCHOR_TRANSACTION_STATUSES } from "@anchorkit/types";
 import {
@@ -14,6 +22,14 @@ import {
   DepositRequestMetadataSchema,
   PaymentRailConfigSchema,
   WithdrawalRequestMetadataSchema,
+  AnchorMockDepositRequestSchema,
+  AnchorMockDepositResponseSchema,
+  AnchorMockWithdrawalRequestSchema,
+  AnchorMockWithdrawalResponseSchema,
+  AnchorMockStatusResponseSchema,
+  AnchorMockUpdateRequestSchema,
+  AnchorMockUpdateResponseSchema,
+  AnchorMockErrorResponseSchema,
 } from "@anchorkit/validators";
 import type { SafeParseReturnType } from "zod";
 import type { StellarPublicKey, StellarTransactionHash } from "@anchorkit/types";
@@ -36,6 +52,54 @@ export function isDepositRequestValid(input: unknown): boolean {
 
 export function isWithdrawalRequestValid(input: unknown): boolean {
   return parseWithdrawalRequestMetadata(input).success;
+}
+
+export function parseAnchorMockDepositRequest(
+  input: unknown
+): SafeParseReturnType<unknown, AnchorMockDepositRequest> {
+  return AnchorMockDepositRequestSchema.safeParse(input);
+}
+
+export function parseAnchorMockDepositResponse(
+  input: unknown
+): SafeParseReturnType<unknown, AnchorMockDepositResponse> {
+  return AnchorMockDepositResponseSchema.safeParse(input);
+}
+
+export function parseAnchorMockWithdrawalRequest(
+  input: unknown
+): SafeParseReturnType<unknown, AnchorMockWithdrawalRequest> {
+  return AnchorMockWithdrawalRequestSchema.safeParse(input);
+}
+
+export function parseAnchorMockWithdrawalResponse(
+  input: unknown
+): SafeParseReturnType<unknown, AnchorMockWithdrawalResponse> {
+  return AnchorMockWithdrawalResponseSchema.safeParse(input);
+}
+
+export function parseAnchorMockStatusResponse(
+  input: unknown
+): SafeParseReturnType<unknown, AnchorMockStatusResponse> {
+  return AnchorMockStatusResponseSchema.safeParse(input);
+}
+
+export function parseAnchorMockUpdateRequest(
+  input: unknown
+): SafeParseReturnType<unknown, AnchorMockUpdateRequest> {
+  return AnchorMockUpdateRequestSchema.safeParse(input);
+}
+
+export function parseAnchorMockUpdateResponse(
+  input: unknown
+): SafeParseReturnType<unknown, AnchorMockUpdateResponse> {
+  return AnchorMockUpdateResponseSchema.safeParse(input);
+}
+
+export function parseAnchorMockErrorResponse(
+  input: unknown
+): SafeParseReturnType<unknown, AnchorMockErrorResponse> {
+  return AnchorMockErrorResponseSchema.safeParse(input);
 }
 
 export function validateAnchorAssetConfig(
@@ -66,9 +130,7 @@ export function isCallbackUrlValid(url: string): boolean {
   return validateCallbackUrl(url).success;
 }
 
-export function isAnchorTransactionStatus(
-  value: string
-): value is AnchorTransactionStatus {
+export function isAnchorTransactionStatus(value: string): value is AnchorTransactionStatus {
   return (ANCHOR_TRANSACTION_STATUSES as unknown as string[]).includes(value);
 }
 
@@ -101,15 +163,17 @@ export function anchorStatusToUserMessage(
     case "pending_stellar":
       return {
         headline: `${k} settling on Stellar`,
-        detail: "Your transaction has been submitted to Stellar and is awaiting network confirmation.",
+        detail:
+          "Your transaction has been submitted to Stellar and is awaiting network confirmation.",
         severity: "info",
       };
     case "completed":
       return {
         headline: `${k} complete`,
-        detail: kind === "deposit"
-          ? "Funds have arrived in your Stellar account."
-          : "Funds have been sent to your external account.",
+        detail:
+          kind === "deposit"
+            ? "Funds have arrived in your Stellar account."
+            : "Funds have been sent to your external account.",
         severity: "success",
       };
     case "failed":
@@ -250,22 +314,14 @@ export type {
   AnchorValidationErrorCode,
 } from "@anchorkit/validators";
 
-import {
-  validateDepositRequest,
-  validateWithdrawalRequest,
-} from "@anchorkit/validators";
+import { validateDepositRequest, validateWithdrawalRequest } from "@anchorkit/validators";
 
 /**
  * Validate an anchor request by kind, returning a uniform `ValidationResult`.
  * Convenience wrapper so callers don't branch on kind before validating.
  */
-export function validateAnchorRequest(
-  kind: AnchorTransactionKind,
-  input: unknown,
-) {
-  return kind === "deposit"
-    ? validateDepositRequest(input)
-    : validateWithdrawalRequest(input);
+export function validateAnchorRequest(kind: AnchorTransactionKind, input: unknown) {
+  return kind === "deposit" ? validateDepositRequest(input) : validateWithdrawalRequest(input);
 }
 
 // ─── Validation UI state ────────────────────────────────────────────────────

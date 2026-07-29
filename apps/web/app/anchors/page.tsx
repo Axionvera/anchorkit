@@ -171,11 +171,18 @@ export default function AnchorsPage() {
             </div>
             <div className="md:col-span-2">
               <Label>Stellar account (destination)</Label>
-              <Input value={depositAccount} onChange={(e) => setDepositAccount(e.target.value.trim())} />
+              <Input
+                value={depositAccount}
+                onChange={(e) => setDepositAccount(e.target.value.trim())}
+              />
             </div>
             <div>
               <Label>Rail id</Label>
-              <Input value={depositRail} onChange={(e) => setDepositRail(e.target.value)} placeholder="sepa_eu" />
+              <Input
+                value={depositRail}
+                onChange={(e) => setDepositRail(e.target.value)}
+                placeholder="sepa_eu"
+              />
             </div>
             <div>
               <Label>Contact email (optional)</Label>
@@ -217,7 +224,10 @@ export default function AnchorsPage() {
             </div>
             <div className="md:col-span-2">
               <Label>Stellar account (sender / refund)</Label>
-              <Input value={withdrawAccount} onChange={(e) => setWithdrawAccount(e.target.value.trim())} />
+              <Input
+                value={withdrawAccount}
+                onChange={(e) => setWithdrawAccount(e.target.value.trim())}
+              />
             </div>
             <div>
               <Label>External destination</Label>
@@ -231,7 +241,9 @@ export default function AnchorsPage() {
           <div className="mt-4">
             <ValidationStateAlert
               state={validationLoading ? "loading" : withdrawFormatValid ? "ready" : "invalid"}
-              title={withdrawFormatValid ? "Valid withdrawal metadata" : "Invalid withdrawal metadata"}
+              title={
+                withdrawFormatValid ? "Valid withdrawal metadata" : "Invalid withdrawal metadata"
+              }
             >
               {validationLoading ? undefined : withdrawFormatValid ? (
                 <>
@@ -316,7 +328,9 @@ export default function AnchorsPage() {
             </div>
             <ValidationStateAlert
               state={validationLoading ? "loading" : cbUrlValid ? "ready" : "warning"}
-              title={cbUrlValid ? "Callback URL valid" : "Callback URL should be HTTPS in production"}
+              title={
+                cbUrlValid ? "Callback URL valid" : "Callback URL should be HTTPS in production"
+              }
             >
               {validationLoading
                 ? undefined
@@ -327,11 +341,17 @@ export default function AnchorsPage() {
             <div>
               <Label>Preview a mock anchor record</Label>
               <div className="mt-2 flex flex-wrap gap-2">
-                <Select value={mockKind} onChange={(e) => setMockKind(e.target.value as AnchorTransactionKind)}>
+                <Select
+                  value={mockKind}
+                  onChange={(e) => setMockKind(e.target.value as AnchorTransactionKind)}
+                >
                   <option value="deposit">Deposit</option>
                   <option value="withdrawal">Withdrawal</option>
                 </Select>
-                <Select value={mockStatus} onChange={(e) => setMockStatus(e.target.value as AnchorTransactionStatus)}>
+                <Select
+                  value={mockStatus}
+                  onChange={(e) => setMockStatus(e.target.value as AnchorTransactionStatus)}
+                >
                   {(
                     [
                       "pending_user",
@@ -362,10 +382,26 @@ export default function AnchorsPage() {
               </div>
               <div className="mt-3 rounded-lg border border-ink-200 p-3 text-sm dark:border-ink-800">
                 <dl className="divide-y divide-ink-100 dark:divide-ink-800">
-                  <DataRow label="Status" value={<AnchorStatusBadge status={mockRecord.status} />} />
-                  <DataRow label="Headline" value={anchorStatusToUserMessage(mockStatus, mockKind).headline} />
-                  <DataRow label="Detail" value={anchorStatusToUserMessage(mockStatus, mockKind).detail} />
-                  <DataRow label="Amount in" value={<span className="text-mono-sm">{mockRecord.amountIn} {mockRecord.assetCode}</span>} />
+                  <DataRow
+                    label="Status"
+                    value={<AnchorStatusBadge status={mockRecord.status} />}
+                  />
+                  <DataRow
+                    label="Headline"
+                    value={anchorStatusToUserMessage(mockStatus, mockKind).headline}
+                  />
+                  <DataRow
+                    label="Detail"
+                    value={anchorStatusToUserMessage(mockStatus, mockKind).detail}
+                  />
+                  <DataRow
+                    label="Amount in"
+                    value={
+                      <span className="text-mono-sm">
+                        {mockRecord.amountIn} {mockRecord.assetCode}
+                      </span>
+                    }
+                  />
                 </dl>
               </div>
               <TransactionReceiptPanel receipt={mockReceipt} title="Normalized anchor receipt" />
@@ -377,9 +413,7 @@ export default function AnchorsPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold tracking-tight">
-              Deposit lifecycle fixtures
-            </h2>
+            <h2 className="text-base font-semibold tracking-tight">Deposit lifecycle fixtures</h2>
             <span className="text-mono-xs text-ink-500 dark:text-ink-400">
               buildDepositLifecycle()
             </span>
@@ -410,10 +444,10 @@ export default function AnchorsPage() {
       <Card>
         <h2 className="text-base font-semibold tracking-tight">Validation engine</h2>
         <p className="mb-3 text-sm text-ink-500">
-          The shared anchor validation engine (<span className="text-mono-xs">
-            @anchorkit/validators
-          </span>) returns a uniform typed <span className="text-mono-xs">ValidationResult</span>{" "}
-          with user-safe errors, instead of raw schema output.
+          The shared anchor validation engine (
+          <span className="text-mono-xs">@anchorkit/validators</span>) returns a uniform typed{" "}
+          <span className="text-mono-xs">ValidationResult</span> with user-safe errors, instead of
+          raw schema output.
         </p>
         <div className="grid gap-3 md:grid-cols-2">
           <div>
@@ -449,9 +483,9 @@ export default function AnchorsPage() {
       <Card>
         <h2 className="text-base font-semibold tracking-tight">Lifecycle transitions</h2>
         <p className="mb-3 text-sm text-ink-500">
-          The SEP-style anchor lifecycle state machine (<span className="text-mono-xs">
-            @anchorkit/anchor-utils
-          </span>) rejects illegal status moves instead of silently wrapping.
+          The SEP-style anchor lifecycle state machine (
+          <span className="text-mono-xs">@anchorkit/anchor-utils</span>) rejects illegal status
+          moves instead of silently wrapping.
         </p>
         <div className="grid gap-3 md:grid-cols-3">
           <div>
@@ -536,7 +570,10 @@ function EngineValidationAlert({
   const issueCount = !result.ok ? result.errors.length : 0;
 
   return (
-    <ValidationStateAlert state={state} title={!loading && !result.ok ? `${title} — ${issueCount} issue(s)` : title}>
+    <ValidationStateAlert
+      state={state}
+      title={!loading && !result.ok ? `${title} — ${issueCount} issue(s)` : title}
+    >
       {loading ? undefined : blocked ? (
         "This operation is currently disabled for this asset in the config above."
       ) : result.ok ? (

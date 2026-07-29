@@ -27,7 +27,15 @@ export interface ExampleEntry {
     | "AnchorTransactionRecord"
     | "Milestone"
     | "StellarPublicKeyArray"
-    | "TransactionReceipt";
+    | "TransactionReceipt"
+    | "AnchorMockDepositRequest"
+    | "AnchorMockDepositResponse"
+    | "AnchorMockWithdrawalRequest"
+    | "AnchorMockWithdrawalResponse"
+    | "AnchorMockStatusResponse"
+    | "AnchorMockUpdateRequest"
+    | "AnchorMockUpdateResponse"
+    | "AnchorMockErrorResponse";
   /** Whether the example must pass or must fail schema validation. */
   expect: ExampleExpectation;
   /** When the file is a JSON array, validate each element. */
@@ -103,5 +111,53 @@ export const EXAMPLE_REGISTRY: ExampleEntry[] = [
     expect: "valid",
     isArray: true,
     arrayKey: "receipts",
+  },
+  {
+    id: "anchors-mock-api-deposit-request",
+    path: "examples/anchors-mock-api-deposit-request.json",
+    schema: "AnchorMockDepositRequest",
+    expect: "valid",
+  },
+  {
+    id: "anchors-mock-api-deposit-response",
+    path: "examples/anchors-mock-api-deposit-response.json",
+    schema: "AnchorMockDepositResponse",
+    expect: "valid",
+  },
+  {
+    id: "anchors-mock-api-withdrawal-request",
+    path: "examples/anchors-mock-api-withdrawal-request.json",
+    schema: "AnchorMockWithdrawalRequest",
+    expect: "valid",
+  },
+  {
+    id: "anchors-mock-api-withdrawal-response",
+    path: "examples/anchors-mock-api-withdrawal-response.json",
+    schema: "AnchorMockWithdrawalResponse",
+    expect: "valid",
+  },
+  {
+    id: "anchors-mock-api-status-response",
+    path: "examples/anchors-mock-api-status-response.json",
+    schema: "AnchorMockStatusResponse",
+    expect: "valid",
+  },
+  {
+    id: "anchors-mock-api-update-request",
+    path: "examples/anchors-mock-api-update-request.json",
+    schema: "AnchorMockUpdateRequest",
+    expect: "valid",
+  },
+  {
+    id: "anchors-mock-api-update-response",
+    path: "examples/anchors-mock-api-update-response.json",
+    schema: "AnchorMockUpdateResponse",
+    expect: "valid",
+  },
+  {
+    id: "anchors-mock-api-error-response",
+    path: "examples/anchors-mock-api-error-response.json",
+    schema: "AnchorMockErrorResponse",
+    expect: "valid",
   },
 ];

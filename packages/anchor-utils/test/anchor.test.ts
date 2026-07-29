@@ -20,10 +20,17 @@ import {
   buildDepositLifecycle,
   buildWithdrawalLifecycle,
   advanceAnchorTransactionStatus,
+  parseAnchorMockDepositRequest,
+  parseAnchorMockDepositResponse,
+  parseAnchorMockWithdrawalRequest,
+  parseAnchorMockWithdrawalResponse,
+  parseAnchorMockStatusResponse,
+  parseAnchorMockUpdateRequest,
+  parseAnchorMockUpdateResponse,
+  parseAnchorMockErrorResponse,
 } from "../src";
 
-const FRIENDBOT =
-  "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR" as StellarPublicKey;
+const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR" as StellarPublicKey;
 
 const goodDeposit: DepositRequestMetadata = {
   assetCode: "XLM",
@@ -75,9 +82,7 @@ describe("Anchor deposit metadata validation", () => {
   });
 
   it("rejects a badly formatted email but accepts missing email (optional)", () => {
-    expect(
-      isDepositRequestValid({ ...goodDeposit, emailAddress: "not-an-email" })
-    ).toBe(false);
+    expect(isDepositRequestValid({ ...goodDeposit, emailAddress: "not-an-email" })).toBe(false);
     const withoutEmail = { ...goodDeposit };
     delete (withoutEmail as Partial<DepositRequestMetadata>).emailAddress;
     expect(isDepositRequestValid(withoutEmail)).toBe(true);
@@ -225,5 +230,128 @@ describe("Anchor lifecycle fixtures and status transitions", () => {
     expect(advanceAnchorTransactionStatus("pending_stellar")).toBe("completed");
     expect(advanceAnchorTransactionStatus("completed")).toBe("completed");
     expect(advanceAnchorTransactionStatus("pending_user", "failed")).toBe("failed");
+  });
+});
+
+describe("Anchor mock API contract parsing", () => {
+  it("parses mock deposit request", () => {
+    const payload = {
+      assetCode: "XLM",
+      amount: "500.0000000",
+      account: FRIENDBOT,
+      memo: "AnchorTest-42",
+      memoType: "text",
+      railId: "sepa_eur_bank",
+      emailAddress: "tester+sep@example.com",
+      type: "SEPA",
+    };
+    expect(parseAnchorMockDepositRequest(payload).success).toBe(true);
+  });
+
+  it("parses mock deposit response", () => {
+    const payload = {
+      transaction: {
+        id: "dep_mock_12345",
+        kind: "deposit",
+        status: "pending_user",
+        assetCode: "XLM",
+        amountIn: "500.0000000",
+        amountOut: "498.5000000",
+        feeAmount: "1.5000000",
+        stellarAccount: FRIENDBOT,
+        externalTransactionId: "SEPA-REF-0001",
+        userActionRequired: true,
+        message: "Please confirm the bank transfer details in the anchor portal.",
+        startedAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-01T00:00:00Z",
+        metadata: { rail: "SEPA" },
+      },
+      userActionUrl: "https://anchor.example.com/portal/deposit?id=dep_mock_12345",
+      instructions: "Initiate a SEPA transfer of 500 EUR using reference code SEPA-REF-0001.",
+    };
+    expect(parseAnchorMockDepositResponse(payload).success).toBe(true);
+  });
+
+  it("parses mock withdrawal request", () => {
+    const payload = {
+      assetCode: "USDC",
+      amount: "250.75",
+      account: FRIENDBOT,
+      memo: "WITHDRAW-99",
+      memoType: "text",
+      railId: "ach_us_bank",
+      dest: "US123456789012",
+      destExtra: "ACCT-4421",
+      type: "ACH",
+    };
+    expect(parseAnchorMockWithdrawalRequest(payload).success).toBe(true);
+  });
+
+  it("parses mock withdrawal response", () => {
+    const payload = {
+      transaction: {
+        id: "with_mock_12345",
+        kind: "withdrawal",
+        status: "pending_user",
+        assetCode: "USDC",
+        amountIn: "250.75",
+        amountOut: "248.75",
+        feeAmount: "2.00",
+        stellarAccount: FRIENDBOT,
+        externalTransactionId: "ACH-OUT-8812",
+        userActionRequired: true,
+        message: "Confirm the destination bank account in the anchor portal.",
+        startedAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-01T00:00:00Z",
+        metadata: { rail: "ACH" },
+      },
+      memo: "WITHDRAW-99",
+      memoType: "text",
+      anchorAddress: FRIENDBOT,
+    };
+    expect(parseAnchorMockWithdrawalResponse(payload).success).toBe(true);
+  });
+
+  it("parses mock status lookup response", () => {
+    const payload = {
+      transaction: {
+        id: "dep_mock_12345",
+        kind: "deposit",
+        status: "pending_anchor",
+        assetCode: "XLM",
+        amountIn: "500.0000000",
+        amountOut: "498.5000000",
+        feeAmount: "1.5000000",
+        stellarAccount: FRIENDBOT,
+        externalTransactionId: "SEPA-REF-0001",
+        userActionRequired: false,
+        message: "Anchor has received the bank transfer and is preparing the Stellar transaction.",
+        startedAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-01T02:00:00Z",
+        metadata: { rail: "SEPA" },
+      },
+      status: "pending_anchor",
+      userMessage: {
+        headline: "Deposit being processed by anchor",
+        detail: "The anchor is reviewing and processing your request. This can take a few minutes.",
+        severity: "info",
+      },
+    };
+    expect(parseAnchorMockStatusResponse(payload).success).toBe(true);
+  });
+
+  it("parses mock API error response", () => {
+    const payload = {
+      ok: false,
+      error: "Illegal status transition from pending_user to completed.",
+      code: "ILLEGAL_LIFECYCLE_TRANSITION",
+      userSafeMessage: "This transaction transition is not allowed by the anchor lifecycle rules.",
+      details: {
+        from: "pending_user",
+        to: "completed",
+        allowed: ["pending_anchor"],
+      },
+    };
+    expect(parseAnchorMockErrorResponse(payload).success).toBe(true);
   });
 });

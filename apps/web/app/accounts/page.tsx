@@ -3,15 +3,7 @@
 import { useState } from "react";
 import { DEFAULT_NETWORK } from "@anchorkit/config";
 import { PageShell } from "@/components/PageShell";
-import {
-  Alert,
-  Button,
-  Card,
-  Input,
-  Label,
-  AccountStatusBadge,
-  DataRow,
-} from "@/components/ui";
+import { Alert, Button, Card, Input, Label, AccountStatusBadge, DataRow } from "@/components/ui";
 import {
   generateTestnetKeypair,
   isPublicKeyValid,
@@ -55,9 +47,7 @@ export default function AccountsPage() {
   const expertUrl = isPublicKeyValid(lookupKey)
     ? getStellarExpertAccountUrl(lookupKey, DEFAULT_NETWORK)
     : null;
-  const friendbot = isPublicKeyValid(lookupKey)
-    ? getTestnetFriendbotUrl(lookupKey)
-    : null;
+  const friendbot = isPublicKeyValid(lookupKey) ? getTestnetFriendbotUrl(lookupKey) : null;
 
   async function handleLookup() {
     if (!isPublicKeyValid(lookupKey)) {
@@ -95,14 +85,12 @@ export default function AccountsPage() {
     <PageShell
       eyebrow="Accounts"
       title="Stellar account tools"
-      subtitle="Generate testnet keypairs, validate public or secret keys locally, and check an account&apos;s funded status against Stellar Horizon."
+      subtitle="Generate testnet keypairs, validate public or secret keys locally, and check an account's funded status against Stellar Horizon."
       warning="Secret keys generated on this page are for local demos only. Never use a mainnet secret here. After initial display, the secret is always shown redacted on rerenders in this MVP."
     >
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <h2 className="text-base font-semibold tracking-tight">
-            Generate a testnet keypair
-          </h2>
+          <h2 className="text-base font-semibold tracking-tight">Generate a testnet keypair</h2>
           <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">
             Generates a fresh random keypair suitable for Stellar testnet development. Secret is
             only shown once on creation.
@@ -114,9 +102,7 @@ export default function AccountsPage() {
             {lastGen && (
               <Button
                 variant="ghost"
-                onClick={() =>
-                  setLastGen({ ...lastGen, shown: !lastGen.shown })
-                }
+                onClick={() => setLastGen({ ...lastGen, shown: !lastGen.shown })}
               >
                 {lastGen.shown ? "Hide secret" : "Reveal secret (demo only)"}
               </Button>
@@ -131,9 +117,7 @@ export default function AccountsPage() {
                     <div className="text-right">
                       <div className="text-mono-sm hash-clip">{lastGen.publicKey}</div>
                       <a
-                        href={
-                          getStellarExpertAccountUrl(lastGen.publicKey, "testnet") ?? "#"
-                        }
+                        href={getStellarExpertAccountUrl(lastGen.publicKey, "testnet") ?? "#"}
                         target="_blank"
                         rel="noreferrer"
                         className="text-mono-xs text-stellar-600 hover:underline dark:text-stellar-400"
@@ -185,8 +169,8 @@ export default function AccountsPage() {
         <Card>
           <h2 className="text-base font-semibold tracking-tight">Validate a key locally</h2>
           <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">
-            Structural validation only — runs in the browser and does not touch the network.
-            Secret input is never logged or echoed verbatim.
+            Structural validation only — runs in the browser and does not touch the network. Secret
+            input is never logged or echoed verbatim.
           </p>
           <div className="mt-4 space-y-3">
             <div>
@@ -224,7 +208,10 @@ export default function AccountsPage() {
               />
             </div>
             {validateInput.length > 0 && (
-              <Alert tone={validationResult ? "success" : "error"} title={validationResult ? "Valid key" : "Invalid key"}>
+              <Alert
+                tone={validationResult ? "success" : "error"}
+                title={validationResult ? "Valid key" : "Invalid key"}
+              >
                 {validationResult ? (
                   <div>
                     {validateMode === "public" ? (
@@ -249,9 +236,7 @@ export default function AccountsPage() {
                           <span className="text-mono-sm">
                             {(() => {
                               try {
-                                return getPublicKeyFromSecret(
-                                  validateInput as StellarSecretKey
-                                );
+                                return getPublicKeyFromSecret(validateInput as StellarSecretKey);
                               } catch {
                                 return "could not derive";
                               }
@@ -276,9 +261,7 @@ export default function AccountsPage() {
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold tracking-tight">
-              Check account funded status
-            </h2>
+            <h2 className="text-base font-semibold tracking-tight">Check account funded status</h2>
             <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">
               Looks up a public key against Stellar testnet Horizon. Returns funded, unfunded,
               unknown (network error), or error.
@@ -297,7 +280,11 @@ export default function AccountsPage() {
             />
           </div>
           <div className="flex items-end gap-2">
-            <Button variant="primary" onClick={handleLookup} disabled={lookupLoading || !isPublicKeyValid(lookupKey)}>
+            <Button
+              variant="primary"
+              onClick={handleLookup}
+              disabled={lookupLoading || !isPublicKeyValid(lookupKey)}
+            >
               {lookupLoading ? "Checking…" : "Check Status"}
             </Button>
           </div>
@@ -337,7 +324,10 @@ export default function AccountsPage() {
                 </div>
               )}
               {lookupInfo.error && (
-                <DataRow label="Error" value={<span className="text-red-600 dark:text-red-400">{lookupInfo.error}</span>} />
+                <DataRow
+                  label="Error"
+                  value={<span className="text-red-600 dark:text-red-400">{lookupInfo.error}</span>}
+                />
               )}
               {lookupDiag && lookupDiag.reserve && (
                 <DataRow
@@ -385,13 +375,21 @@ export default function AccountsPage() {
               {lookupDiag?.state === "invalid" && (
                 <DataRow
                   label="Diagnostic"
-                  value={<span className="text-red-600 dark:text-red-400">Invalid public key — cannot diagnose.</span>}
+                  value={
+                    <span className="text-red-600 dark:text-red-400">
+                      Invalid public key — cannot diagnose.
+                    </span>
+                  }
                 />
               )}
               {lookupDiag?.state === "unavailable" && (
                 <DataRow
                   label="Diagnostic"
-                  value={<span className="text-amber-600 dark:text-amber-400">Account diagnostics unavailable (network error).</span>}
+                  value={
+                    <span className="text-amber-600 dark:text-amber-400">
+                      Account diagnostics unavailable (network error).
+                    </span>
+                  }
                 />
               )}
               <div className="flex flex-wrap gap-2 pt-2">
@@ -424,8 +422,8 @@ export default function AccountsPage() {
       <Card>
         <h2 className="text-base font-semibold tracking-tight">Transaction lookup</h2>
         <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">
-          Paste a transaction hash to build a Stellar Expert link. Invalid hashes are
-          rejected locally — no explorer URL is hardcoded.
+          Paste a transaction hash to build a Stellar Expert link. Invalid hashes are rejected
+          locally — no explorer URL is hardcoded.
         </p>
         <Input
           className="mt-3"
@@ -435,7 +433,9 @@ export default function AccountsPage() {
           aria-label="Transaction hash"
         />
         {txHashInput.trim() && !txParse && (
-          <p className="mt-2 text-sm text-red-600">Enter a valid 64-character hex transaction hash.</p>
+          <p className="mt-2 text-sm text-red-600">
+            Enter a valid 64-character hex transaction hash.
+          </p>
         )}
         {txParse && txParse.ok && (
           <a

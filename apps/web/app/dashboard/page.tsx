@@ -51,7 +51,6 @@ export default function DashboardPage() {
       <CapabilityHealthSummary capabilities={MODULE_CAPABILITIES} />
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-
         {MODULE_CAPABILITIES.map((m) => {
           const meta = MODULE_META[m.id];
           const disabled = m.state === "unavailable";
@@ -93,13 +92,17 @@ export default function DashboardPage() {
       <section>
         <div className="mb-4 flex items-center gap-3">
           <h2 className="text-lg font-semibold tracking-tight">Package health</h2>
-          <CapabilityHealthSummary capabilities={PACKAGE_CAPABILITIES} />
+          <CapabilityHealthSummary
+            capabilities={PACKAGE_CAPABILITIES.map((pkg) => ({ state: pkg.overallState }))}
+          />
         </div>
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {PACKAGE_CAPABILITIES.map((pkg) => (
             <Card key={pkg.packageName} className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className={`inline-block h-8 w-8 rounded-md ${PACKAGE_ACCENT[pkg.packageName] ?? "bg-ink-500"} opacity-90`} />
+                <span
+                  className={`inline-block h-8 w-8 rounded-md ${PACKAGE_ACCENT[pkg.packageName] ?? "bg-ink-500"} opacity-90`}
+                />
                 <CapabilityBadge state={pkg.overallState} />
               </div>
               <h3 className="text-base font-semibold tracking-tight">
@@ -144,9 +147,9 @@ export default function DashboardPage() {
               unless you explicitly wire one.
             </li>
             <li>
-              <span className="font-medium text-amber-700 dark:text-amber-300">4.</span> Secret
-              keys generated here are ephemeral by default — copy them to a secure place if you
-              want to reuse a test identity.
+              <span className="font-medium text-amber-700 dark:text-amber-300">4.</span> Secret keys
+              generated here are ephemeral by default — copy them to a secure place if you want to
+              reuse a test identity.
             </li>
           </ul>
         </Card>

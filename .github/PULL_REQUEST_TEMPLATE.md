@@ -2,12 +2,14 @@
 
 Closes #ISSUE_NUMBER_HERE
 
-Describe what this PR delivers in 1-3 sentences.
+Describe what this PR delivers in 1-3 sentences. For implementation-heavy issues, self-check the scope against [docs/MEANINGFUL_IMPLEMENTATION_CHECKLIST.md](../docs/MEANINGFUL_IMPLEMENTATION_CHECKLIST.md).
 
 ## Issue scope
 
 Fill in a completion table mapping every Acceptance Criterion from the issue to its status,
-implementation evidence, and tests. See
+implementation evidence, and tests.
+
+For cross-package issues, use [docs/ACCEPTANCE_CRITERIA_TRACEABILITY.md](../docs/ACCEPTANCE_CRITERIA_TRACEABILITY.md) to map each criterion to affected packages, tests, docs, examples, and behavior. See
 [docs/ACCEPTANCE_CRITERIA_COMPLETION.md](../docs/ACCEPTANCE_CRITERIA_COMPLETION.md) for the full
 format, status legend, and a worked example.
 
@@ -37,7 +39,7 @@ maintainer):
 
 If any CI check is failing, summarize the failure and the fix or evidence that it is unrelated. See [docs/FAILING_CI_RESPONSE_GUIDE.md](../docs/FAILING_CI_RESPONSE_GUIDE.md).
 
-Describe what you ran and how you verified the change (commands run, manual steps in the`ndashboard, contract test output, etc.). Include affected packages/apps, tests added or updated,`ncommands run, CI status, and any no-test justification. See`n[docs/TEST_EVIDENCE_REQUIREMENT.md](../docs/TEST_EVIDENCE_REQUIREMENT.md). This is required even when the checklist below is filled
+Describe what you ran and how you verified the change (commands run, manual steps in the`ndashboard, contract test output, etc.). Include affected packages/apps, tests added or updated,`ncommands run, CI status, and any no-test justification. See`n[docs/TEST_EVIDENCE_REQUIREMENT.md](../docs/TEST_EVIDENCE_REQUIREMENT.md) and the area-specific minimums in [docs/MINIMUM_TESTING_STANDARD.md](../docs/MINIMUM_TESTING_STANDARD.md). This is required even when the checklist below is filled
 in — the checklist confirms _that_ something was tested, this explains _how_.
 
 ## Screenshots / recordings
@@ -67,6 +69,8 @@ If checked, summarise the impact and mitigation here.
 Paste the [MAINTAINER_REVIEW_CHECKLIST.md](./docs/MAINTAINER_REVIEW_CHECKLIST.md) **Phase 1** into
 your PR description and mark each item. Do not fill out Phase 2 (GrantFox reward-readiness) —
 that is completed by the campaign reviewer after merge.
+
+GrantFox reviewers can use [docs/GRANTFOX_REVIEWER_CHECKLIST.md](../docs/GRANTFOX_REVIEWER_CHECKLIST.md) for scope, tests, CI, docs/examples, and acceptance-criteria review.
 
 ### PR self-check
 
@@ -148,3 +152,7 @@ For multi-criterion issues, use or link the audit table in [docs/ACCEPTANCE_CRIT
 ## GrantFox payment expectations
 
 For `GrantFox OSS` / `Maybe Rewarded` issues, remember that merge does not guarantee payment. Before asking about a reward, self-review acceptance criteria, scope, test evidence, CI status, and any documented claim step in [docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md](../docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md).
+
+## Contributor self-review
+
+Before requesting review on a non-trivial issue, complete the self-review template in [docs/CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md](../docs/CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md). Confirm affected packages, tests, CI, docs/examples, acceptance criteria, and residual risk are ready.

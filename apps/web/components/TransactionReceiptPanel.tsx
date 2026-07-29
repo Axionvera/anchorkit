@@ -36,15 +36,16 @@ export function TransactionReceiptPanel({
         {receipt.detail}
       </Alert>
       <dl className="divide-y divide-ink-100 dark:divide-ink-800">
-        <DataRow label="Receipt id" value={<span className="font-mono text-xs">{receipt.id}</span>} />
+        <DataRow
+          label="Receipt id"
+          value={<span className="font-mono text-xs">{receipt.id}</span>}
+        />
         <DataRow label="Source" value={receipt.source} />
         <DataRow label="Network" value={receipt.network} />
         {receipt.transactionHash && (
           <DataRow
             label="Transaction hash"
-            value={
-              <span className="font-mono text-xs break-all">{receipt.transactionHash}</span>
-            }
+            value={<span className="font-mono text-xs break-all">{receipt.transactionHash}</span>}
           />
         )}
         {receipt.explorerUrl && (

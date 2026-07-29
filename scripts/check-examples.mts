@@ -23,6 +23,14 @@ import {
   MilestoneSchema,
   StellarPublicKeySchema,
   TransactionReceiptSchema,
+  AnchorMockDepositRequestSchema,
+  AnchorMockDepositResponseSchema,
+  AnchorMockWithdrawalRequestSchema,
+  AnchorMockWithdrawalResponseSchema,
+  AnchorMockStatusResponseSchema,
+  AnchorMockUpdateRequestSchema,
+  AnchorMockUpdateResponseSchema,
+  AnchorMockErrorResponseSchema,
 } from "@anchorkit/validators";
 import { EXAMPLE_REGISTRY, type ExampleEntry } from "../examples/registry";
 
@@ -35,6 +43,14 @@ export const SCHEMA_MAP = {
   Milestone: MilestoneSchema,
   StellarPublicKeyArray: StellarPublicKeySchema,
   TransactionReceipt: TransactionReceiptSchema,
+  AnchorMockDepositRequest: AnchorMockDepositRequestSchema,
+  AnchorMockDepositResponse: AnchorMockDepositResponseSchema,
+  AnchorMockWithdrawalRequest: AnchorMockWithdrawalRequestSchema,
+  AnchorMockWithdrawalResponse: AnchorMockWithdrawalResponseSchema,
+  AnchorMockStatusResponse: AnchorMockStatusResponseSchema,
+  AnchorMockUpdateRequest: AnchorMockUpdateRequestSchema,
+  AnchorMockUpdateResponse: AnchorMockUpdateResponseSchema,
+  AnchorMockErrorResponse: AnchorMockErrorResponseSchema,
 } as const;
 
 export type SchemaName = keyof typeof SCHEMA_MAP;
