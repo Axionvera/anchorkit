@@ -6,6 +6,7 @@ export * from "./schemas/anchor";
 export * from "./schemas/escrow";
 export * from "./schemas/milestoneUi";
 export * from "./schemas/receipt";
+export * from "./schemas/railCapability";
 
 // ─── Validation engine (issue #6) ───────────────────────────────────────────
 export * from "./validationEngine";

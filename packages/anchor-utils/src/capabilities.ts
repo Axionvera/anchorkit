@@ -40,6 +40,12 @@ export const ANCHOR_UTILS_CAPABILITIES: PackageCapability = {
       state: "implemented",
       description: "Pre-built arrays representing successful deposits and failed/refunded withdrawals.",
     },
+    {
+      id: "rail-capability",
+      label: "Rail Capability Matrix Validators",
+      state: "implemented",
+      description: "Parse and validate AnchorCapabilityMatrix, AnchorRailCapability, and AnchorAssetCapability objects with typed Zod-backed helpers.",
+    },
   ],
   docsHref: "/docs#anchor-utils",
 };

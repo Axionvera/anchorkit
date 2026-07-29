@@ -13,6 +13,7 @@ import {
   Select,
   ValidationStateAlert,
 } from "@/components/ui";
+import { CapabilityMatrixCard } from "@/components/CapabilityMatrixCard";
 import {
   anchorStatusToUserMessage,
   anchorValidationUiState,
@@ -31,6 +32,7 @@ import {
   transition,
   ALLOWED_TRANSITIONS,
 } from "@anchorkit/anchor-utils";
+import { DEFAULT_ANCHOR_CAPABILITY_MATRIX } from "@anchorkit/config";
 import { anchorRecordToReceipt } from "@anchorkit/stellar-kit";
 import { validateCallbackUrl } from "@anchorkit/validators";
 import type { ValidationResult } from "@anchorkit/validators";
@@ -544,6 +546,18 @@ export default function AnchorsPage() {
           )}
         </div>
       </Card>
+
+      {/* ── Capability matrix (issue #54) ───────────────────────────────── */}
+      <section>
+        <h2 className="mb-4 text-lg font-semibold tracking-tight">Anchor capability matrix</h2>
+        <p className="mb-4 text-sm text-ink-500 dark:text-ink-400">
+          The matrix below describes which payment rails and assets are supported by the mock
+          anchor integration, and whether deposit and withdrawal flows are available for each.
+          Experimental and disabled behaviours are called out explicitly so contributors can avoid
+          building unsupported flows.
+        </p>
+        <CapabilityMatrixCard matrix={DEFAULT_ANCHOR_CAPABILITY_MATRIX} />
+      </section>
     </PageShell>
   );
 }
