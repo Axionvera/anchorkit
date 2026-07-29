@@ -60,6 +60,7 @@ All of these live under [`./docs/`](./docs/).
 | Shared test fixtures                              | [`FIXTURE_FRAMEWORK.md`](./docs/FIXTURE_FRAMEWORK.md)                           |
 | Status severity mapping                           | [`STATUS_SEVERITY_MAPPING.md`](./docs/STATUS_SEVERITY_MAPPING.md)               |
 | Contributor guide                                 | [`CONTRIBUTOR_GUIDE.md`](./docs/CONTRIBUTOR_GUIDE.md)                           |
+| Issue application guide                           | [`ISSUE_APPLICATION_GUIDE.md`](./docs/ISSUE_APPLICATION_GUIDE.md)               |
 | Meaningful vs. insufficient contribution examples | [`MEANINGFUL_WORK_EXAMPLES.md`](./docs/MEANINGFUL_WORK_EXAMPLES.md)             |
 | Meaningful implementation checklist               | [`MEANINGFUL_IMPLEMENTATION_CHECKLIST.md`](./docs/MEANINGFUL_IMPLEMENTATION_CHECKLIST.md) |
 | Low-effort contribution examples              | [`LOW_EFFORT_CONTRIBUTION_EXAMPLES.md`](./docs/LOW_EFFORT_CONTRIBUTION_EXAMPLES.md) |
