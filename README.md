@@ -43,6 +43,7 @@ All of these live under [`./docs/`](./docs/).
 | Test-first contribution guide                     | [`TEST_FIRST_CONTRIBUTION_GUIDE.md`](./docs/TEST_FIRST_CONTRIBUTION_GUIDE.md)         |
 | Minimum testing standard                         | [`MINIMUM_TESTING_STANDARD.md`](./docs/MINIMUM_TESTING_STANDARD.md)             |
 | Contributor self-review template                  | [`CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md`](./docs/CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md) |
+| Contributor self-assessment form                 | [`CONTRIBUTOR_SELF_ASSESSMENT_FORM.md`](./docs/CONTRIBUTOR_SELF_ASSESSMENT_FORM.md) |
 | Architecture / package boundaries                 | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                                     |
 | Stellar testnet usage                             | [`STELLAR_TESTNET_USAGE.md`](./docs/STELLAR_TESTNET_USAGE.md)                   |
 | Security notes                                    | [`SECURITY_NOTES.md`](./docs/SECURITY_NOTES.md)                                 |
