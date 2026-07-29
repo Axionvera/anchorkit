@@ -16,8 +16,11 @@ Before opening your first PR, please read:
   examples of low-effort, partial, under-tested, failing-CI, and acceptable PRs
   against real AnchorKit code, so "meaningful contribution" isn't left to guesswork.
 - If you are contributing under a GrantFox campaign, also read
-  [docs/GRANTFOX_WORKFLOW.md](./docs/GRANTFOX_WORKFLOW.md) and
-  [docs/ISSUE_STANDARD.md](./docs/ISSUE_STANDARD.md).
+  [docs/GRANTFOX_WORKFLOW.md](./docs/GRANTFOX_WORKFLOW.md),
+  [docs/ISSUE_STANDARD.md](./docs/ISSUE_STANDARD.md), and the
+  [docs/PAYMENT_PERIOD_COMMUNICATION_POLICY.md](./docs/PAYMENT_PERIOD_COMMUNICATION_POLICY.md) —
+  it explains how to communicate about payment once a PR merges, without
+  flooding issues or maintainer channels with repeated follow-ups.
 
 ## Quick start
 
@@ -80,3 +83,7 @@ completion before review starts.
    suite clean.
 4. Maintainers will review using the checklist. Merging is a prerequisite for
    reward consideration but does not itself guarantee reward-readiness.
+5. After merge, follow the
+   [payment-period communication policy](./docs/PAYMENT_PERIOD_COMMUNICATION_POLICY.md):
+   ask once, with evidence, and wait for the documented evaluation process
+   instead of repeating the request.
