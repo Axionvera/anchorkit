@@ -70,7 +70,10 @@ export default function HomePage() {
             </div>
             <ul className="space-y-1">
               {m.bullets.map((b) => (
-                <li key={b} className="flex items-start gap-2 text-sm text-ink-700 dark:text-ink-200">
+                <li
+                  key={b}
+                  className="flex items-start gap-2 text-sm text-ink-700 dark:text-ink-200"
+                >
                   <span className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-stellar-500" />
                   {b}
                 </li>
@@ -109,8 +112,8 @@ export default function HomePage() {
             GrantFox-ready
           </h3>
           <p className="mt-2 text-sm text-ink-700 dark:text-ink-200">
-            Issue templates, pull request template, review checklist, labels, and contributor
-            guides are pre-shipped for open-source grants.
+            Issue templates, pull request template, review checklist, labels, and contributor guides
+            are pre-shipped for open-source grants.
           </p>
         </Card>
       </div>
@@ -121,17 +124,13 @@ export default function HomePage() {
           <Link href="/docs" className="group">
             <div className="rounded-lg border border-ink-200 p-4 transition-colors group-hover:border-stellar-400 dark:border-ink-800 group-hover:dark:border-stellar-700">
               <div className="text-sm font-medium">Project documentation</div>
-              <div className="mt-1 text-mono-xs text-ink-500 dark:text-ink-400">
-                /docs
-              </div>
+              <div className="mt-1 text-mono-xs text-ink-500 dark:text-ink-400">/docs</div>
             </div>
           </Link>
           <Link href="/dashboard" className="group">
             <div className="rounded-lg border border-ink-200 p-4 transition-colors group-hover:border-stellar-400 dark:border-ink-800 group-hover:dark:border-stellar-700">
               <div className="text-sm font-medium">Developer dashboard</div>
-              <div className="mt-1 text-mono-xs text-ink-500 dark:text-ink-400">
-                /dashboard
-              </div>
+              <div className="mt-1 text-mono-xs text-ink-500 dark:text-ink-400">/dashboard</div>
             </div>
           </Link>
           <a
@@ -142,9 +141,7 @@ export default function HomePage() {
           >
             <div className="rounded-lg border border-ink-200 p-4 transition-colors group-hover:border-stellar-400 dark:border-ink-800 group-hover:dark:border-stellar-700">
               <div className="text-sm font-medium">Stellar Expert (Testnet) ↗</div>
-              <div className="mt-1 text-mono-xs text-ink-500 dark:text-ink-400">
-                stellar.expert
-              </div>
+              <div className="mt-1 text-mono-xs text-ink-500 dark:text-ink-400">stellar.expert</div>
             </div>
           </a>
           <a

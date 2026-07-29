@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "error": "Illegal status transition from pending_user to completed.",
+  "code": "ILLEGAL_LIFECYCLE_TRANSITION",
+  "userSafeMessage": "This transaction transition is not allowed by the anchor lifecycle rules.",
+  "details": {
+    "from": "pending_user",
+    "to": "completed",
+    "allowed": ["pending_anchor"]
+  }
+}

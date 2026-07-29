@@ -86,25 +86,88 @@ export const AnchorTransactionRecordSchema = z.object({
   metadata: z.record(z.unknown()).default({}),
 });
 
-export const CallbackUrlSchema = z.string().url().superRefine((val, ctx) => {
-  try {
-    const url = new URL(val);
-    if (url.protocol !== "https:" && url.hostname !== "localhost") {
+export const AnchorMockDepositRequestSchema = DepositRequestMetadataSchema;
+
+export const AnchorMockDepositResponseSchema = z.object({
+  transaction: AnchorTransactionRecordSchema,
+  userActionUrl: z.string().url().optional(),
+  instructions: z.string().optional(),
+});
+
+export const AnchorMockWithdrawalRequestSchema = WithdrawalRequestMetadataSchema;
+
+export const AnchorMockWithdrawalResponseSchema = z.object({
+  transaction: AnchorTransactionRecordSchema,
+  memo: z.string(),
+  memoType: MemoTypeSchema,
+  anchorAddress: StellarPublicKeySchema,
+});
+
+export const AnchorMockStatusResponseSchema = z.object({
+  transaction: AnchorTransactionRecordSchema,
+  status: AnchorTransactionStatusSchema,
+  userMessage: z.object({
+    headline: z.string().min(1),
+    detail: z.string().min(1),
+    cta: z.string().optional(),
+    severity: z.enum(["info", "warning", "error", "success"]),
+  }),
+});
+
+export const AnchorMockUpdateRequestSchema = z.object({
+  status: AnchorTransactionStatusSchema.optional(),
+  message: z.string().optional(),
+  externalTransactionId: z.string().optional(),
+  stellarTransactionId: z.string().optional(),
+  refunded: z.boolean().optional(),
+  feeAmount: PaymentAmountSchema.optional(),
+  amountOut: PaymentAmountSchema.optional(),
+});
+
+export const AnchorMockUpdateResponseSchema = z.object({
+  ok: z.boolean(),
+  transaction: AnchorTransactionRecordSchema.optional(),
+  error: z.string().optional(),
+});
+
+export const AnchorMockErrorResponseSchema = z.object({
+  ok: z.literal(false),
+  error: z.string(),
+  code: z.string(),
+  userSafeMessage: z.string().optional(),
+  details: z.record(z.unknown()).optional(),
+});
+
+export const CallbackUrlSchema = z
+  .string()
+  .url()
+  .superRefine((val, ctx) => {
+    try {
+      const url = new URL(val);
+      if (url.protocol !== "https:" && url.hostname !== "localhost") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Callback URL must use HTTPS in production (localhost is allowed for testing)",
+        });
+      }
+    } catch {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Callback URL must use HTTPS in production (localhost is allowed for testing)",
+        message: "Invalid URL format",
       });
     }
-  } catch {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Invalid URL format",
-    });
-  }
-});
+  });
 
 export type ParsedAnchorAssetConfig = z.infer<typeof AnchorAssetConfigSchema>;
 export type ParsedPaymentRailConfig = z.infer<typeof PaymentRailConfigSchema>;
 export type ParsedDepositRequestMetadata = z.infer<typeof DepositRequestMetadataSchema>;
 export type ParsedWithdrawalRequestMetadata = z.infer<typeof WithdrawalRequestMetadataSchema>;
 export type ParsedAnchorTransactionRecord = z.infer<typeof AnchorTransactionRecordSchema>;
+export type ParsedAnchorMockDepositRequest = z.infer<typeof AnchorMockDepositRequestSchema>;
+export type ParsedAnchorMockDepositResponse = z.infer<typeof AnchorMockDepositResponseSchema>;
+export type ParsedAnchorMockWithdrawalRequest = z.infer<typeof AnchorMockWithdrawalRequestSchema>;
+export type ParsedAnchorMockWithdrawalResponse = z.infer<typeof AnchorMockWithdrawalResponseSchema>;
+export type ParsedAnchorMockStatusResponse = z.infer<typeof AnchorMockStatusResponseSchema>;
+export type ParsedAnchorMockUpdateRequest = z.infer<typeof AnchorMockUpdateRequestSchema>;
+export type ParsedAnchorMockUpdateResponse = z.infer<typeof AnchorMockUpdateResponseSchema>;
+export type ParsedAnchorMockErrorResponse = z.infer<typeof AnchorMockErrorResponseSchema>;

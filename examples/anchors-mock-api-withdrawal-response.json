@@ -1,0 +1,23 @@
+{
+  "transaction": {
+    "id": "with_mock_12345",
+    "kind": "withdrawal",
+    "status": "pending_user",
+    "assetCode": "USDC",
+    "amountIn": "250.75",
+    "amountOut": "248.75",
+    "feeAmount": "2.00",
+    "stellarAccount": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+    "externalTransactionId": "ACH-OUT-8812",
+    "userActionRequired": true,
+    "message": "Confirm the destination bank account in the anchor portal.",
+    "startedAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "metadata": {
+      "rail": "ACH"
+    }
+  },
+  "memo": "WITHDRAW-99",
+  "memoType": "text",
+  "anchorAddress": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR"
+}

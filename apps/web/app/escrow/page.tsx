@@ -9,7 +9,13 @@ import { parseEscrowEvents, escrowReleaseToReceipt } from "@anchorkit/stellar-ki
 import { escrowEventExample } from "@/lib/escrowEventExample";
 import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
 import { getMilestoneUiInfo } from "@anchorkit/types";
-import type { EscrowEventV1, EscrowSummary, Milestone, MilestoneStatus, MilestoneAction } from "@anchorkit/types";
+import type {
+  EscrowEventV1,
+  EscrowSummary,
+  Milestone,
+  MilestoneStatus,
+  MilestoneAction,
+} from "@anchorkit/types";
 
 const FRIENDBOT = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
 const LIFECYCLE: MilestoneStatus[] = [
@@ -72,11 +78,12 @@ export default function EscrowPage() {
       disputedCount: step === 4 ? 1 : 0,
       completedCount: step >= 6 ? 2 : 1,
     }),
-    [step, amount],
+    [step, amount]
   );
 
   const handleAction = (action: MilestoneAction) => {
     const status = LIFECYCLE[step];
+    if (!status) return;
     const idx = LIFECYCLE.indexOf(status);
     const transitions: Partial<Record<MilestoneStatus, MilestoneStatus>> = {
       draft: "active",
@@ -192,11 +199,7 @@ export default function EscrowPage() {
             </div>
 
             <div className="mt-4">
-              <MilestoneActionPanel
-                uiInfo={milestoneUi}
-                isAdmin={true}
-                onAction={handleAction}
-              />
+              <MilestoneActionPanel uiInfo={milestoneUi} isAdmin={true} onAction={handleAction} />
             </div>
           </div>
         </div>
@@ -326,7 +329,8 @@ function EscrowEventLog({ events }: { events: EscrowEventV1[] }) {
           </div>
           <div className="mt-1 text-ink-600 dark:text-ink-300">{eventSummary(e)}</div>
           <div className="mt-1 text-mono-xs text-ink-400">
-            {e.timestamp} &middot; {e.caller.slice(0, 6)}&hellip; &middot; contract {e.contractId.slice(0, 6)}&hellip;
+            {e.timestamp} &middot; {e.caller.slice(0, 6)}&hellip; &middot; contract{" "}
+            {e.contractId.slice(0, 6)}&hellip;
           </div>
         </li>
       ))}

@@ -1,0 +1,10 @@
+{
+  "assetCode": "XLM",
+  "amount": "500.0000000",
+  "account": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+  "memo": "AnchorTest-42",
+  "memoType": "text",
+  "railId": "sepa_eur_bank",
+  "emailAddress": "tester+sep@example.com",
+  "type": "SEPA"
+}

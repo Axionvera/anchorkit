@@ -347,6 +347,58 @@ export interface AnchorTransactionRecord {
   metadata: Record<string, unknown>;
 }
 
+export interface AnchorMockDepositRequest extends DepositRequestMetadata {}
+
+export interface AnchorMockDepositResponse {
+  transaction: AnchorTransactionRecord;
+  userActionUrl?: string;
+  instructions?: string;
+}
+
+export interface AnchorMockWithdrawalRequest extends WithdrawalRequestMetadata {}
+
+export interface AnchorMockWithdrawalResponse {
+  transaction: AnchorTransactionRecord;
+  memo: string;
+  memoType: string;
+  anchorAddress: string;
+}
+
+export interface AnchorMockStatusResponse {
+  transaction: AnchorTransactionRecord;
+  status: AnchorTransactionStatus;
+  userMessage: {
+    headline: string;
+    detail: string;
+    cta?: string;
+    severity: "info" | "warning" | "error" | "success";
+  };
+}
+
+export interface AnchorMockUpdateRequest {
+  status?: AnchorTransactionStatus;
+  message?: string;
+  externalTransactionId?: string;
+  stellarTransactionId?: string;
+  refunded?: boolean;
+  feeAmount?: string;
+  amountOut?: string;
+}
+
+export interface AnchorMockUpdateResponse {
+  ok: boolean;
+  transaction?: AnchorTransactionRecord;
+  error?: string;
+}
+
+export interface AnchorMockErrorResponse {
+  ok: false;
+  error: string;
+  code: string;
+  userSafeMessage?: string;
+  details?: Record<string, unknown>;
+}
+
 export type MilestoneStatus =
   | "draft"
   | "active"
@@ -634,4 +686,3 @@ export interface PackageCapability {
   features: PackageFeatureCapability[];
   docsHref?: string;
 }
-
