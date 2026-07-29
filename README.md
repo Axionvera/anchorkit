@@ -40,6 +40,7 @@ All of these live under [`./docs/`](./docs/).
 | Local setup                                       | [`LOCAL_SETUP.md`](./docs/LOCAL_SETUP.md)                                       |
 | Failing CI response guide                         | [`FAILING_CI_RESPONSE_GUIDE.md`](./docs/FAILING_CI_RESPONSE_GUIDE.md)           |
 | Test evidence PR requirement                      | [`TEST_EVIDENCE_REQUIREMENT.md`](./docs/TEST_EVIDENCE_REQUIREMENT.md)           |
+| Test-first contribution guide                     | [`TEST_FIRST_CONTRIBUTION_GUIDE.md`](./docs/TEST_FIRST_CONTRIBUTION_GUIDE.md)         |
 | Minimum testing standard                         | [`MINIMUM_TESTING_STANDARD.md`](./docs/MINIMUM_TESTING_STANDARD.md)             |
 | Contributor self-review template                  | [`CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md`](./docs/CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md) |
 | Architecture / package boundaries                 | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                                     |
