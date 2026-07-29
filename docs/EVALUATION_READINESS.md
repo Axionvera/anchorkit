@@ -1,63 +1,56 @@
-# Evaluation-Readiness Index
+# Evaluation-Readiness Dashboard
 
-This page links every evaluation-readiness requirement for AnchorKit contributors. Use it before submitting a pull request or when preparing a PR for GrantFox campaign review.
+Use this dashboard before requesting review, moving a pull request out of draft, or following up during a GrantFox payment period.
 
-## Payment Expectations
+A contribution is evaluation-ready when the issue scope is complete, the required verification has been performed, the pull request contains clear evidence, and any remaining limitations are documented.
 
-| Guide | What it covers |
-| ----- | -------------- |
-| [Contributor Payment Expectations](./CONTRIBUTOR_PAYMENT_EXPECTATIONS.md) | What a merge means, self-review before asking about payment, and how to handle unrewarded PRs. |
-| [Payment-Period Conduct Note](./PAYMENT_PERIOD_CONDUCT.md) | Communication expectations during the payment evaluation period. |
+## Readiness Dashboard
 
-## Testing Standards
+| Area                   | Evaluation-ready when                                                                                              | Guidance                                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Testing standard       | The applicable testing requirements have been followed, including a valid no-test justification where appropriate. | [Minimum Testing Standard](./MINIMUM_TESTING_STANDARD.md)                                                                  |
+| CI workflow            | Local verification has been completed and the available CI status is reported accurately.                          | [Local Verification](./LOCAL_VERIFICATION.md) · [Pull-request workflow](../.github/workflows/trigger-auto-merge.yml)       |
+| PR evidence            | The pull request explains the scope, affected areas, testing performed, results, limitations, and risks.           | [Pull Request Template](../.github/PULL_REQUEST_TEMPLATE.md) · [Test Evidence Requirement](./TEST_EVIDENCE_REQUIREMENT.md) |
+| Acceptance criteria    | Every issue criterion is mapped to implementation, documentation, tests, or verification evidence.                 | [Acceptance Criteria Traceability Table](./ACCEPTANCE_CRITERIA_TRACEABILITY.md)                                            |
+| Self-review            | The complete branch diff has been checked for scope, quality, tests, documentation, and residual risk.             | [Contributor Self-Review Template](./CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md)                                                  |
+| Payment-period conduct | Payment follow-up happens only after scope, evidence, review status, and CI status have been checked.              | [Payment-Period Conduct Note](./PAYMENT_PERIOD_CONDUCT.md)                                                                 |
+| Contributor conduct    | Communication remains respectful, accurate, and consistent with project expectations.                              | [Code of Conduct](../CODE_OF_CONDUCT.md)                                                                                   |
 
-| Guide | What it covers |
-| ----- | -------------- |
-| [Minimum Testing Standard](./MINIMUM_TESTING_STANDARD.md) | Area-specific minimums, happy-path and negative-path expectations, no-test justification. |
-| [Test Evidence PR Requirement](./TEST_EVIDENCE_REQUIREMENT.md) | Required PR evidence format, acceptable no-test justifications, CI status language. |
-| [Test-First Contribution Guide](./TEST_FIRST_CONTRIBUTION_GUIDE.md) | Test-first workflow with worked examples for package and diagnostics changes. |
+## Evaluation-Readiness Checklist
 
-## CI Guidance
+Before requesting evaluation, confirm that:
 
-| Guide | What it covers |
-| ----- | -------------- |
-| [Failing CI Response Guide](./FAILING_CI_RESPONSE_GUIDE.md) | First response to CI failures, common AnchorKit commands, per-area failure guidance. |
-| [Local Verification](./LOCAL_VERIFICATION.md) | Commands to run before opening a PR: `pnpm verify` and `pnpm verify:full`. |
+- [ ] The branch contains only changes required for the assigned issue.
+- [ ] Every acceptance criterion is addressed.
+- [ ] The applicable testing standard has been followed.
+- [ ] Test commands and results are recorded in the pull request.
+- [ ] `pnpm verify` has passed, or any limitation is explained.
+- [ ] The current CI status is described accurately.
+- [ ] The pull request template is complete.
+- [ ] Documentation and examples match the contribution.
+- [ ] The complete diff has been self-reviewed.
+- [ ] Known risks, limitations, and follow-up work are documented.
+- [ ] Payment-period communication follows the project guidance.
 
-## Acceptance Criteria Documentation
+A checked item should represent evidence, not an assumption.
 
-| Guide | What it covers |
-| ----- | -------------- |
-| [Acceptance Criteria Completion Table](./ACCEPTANCE_CRITERIA_COMPLETION.md) | Table format for mapping PR delivery to issue criteria, with status legend and worked example. |
-| [Acceptance Criteria Audit Template](./ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md) | Audit table for multi-criterion issues with status rules and required notes. |
-| [Acceptance Criteria Traceability Table](./ACCEPTANCE_CRITERIA_TRACEABILITY.md) | Extended table mapping criteria to packages, tests, docs, and CI status. |
+## Testing and CI Evidence
 
-## Contributor Self-Assessment
+Follow the [Minimum Testing Standard](./MINIMUM_TESTING_STANDARD.md) for the area changed.
 
-| Guide | What it covers |
-| ----- | -------------- |
-| [Contributor Self-Review Template](./CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md) | Self-review checklist: scope, tests, CI, docs, acceptance criteria, and ready-for-review decision. |
-| [Issue Approval Readiness Checklist](./ISSUE_APPROVAL_READINESS.md) | Pre-evaluation checklist for both contributors and reviewers. |
-| [Meaningful Implementation Checklist](./MEANINGFUL_IMPLEMENTATION_CHECKLIST.md) | Defines meaningful work across affected packages and surfaces. |
+Pull-request evidence should state:
 
-## Reviewer Checklists
+- tests added or updated;
+- commands executed;
+- whether each command passed;
+- packages, apps, examples, or contracts covered;
+- manual verification performed; and
+- any valid no-test justification.
 
-| Guide | What it covers |
-| ----- | -------------- |
-| [Maintainer Review Checklist](./MAINTAINER_REVIEW_CHECKLIST.md) | Two-phase review: Phase 1 (pre-merge code review) and Phase 2 (post-merge reward-readiness). |
-| [Reviewer Quality Checklist](./REVIEWER_QUALITY_CHECKLIST.md) | Engineering quality checklist: implementation, tests, CI, acceptance criteria, decision matrix. |
-| [GrantFox Reviewer Checklist](./GRANTFOX_REVIEWER_CHECKLIST.md) | Campaign-specific checklist for scope, tests, docs, and acceptance criteria. |
+Use the [Test Evidence Requirement](./TEST_EVIDENCE_REQUIREMENT.md) for the expected format.
 
-## Communication Policy
+Run the commands described in [Local Verification](./LOCAL_VERIFICATION.md). The standard repository verification command is:
 
-| Guide | What it covers |
-| ----- | -------------- |
-| [GrantFox Contribution Workflow §7](./GRANTFOX_WORKFLOW.md#7-communication-rules) | Where to communicate, response time expectations, scope change process. |
-| [Payment-Period Conduct Note](./PAYMENT_PERIOD_CONDUCT.md) | Conduct expectations during the payment evaluation period. |
-| [Code of Conduct](../CODE_OF_CONDUCT.md) | Project-wide participation expectations. |
-
-## Related Guides
-
-- [GrantFox Contribution Workflow](./GRANTFOX_WORKFLOW.md) — full campaign process from application to reward
-- [Contributor Guide](./CONTRIBUTOR_GUIDE.md) — contribution loop and conventions
-- [Low-Effort Contribution Examples](./LOW_EFFORT_CONTRIBUTION_EXAMPLES.md) — patterns that merge but fall short of evaluation expectations
+```bash
+pnpm verify
+```
