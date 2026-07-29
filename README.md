@@ -24,6 +24,7 @@ All of these live under `./docs/`.
 | Status severity mapping | `STATUS_SEVERITY_MAPPING.md` |
 | Dashboard capability states | `CAPABILITY_STATES.md` |
 | Contributor guide | `CONTRIBUTOR_GUIDE.md` |
+| Evaluation-readiness dashboard | `EVALUATION_READINESS.md` |
 | Maintainer guide | `MAINTAINER_GUIDE.md` |
 | Issue writing guide | `ISSUE_WRITING_GUIDE.md` |
 | GrantFox contribution workflow | `GRANTFOX_WORKFLOW.md` |
@@ -35,3 +36,7 @@ All of these live under `./docs/`.
 | Escrow compatibility matrix | `ESCROW_COMPATIBILITY_MATRIX.md` |
 
 ## 🦊 GrantFox readiness
+Before requesting review or following up during a payment period, use the
+[Evaluation-Readiness Dashboard](./docs/EVALUATION_READINESS.md) to confirm
+scope, testing, CI and verification evidence, acceptance-criteria mapping,
+self-review, and contributor conduct requirements.
