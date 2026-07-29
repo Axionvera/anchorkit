@@ -5,7 +5,8 @@
  * it should satisfy, plus whether it is expected to be *valid* or *invalid*.
  * The fixture validation script (`scripts/check-examples.mts`) and the
  * `examples.test.ts` vitest suite both consume this registry, so adding a new
- * example is a one-line change here.
+ * example is a one-line change here. CI runs the same script via
+ * `.github/workflows/check-examples.yml` (issue #94).
  *
  * Schema names map to the exported Zod schemas in `@anchorkit/validators`.
  * `expect: 'invalid'` is used for fixtures that are deliberately crafted to

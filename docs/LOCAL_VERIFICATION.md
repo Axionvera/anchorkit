@@ -65,6 +65,7 @@ pnpm contract:test
 ## Related docs
 
 - [LOCAL_SETUP.md](./LOCAL_SETUP.md) — install prerequisites and run the dashboard
+- [examples.md](./examples.md) — example/fixture validation (`pnpm check:examples`)
 - [CONTRIBUTOR_GUIDE.md](./CONTRIBUTOR_GUIDE.md) — contribution loop
 - [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) — PR self-check
 - [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) — GrantFox CI expectations

@@ -19,3 +19,15 @@ ever held real value.
 
 Do not commit a secret key (S…) that has ever held mainnet funds to this directory. All
 synthetic secrets used here are only valid structurally and are derived at runtime in tests.
+
+## Validation
+
+Registered fixtures are validated against shared Zod schemas:
+
+```bash
+pnpm check:examples
+pnpm test:examples
+```
+
+See [docs/examples.md](../docs/examples.md) for when to run validation and how to
+register new examples. CI runs the same checks on relevant PRs.

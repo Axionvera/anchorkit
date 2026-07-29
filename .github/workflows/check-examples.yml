@@ -1,0 +1,62 @@
+name: Check Examples
+
+on:
+  pull_request:
+    paths:
+      - "examples/**"
+      - "packages/validators/**"
+      - "packages/types/**"
+      - "packages/config/**"
+      - "scripts/check-examples.mts"
+      - "scripts/check-examples.test.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - "examples/**"
+      - "packages/validators/**"
+      - "packages/types/**"
+      - "packages/config/**"
+      - "scripts/check-examples.mts"
+      - "scripts/check-examples.test.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-examples:
+    name: Validate example fixtures
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build schema packages
+        run: pnpm --filter @anchorkit/validators... build
+
+      - name: Validate examples against shared schemas
+        run: pnpm check:examples -- --verbose
+
+      - name: Run example validation unit tests
+        run: pnpm test:examples

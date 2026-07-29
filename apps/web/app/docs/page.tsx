@@ -11,6 +11,7 @@ const docsNav = [
       { title: "Project overview", file: "PROJECT_OVERVIEW.md" },
       { title: "Local setup", file: "LOCAL_SETUP.md" },
       { title: "Local verification", file: "LOCAL_VERIFICATION.md" },
+      { title: "Example validation", file: "examples.md" },
       { title: "Architecture", file: "ARCHITECTURE.md" },
       { title: "Capability states", file: "CAPABILITY_STATES.md" },
       { title: "Roadmap & capability disclaimer", file: "ROADMAP.md" },
