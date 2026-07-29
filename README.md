@@ -71,6 +71,7 @@ All of these live under [`./docs/`](./docs/).
 | Advanced issue standard                           | [`ISSUE_STANDARD.md`](./docs/ISSUE_STANDARD.md)                                 |
 | Maintainer review checklist                       | [`MAINTAINER_REVIEW_CHECKLIST.md`](./docs/MAINTAINER_REVIEW_CHECKLIST.md)       |
 | Reviewer quality checklist                        | [`REVIEWER_QUALITY_CHECKLIST.md`](./docs/REVIEWER_QUALITY_CHECKLIST.md)         |
+| GrantFox reviewer checklist                       | [`GRANTFOX_REVIEWER_CHECKLIST.md`](./docs/GRANTFOX_REVIEWER_CHECKLIST.md)       |
 | Automation runbook                                | [`AUTOMATION_RUNBOOK.md`](./docs/AUTOMATION_RUNBOOK.md)                         |
 | Auto-assign workflow                              | [`AUTO_ASSIGN_WORKFLOW.md`](./docs/AUTO_ASSIGN_WORKFLOW.md)                     |
 | Dashboard capability states                       | [`CAPABILITY_STATES.md`](./docs/CAPABILITY_STATES.md)                           |
