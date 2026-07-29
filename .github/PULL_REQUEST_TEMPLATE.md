@@ -148,3 +148,7 @@ For multi-criterion issues, use or link the audit table in [docs/ACCEPTANCE_CRIT
 ## GrantFox payment expectations
 
 For `GrantFox OSS` / `Maybe Rewarded` issues, remember that merge does not guarantee payment. Before asking about a reward, self-review acceptance criteria, scope, test evidence, CI status, and any documented claim step in [docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md](../docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md).
+
+## Contributor self-review
+
+Before requesting review on a non-trivial issue, complete the self-review template in [docs/CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md](../docs/CONTRIBUTOR_SELF_REVIEW_TEMPLATE.md). Confirm affected packages, tests, CI, docs/examples, acceptance criteria, and residual risk are ready.
