@@ -12,6 +12,10 @@ ever held real value.
 | `assets-issued-example.json` | Example issued asset (USDC-like) with a test issuer |
 | `payments-valid-intent.json` | A payment intent that passes all validation |
 | `payments-invalid-intent.json` | A payment intent deliberately crafted to fail multiple checks |
+| `payment-request-valid.json` | A complete version 1 payment request |
+| `payment-request-expired.json` | A structurally valid request rejected by the parser after expiry |
+| `payment-request-malformed.json` | A request with invalid destination, amount, asset, memo, metadata, and expiry |
+| `payment-request-unsupported.json` | A request targeting an unsupported network |
 | `anchors-deposit-lifecycle.json` | Array of 4 deposit status records (pending_user → completed) |
 | `anchors-withdrawal-lifecycle.json` | Array of 5 withdrawal records (incl. failed, refunded) |
 | `escrow-milestone-lifecycle.json` | Treasury escrow milestones across the full state DAG |

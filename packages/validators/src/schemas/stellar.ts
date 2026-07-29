@@ -2,6 +2,7 @@ import { z } from "zod";
 import { STELLAR_NETWORKS } from "@anchorkit/types";
 import type {
   AssetCode,
+  PaymentRequestMetadataValue,
   StellarNetwork,
   StellarPublicKey,
   StellarSecretKey,
@@ -184,8 +185,51 @@ export const PaymentIntentSchema = z.object({
   memo: MemoInputSchema.optional(),
 });
 
+const PaymentRequestMetadataValueSchema: z.ZodType<PaymentRequestMetadataValue> = z.union([
+  z.string().max(512, "Payment request metadata values must be at most 512 characters"),
+  z.number().finite("Payment request metadata numbers must be finite"),
+  z.boolean(),
+]);
+
+export const PaymentRequestMetadataSchema = z
+  .record(
+    z
+      .string()
+      .min(1, "Payment request metadata keys must not be empty")
+      .max(64, "Payment request metadata keys must be at most 64 characters"),
+    PaymentRequestMetadataValueSchema
+  )
+  .superRefine((metadata, ctx) => {
+    if (Object.keys(metadata).length > 20) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.too_big,
+        maximum: 20,
+        type: "array",
+        inclusive: true,
+        message: "Payment request metadata must contain at most 20 entries",
+      });
+    }
+  });
+
+export const PaymentRequestSchema = z
+  .object({
+    version: z.literal("1"),
+    destination: StellarPublicKeySchema,
+    amount: PaymentAmountSchema,
+    asset: StellarAssetSchema,
+    memo: MemoInputSchema.optional(),
+    network: StellarNetworkSchema,
+    metadata: PaymentRequestMetadataSchema.optional(),
+    expiresAt: z
+      .string()
+      .datetime({ offset: true, message: "Payment request expiry must be an ISO-8601 timestamp" })
+      .optional(),
+  })
+  .strict();
+
 export type ParsedMemoInput = z.infer<typeof MemoInputSchema>;
 export type ParsedNativeAsset = z.infer<typeof NativeAssetSchema>;
 export type ParsedIssuedAsset = z.infer<typeof IssuedAssetSchema>;
 export type ParsedStellarAsset = z.infer<typeof StellarAssetSchema>;
 export type ParsedPaymentIntent = z.infer<typeof PaymentIntentSchema>;
+export type ParsedPaymentRequest = z.infer<typeof PaymentRequestSchema>;

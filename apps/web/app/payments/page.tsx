@@ -2,15 +2,25 @@
 
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
-import { Alert, Button, Card, Input, Label, Select } from "@/components/ui";
+import { Alert, Button, Card, Input, Label, Select, Textarea } from "@/components/ui";
 import {
   createPaymentIntent,
   createMockTransactionReceipt,
   estimateTransactionReadinessSync,
   getStellarExpertAccountUrl,
   isPublicKeyValid,
+  parsePaymentRequest,
 } from "@anchorkit/stellar-kit";
-import type { AssetCode, MemoType, PaymentIntent, StellarAsset, StellarPublicKey, TransactionReadiness, TransactionReceiptStatus } from "@anchorkit/types";
+import type {
+  AssetCode,
+  MemoType,
+  PaymentIntent,
+  StellarAsset,
+  StellarNetwork,
+  StellarPublicKey,
+  TransactionReadiness,
+  TransactionReceiptStatus,
+} from "@anchorkit/types";
 import { DEFAULT_NETWORK } from "@anchorkit/config";
 import { TransactionReceiptPanel } from "@/components/TransactionReceiptPanel";
 
@@ -28,6 +38,13 @@ export default function PaymentsPage() {
   const [amount, setAmount] = useState("100.5000000");
   const [memoType, setMemoType] = useState<MemoType>("text");
   const [memoValue, setMemoValue] = useState("Invoice #42");
+  const [network, setNetwork] = useState<StellarNetwork>(DEFAULT_NETWORK);
+  const [requestJson, setRequestJson] = useState("");
+  const [requestFeedback, setRequestFeedback] = useState<{
+    tone: "error" | "success";
+    title: string;
+    message: string;
+  } | null>(null);
 
   const [simulateSource, setSimulateSource] = useState<"funded" | "unfunded" | "unknown">("funded");
   const [simulateDest, setSimulateDest] = useState<"funded" | "unfunded" | "unknown">("funded");
@@ -76,7 +93,7 @@ export default function PaymentsPage() {
   const readiness: TransactionReadiness | null = useMemo(() => {
     if (!intent) return null;
     return estimateTransactionReadinessSync(intent, {
-      network: DEFAULT_NETWORK,
+      network,
       sourceAccountFunded:
         simulateSource === "funded"
           ? true
@@ -90,15 +107,90 @@ export default function PaymentsPage() {
             ? false
             : undefined,
     });
-  }, [intent, simulateSource, simulateDest]);
+  }, [intent, network, simulateSource, simulateDest]);
+
+  function applyPaymentRequest() {
+    const result = parsePaymentRequest(requestJson);
+    if (!result.success) {
+      const firstIssue = result.error.issues?.[0];
+      setRequestFeedback({
+        tone: "error",
+        title: result.error.code,
+        message: firstIssue
+          ? `${firstIssue.path || "request"}: ${firstIssue.message}`
+          : result.error.message,
+      });
+      return;
+    }
+
+    const request = result.data;
+    setDest(request.destination);
+    setAmount(request.amount);
+    setNetwork(request.network);
+    if (request.asset.type === "native") {
+      setAssetMode("native");
+    } else {
+      setAssetMode("issued");
+      setAssetCode(request.asset.code);
+      setAssetIssuer(request.asset.issuer);
+    }
+    if (request.memo) {
+      setMemoType(request.memo.type);
+      setMemoValue(request.memo.value);
+    } else {
+      setMemoType("none");
+      setMemoValue("");
+    }
+    setRequestFeedback({
+      tone: "success",
+      title: "Payment request applied",
+      message: `Loaded a ${request.network} request${
+        request.expiresAt ? ` expiring ${request.expiresAt}` : ""
+      }. Review the intent and readiness checks before continuing.`,
+    });
+  }
 
   return (
     <PageShell
       eyebrow="Payments"
-      title="Payment intent builder & readiness"
-      subtitle="Compose a basic payment intent, validate each field, and inspect typed readiness warnings before any network call is made."
+      title="Payment request, intent builder & readiness"
+      subtitle="Import a versioned payment request or compose an intent manually, then inspect typed readiness warnings before any network call is made."
       warning="The MVP does not submit real Stellar transactions. Readiness checks use simulated account statuses by default. A testnet-only mock submit toggle can be wired in by contributors."
     >
+      <Card className="space-y-4">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight">Import payment request</h2>
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+            Paste an AnchorKit version 1 JSON request. Valid fields are applied to the intent
+            builder; expired, malformed, and unsupported requests are rejected with typed errors.
+          </p>
+        </div>
+        <div>
+          <Label htmlFor="payment-request-json">Payment request JSON</Label>
+          <Textarea
+            id="payment-request-json"
+            rows={7}
+            value={requestJson}
+            onChange={(event) => setRequestJson(event.target.value)}
+            placeholder='{"version":"1","destination":"G…","amount":"10.0000000","asset":{"type":"native","code":"XLM","issuer":null},"network":"testnet"}'
+            className="font-mono"
+          />
+        </div>
+        <div className="flex items-center gap-3">
+          <Button type="button" variant="secondary" onClick={applyPaymentRequest}>
+            Parse & apply request
+          </Button>
+          <span className="text-mono-xs text-ink-500 dark:text-ink-400">
+            Active network: {network}
+          </span>
+        </div>
+        {requestFeedback && (
+          <Alert tone={requestFeedback.tone} title={requestFeedback.title}>
+            {requestFeedback.message}
+          </Alert>
+        )}
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3 space-y-4">
           <h2 className="text-base font-semibold tracking-tight">Intent fields</h2>

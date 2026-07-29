@@ -13,6 +13,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   PaymentIntentSchema,
+  PaymentRequestSchema,
   StellarAssetSchema,
   AnchorTransactionRecordSchema,
   MilestoneSchema,
@@ -25,6 +26,7 @@ const ROOT = resolve(import.meta.dirname, "..");
 
 const SCHEMA_MAP = {
   PaymentIntent: PaymentIntentSchema,
+  PaymentRequest: PaymentRequestSchema,
   StellarAsset: StellarAssetSchema,
   AnchorTransactionRecord: AnchorTransactionRecordSchema,
   Milestone: MilestoneSchema,

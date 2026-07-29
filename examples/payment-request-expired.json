@@ -1,0 +1,12 @@
+{
+  "version": "1",
+  "destination": "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR",
+  "amount": "25.5000000",
+  "asset": {
+    "type": "native",
+    "code": "XLM",
+    "issuer": null
+  },
+  "network": "testnet",
+  "expiresAt": "2024-01-01T00:00:00Z"
+}

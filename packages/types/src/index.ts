@@ -113,6 +113,52 @@ export interface PaymentIntent {
   memo?: MemoInput;
 }
 
+/**
+ * Scalar, JSON-safe metadata carried by a payment request.
+ *
+ * Metadata is informational only and must never be treated as a trusted
+ * instruction by payment clients.
+ */
+export type PaymentRequestMetadataValue = string | number | boolean;
+
+/**
+ * Version 1 of AnchorKit's portable payment request format.
+ *
+ * The request identifies what should be paid, but deliberately contains no
+ * source account or signing material.
+ */
+export interface PaymentRequest {
+  version: "1";
+  destination: StellarPublicKey;
+  amount: string;
+  asset: StellarAsset;
+  memo?: MemoInput;
+  network: StellarNetwork;
+  metadata?: Record<string, PaymentRequestMetadataValue>;
+  expiresAt?: string;
+}
+
+export type PaymentRequestParseErrorCode =
+  | "PAYMENT_REQUEST_MALFORMED"
+  | "PAYMENT_REQUEST_EXPIRED"
+  | "PAYMENT_REQUEST_UNSUPPORTED_VERSION"
+  | "PAYMENT_REQUEST_UNSUPPORTED_NETWORK";
+
+export interface PaymentRequestParseIssue {
+  path: string;
+  message: string;
+}
+
+export interface PaymentRequestParseError {
+  code: PaymentRequestParseErrorCode;
+  message: string;
+  issues?: PaymentRequestParseIssue[];
+}
+
+export type PaymentRequestParseResult =
+  | { success: true; data: PaymentRequest }
+  | { success: false; error: PaymentRequestParseError };
+
 export type MemoType = "none" | "text" | "id" | "hash" | "return";
 
 export interface MemoInput {

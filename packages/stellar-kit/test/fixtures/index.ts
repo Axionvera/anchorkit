@@ -43,6 +43,14 @@ export {
   PAYMENT_INTENTS_INVALID_ARRAY,
 } from "./payments";
 
+// ─── Payment requests ──────────────────────────────────────────────────────
+export {
+  VALID_PAYMENT_REQUEST,
+  EXPIRED_PAYMENT_REQUEST,
+  MALFORMED_PAYMENT_REQUEST,
+  UNSUPPORTED_PAYMENT_REQUEST,
+} from "./paymentRequests";
+
 // ─── Assets ─────────────────────────────────────────────────────────────────
 export {
   NATIVE_ASSET,

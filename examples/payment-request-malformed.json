@@ -1,0 +1,21 @@
+{
+  "version": "1",
+  "destination": "not-a-stellar-account",
+  "amount": "0",
+  "asset": {
+    "type": "native",
+    "code": "USD",
+    "issuer": null
+  },
+  "memo": {
+    "type": "text",
+    "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "network": "testnet",
+  "metadata": {
+    "nested": {
+      "unsafe": true
+    }
+  },
+  "expiresAt": "tomorrow"
+}

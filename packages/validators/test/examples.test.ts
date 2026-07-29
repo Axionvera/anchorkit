@@ -11,6 +11,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   PaymentIntentSchema,
+  PaymentRequestSchema,
   StellarAssetSchema,
   AnchorTransactionRecordSchema,
   MilestoneSchema,
@@ -21,6 +22,7 @@ import { EXAMPLE_REGISTRY } from "../../../examples/registry";
 
 const SCHEMA_MAP = {
   PaymentIntent: PaymentIntentSchema,
+  PaymentRequest: PaymentRequestSchema,
   StellarAsset: StellarAssetSchema,
   AnchorTransactionRecord: AnchorTransactionRecordSchema,
   Milestone: MilestoneSchema,

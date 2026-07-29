@@ -22,6 +22,7 @@ export interface ExampleEntry {
   /** Zod schema exported from `@anchorkit/validators`. */
   schema:
     | "PaymentIntent"
+    | "PaymentRequest"
     | "StellarAsset"
     | "AnchorTransactionRecord"
     | "Milestone"
@@ -36,6 +37,30 @@ export interface ExampleEntry {
 }
 
 export const EXAMPLE_REGISTRY: ExampleEntry[] = [
+  {
+    id: "payment-request-valid",
+    path: "examples/payment-request-valid.json",
+    schema: "PaymentRequest",
+    expect: "valid",
+  },
+  {
+    id: "payment-request-expired",
+    path: "examples/payment-request-expired.json",
+    schema: "PaymentRequest",
+    expect: "valid",
+  },
+  {
+    id: "payment-request-malformed",
+    path: "examples/payment-request-malformed.json",
+    schema: "PaymentRequest",
+    expect: "invalid",
+  },
+  {
+    id: "payment-request-unsupported",
+    path: "examples/payment-request-unsupported.json",
+    schema: "PaymentRequest",
+    expect: "invalid",
+  },
   {
     id: "payments-valid-intent",
     path: "examples/payments-valid-intent.json",

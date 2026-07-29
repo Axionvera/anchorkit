@@ -23,6 +23,7 @@ mvp:  0.1.x (testnet-only by default)
   - Asset parsing + validation (native + issued)
   - Safe amount + memo validation (7 decimals, 28-byte text, 64-hex hash)
   - Payment intent builders & synchronous + asynchronous transaction readiness
+  - Versioned payment request schema, parser, expiry checks, and typed errors
   - Typed Stellar errors with Horizon error mapping + secret redaction
   - Transaction hash parsing + Stellar Expert + Horizon link generators
 - **`@anchorkit/anchor-utils`**
@@ -177,6 +178,7 @@ All of these live under [`./docs/`](./docs/).
 | Secret key handling rules R0–R6          | [`SECRET_KEY_HANDLING.md`](./docs/SECRET_KEY_HANDLING.md)                   |
 | Account utilities                        | [`ACCOUNT_UTILITIES.md`](./docs/ACCOUNT_UTILITIES.md)                       |
 | Payment intent utilities                 | [`PAYMENT_INTENT_UTILITIES.md`](./docs/PAYMENT_INTENT_UTILITIES.md)         |
+| Payment request format                   | [`PAYMENT_REQUESTS.md`](./docs/PAYMENT_REQUESTS.md)                         |
 | Anchor utilities                         | [`ANCHOR_UTILITIES.md`](./docs/ANCHOR_UTILITIES.md)                         |
 | Soroban treasury escrow contract         | [`SOROBAN_ESCROW_CONTRACT.md`](./docs/SOROBAN_ESCROW_CONTRACT.md)           |
 | Shared error taxonomy                    | [`ERROR_TAXONOMY.md`](./docs/ERROR_TAXONOMY.md)                             |
