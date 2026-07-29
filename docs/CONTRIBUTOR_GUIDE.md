@@ -18,6 +18,13 @@ technical, constructive, and respectful.
 Start with the [DEVELOPER_JOURNEY.md](./DEVELOPER_JOURNEY.md) walkthrough to understand how the
 monorepo modules fit together before diving into an issue.
 
+## Applying for an issue
+
+Before commenting on any issue, read the [ISSUE_APPLICATION_GUIDE.md](./ISSUE_APPLICATION_GUIDE.md).
+It covers how to write an application comment, the assignment-before-work rule, how to keep the
+issue thread useful while you're assigned, and how to link your PR back to the issue — for both
+regular issues and GrantFox campaign issues.
+
 ## GrantFox campaign contributors
 
 If you are contributing through a GrantFox campaign, read
