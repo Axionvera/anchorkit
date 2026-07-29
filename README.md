@@ -64,6 +64,7 @@ All of these live under [`./docs/`](./docs/).
 | Issue writing guide                               | [`ISSUE_WRITING_GUIDE.md`](./docs/ISSUE_WRITING_GUIDE.md)                       |
 | Acceptance criteria completion table              | [`ACCEPTANCE_CRITERIA_COMPLETION.md`](./docs/ACCEPTANCE_CRITERIA_COMPLETION.md) |
 | Acceptance criteria audit template              | [`ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md`](./docs/ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md) |
+| Acceptance criteria traceability table            | [`ACCEPTANCE_CRITERIA_TRACEABILITY.md`](./docs/ACCEPTANCE_CRITERIA_TRACEABILITY.md) |
 | Issue approval readiness checklist             | [`ISSUE_APPROVAL_READINESS.md`](./docs/ISSUE_APPROVAL_READINESS.md)             |
 | GrantFox contribution workflow                    | [`GRANTFOX_WORKFLOW.md`](./docs/GRANTFOX_WORKFLOW.md)                           |
 | Contributor payment expectations                  | [`CONTRIBUTOR_PAYMENT_EXPECTATIONS.md`](./docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md) |
