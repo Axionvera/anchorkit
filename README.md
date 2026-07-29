@@ -58,6 +58,7 @@ All of these live under [`./docs/`](./docs/).
 | Maintainer guide                                  | [`MAINTAINER_GUIDE.md`](./docs/MAINTAINER_GUIDE.md)                             |
 | Issue writing guide                               | [`ISSUE_WRITING_GUIDE.md`](./docs/ISSUE_WRITING_GUIDE.md)                       |
 | Acceptance criteria completion table              | [`ACCEPTANCE_CRITERIA_COMPLETION.md`](./docs/ACCEPTANCE_CRITERIA_COMPLETION.md) |
+| Issue approval readiness checklist             | [`ISSUE_APPROVAL_READINESS.md`](./docs/ISSUE_APPROVAL_READINESS.md)             |
 | GrantFox contribution workflow                    | [`GRANTFOX_WORKFLOW.md`](./docs/GRANTFOX_WORKFLOW.md)                           |
 | Advanced issue standard                           | [`ISSUE_STANDARD.md`](./docs/ISSUE_STANDARD.md)                                 |
 | Maintainer review checklist                       | [`MAINTAINER_REVIEW_CHECKLIST.md`](./docs/MAINTAINER_REVIEW_CHECKLIST.md)       |
