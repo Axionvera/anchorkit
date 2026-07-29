@@ -39,6 +39,8 @@ All of these live under [`./docs/`](./docs/).
 | End-to-end developer journey                      | [`DEVELOPER_JOURNEY.md`](./docs/DEVELOPER_JOURNEY.md)                           |
 | Local setup                                       | [`LOCAL_SETUP.md`](./docs/LOCAL_SETUP.md)                                       |
 | Example / fixture validation                      | [`examples.md`](./docs/examples.md)                                             |
+| Failing CI response guide                         | [`FAILING_CI_RESPONSE_GUIDE.md`](./docs/FAILING_CI_RESPONSE_GUIDE.md)           |
+| Test evidence PR requirement                      | [`TEST_EVIDENCE_REQUIREMENT.md`](./docs/TEST_EVIDENCE_REQUIREMENT.md)           |
 | Architecture / package boundaries                 | [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                                     |
 | Stellar testnet usage                             | [`STELLAR_TESTNET_USAGE.md`](./docs/STELLAR_TESTNET_USAGE.md)                   |
 | Security notes                                    | [`SECURITY_NOTES.md`](./docs/SECURITY_NOTES.md)                                 |
@@ -56,11 +58,14 @@ All of these live under [`./docs/`](./docs/).
 | Status severity mapping                           | [`STATUS_SEVERITY_MAPPING.md`](./docs/STATUS_SEVERITY_MAPPING.md)               |
 | Contributor guide                                 | [`CONTRIBUTOR_GUIDE.md`](./docs/CONTRIBUTOR_GUIDE.md)                           |
 | Meaningful vs. insufficient contribution examples | [`MEANINGFUL_WORK_EXAMPLES.md`](./docs/MEANINGFUL_WORK_EXAMPLES.md)             |
+| Low-effort contribution examples              | [`LOW_EFFORT_CONTRIBUTION_EXAMPLES.md`](./docs/LOW_EFFORT_CONTRIBUTION_EXAMPLES.md) |
 | Maintainer guide                                  | [`MAINTAINER_GUIDE.md`](./docs/MAINTAINER_GUIDE.md)                             |
 | Issue writing guide                               | [`ISSUE_WRITING_GUIDE.md`](./docs/ISSUE_WRITING_GUIDE.md)                       |
 | Acceptance criteria completion table              | [`ACCEPTANCE_CRITERIA_COMPLETION.md`](./docs/ACCEPTANCE_CRITERIA_COMPLETION.md) |
+| Acceptance criteria audit template              | [`ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md`](./docs/ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md) |
 | Issue approval readiness checklist             | [`ISSUE_APPROVAL_READINESS.md`](./docs/ISSUE_APPROVAL_READINESS.md)             |
 | GrantFox contribution workflow                    | [`GRANTFOX_WORKFLOW.md`](./docs/GRANTFOX_WORKFLOW.md)                           |
+| Contributor payment expectations                  | [`CONTRIBUTOR_PAYMENT_EXPECTATIONS.md`](./docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md) |
 | Advanced issue standard                           | [`ISSUE_STANDARD.md`](./docs/ISSUE_STANDARD.md)                                 |
 | Maintainer review checklist                       | [`MAINTAINER_REVIEW_CHECKLIST.md`](./docs/MAINTAINER_REVIEW_CHECKLIST.md)       |
 | Reviewer quality checklist                        | [`REVIEWER_QUALITY_CHECKLIST.md`](./docs/REVIEWER_QUALITY_CHECKLIST.md)         |

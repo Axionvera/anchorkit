@@ -35,8 +35,9 @@ maintainer):
 
 ## Testing performed
 
-Describe what you ran and how you verified the change (commands run, manual steps in the
-dashboard, contract test output, etc.). This is required even when the checklist below is filled
+If any CI check is failing, summarize the failure and the fix or evidence that it is unrelated. See [docs/FAILING_CI_RESPONSE_GUIDE.md](../docs/FAILING_CI_RESPONSE_GUIDE.md).
+
+Describe what you ran and how you verified the change (commands run, manual steps in the`ndashboard, contract test output, etc.). Include affected packages/apps, tests added or updated,`ncommands run, CI status, and any no-test justification. See`n[docs/TEST_EVIDENCE_REQUIREMENT.md](../docs/TEST_EVIDENCE_REQUIREMENT.md). This is required even when the checklist below is filled
 in — the checklist confirms _that_ something was tested, this explains _how_.
 
 ## Screenshots / recordings
@@ -139,3 +140,11 @@ that is completed by the campaign reviewer after merge.
 ## Risk / follow-ups
 
 Any out-of-scope follow-up issues or known follow-up work. List them here and (if already created) link the follow-up issue numbers.
+
+## Acceptance Criteria Audit
+
+For multi-criterion issues, use or link the audit table in [docs/ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md](../docs/ACCEPTANCE_CRITERIA_AUDIT_TEMPLATE.md) and mark incomplete criteria explicitly.
+
+## GrantFox payment expectations
+
+For `GrantFox OSS` / `Maybe Rewarded` issues, remember that merge does not guarantee payment. Before asking about a reward, self-review acceptance criteria, scope, test evidence, CI status, and any documented claim step in [docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md](../docs/CONTRIBUTOR_PAYMENT_EXPECTATIONS.md).
