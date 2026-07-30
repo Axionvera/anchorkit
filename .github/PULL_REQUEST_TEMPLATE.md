@@ -4,6 +4,17 @@ Closes #ISSUE_NUMBER_HERE
 
 Describe what this PR delivers in 1-3 sentences. For implementation-heavy issues, self-check the scope against [docs/MEANINGFUL_IMPLEMENTATION_CHECKLIST.md](../docs/MEANINGFUL_IMPLEMENTATION_CHECKLIST.md).
 
+## PR Evidence Checklist
+
+Before requesting review, confirm the following evidence is present in this PR description. Each item links to detailed guidance. PRs missing evidence will be sent back for completion.
+
+- [ ] **Issue reference:** PR body links the issue with `Closes #NNN`.
+- [ ] **Implementation summary:** 1–3 sentence description of what changed and why.
+- [ ] **Tests added or updated:** Test file names and test descriptions listed, or a specific no-test justification (see [TEST_EVIDENCE_REQUIREMENT.md](../docs/TEST_EVIDENCE_REQUIREMENT.md) for acceptable justifications).
+- [ ] **Commands run:** Exact commands and their output or status (e.g. `pnpm verify`, `pnpm contract:test`, `pnpm check:boundaries`). See [TEST_EVIDENCE_REQUIREMENT.md](../docs/TEST_EVIDENCE_REQUIREMENT.md).
+- [ ] **CI status:** State `Passing`, `Pending`, `Failing-fixed`, `Failing-unrelated`, or `Skipped` with supporting evidence. See [FAILING_CI_RESPONSE_GUIDE.md](../docs/FAILING_CI_RESPONSE_GUIDE.md).
+- [ ] **Acceptance criteria coverage:** Link to a completion table or traceability table mapping each criterion to implementation evidence and tests. See [ACCEPTANCE_CRITERIA_COMPLETION.md](../docs/ACCEPTANCE_CRITERIA_COMPLETION.md).
+
 ## Issue scope
 
 Fill in a completion table mapping every Acceptance Criterion from the issue to its status,

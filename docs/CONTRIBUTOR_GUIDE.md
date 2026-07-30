@@ -47,7 +47,8 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
 4. Implement, add tests, update docs if needed.
 5. Run `pnpm verify` locally (format, lint, typecheck, test, build). See
    [LOCAL_VERIFICATION.md](./LOCAL_VERIFICATION.md). If you changed `contracts/`,
-   also run `pnpm contract:test` or `pnpm verify:full`. Record affected packages, tests added,
+   also run `pnpm contract:test` or `pnpm verify:full`. Complete the
+   PR Evidence Checklist in the pull request template: record affected packages, tests added,
    commands run, CI status, and no-test justifications using
    [TEST_EVIDENCE_REQUIREMENT.md](./TEST_EVIDENCE_REQUIREMENT.md).
 6. Open a PR referencing the issue number (e.g. `Closes #42`).
@@ -61,9 +62,9 @@ See [GRANTFOX_WORKFLOW.md](./GRANTFOX_WORKFLOW.md) for the full process.
   choices, and list any risks.
 - Every PR must use the
   [PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) — GitHub pre-fills it
-  automatically when you open a PR. Complete every section: issue reference, affected
-  packages/apps, testing performed, screenshots for `apps/web` UI changes, security impact,
-  and documentation impact. Do not delete sections that don't apply — mark them N/A instead so
+  automatically when you open a PR. Complete every section: issue reference, implementation summary, PR evidence checklist,
+  affected packages/apps, testing performed, screenshots for `apps/web` UI changes, security impact,
+  documentation impact, and the maintainer review self-check. Do not delete sections that don't apply — mark them N/A instead so
   reviewers know they were considered.
 - For GrantFox issues, review the criteria in
   [MAINTAINER_REVIEW_CHECKLIST.md](./MAINTAINER_REVIEW_CHECKLIST.md) and
