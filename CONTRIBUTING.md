@@ -69,10 +69,10 @@ pnpm web:dev
 
 Every PR is pre-filled from
 [.github/PULL_REQUEST_TEMPLATE.md](./.github/PULL_REQUEST_TEMPLATE.md). Fill in **every**
-section before requesting review — issue reference, affected packages/apps, testing performed,
-screenshots (for `apps/web` UI changes), security impact, documentation impact, and the
-maintainer review self-check. PRs with unfilled or deleted sections will be sent back for
-completion before review starts.
+section before requesting review — issue reference, implementation summary, PR evidence checklist,
+affected packages/apps, testing performed, screenshots (for `apps/web` UI changes), security impact,
+documentation impact, and the maintainer review self-check. PRs with unfilled or deleted sections
+will be sent back for completion before review starts.
 
 ## GrantFox contribution flow
 
