@@ -50,10 +50,14 @@ maintainer recovery), see [AUTO_ASSIGN_WORKFLOW.md](./AUTO_ASSIGN_WORKFLOW.md).
 
 ## Releases
 
+Before cutting a release, run through the
+[RELEASE_READINESS_CHECKLIST.md](./RELEASE_READINESS_CHECKLIST.md) to verify packages, web app,
+docs, examples, security, testnet safety, public APIs, and contributor workflows.
+
 - Use semver for packages (`0.x` MVP stage).
 - Cut a GitHub release with changelog summarising merged PRs since the last release.
 - Contract releases: tag the contract crate version, build the `.wasm`, and pin the
-  corresponding SHA in `CONTRACTS.md` under `/docs` for auditability.
+  corresponding SHA in a contract reference doc under `/docs` for auditability.
 
 ## Conflict of interest
 
