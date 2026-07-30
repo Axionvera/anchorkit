@@ -251,6 +251,36 @@ importers:
         specifier: ^1.2.0
         version: 1.6.1(@types/node@20.19.43)
 
+  tests/integration:
+    devDependencies:
+      '@anchorkit/anchor-utils':
+        specifier: workspace:*
+        version: link:../../packages/anchor-utils
+      '@anchorkit/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@anchorkit/fixtures':
+        specifier: workspace:*
+        version: link:../../packages/fixtures
+      '@anchorkit/stellar-kit':
+        specifier: workspace:*
+        version: link:../../packages/stellar-kit
+      '@anchorkit/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@anchorkit/validators':
+        specifier: workspace:*
+        version: link:../../packages/validators
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.43
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.2.0
+        version: 1.6.1(@types/node@20.19.43)
+
 packages:
 
   '@alloc/quick-lru@5.2.0':

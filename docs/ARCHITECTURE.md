@@ -51,6 +51,9 @@ AnchorKit/
 │   ├── registry.ts                      Fixture-to-schema registry
 │   └── *.json                           Valid and invalid example payloads
 │
+├── tests/
+│   └── integration/                     Public-API cross-package integration tests
+│
 ├── scripts/                             Repository automation
 ├── docs/                                Architecture and feature documentation
 ├── package.json                         Root scripts and workspace orchestration
@@ -96,6 +99,9 @@ config
 
 types
    └──▶ no internal AnchorKit package
+
+tests/integration
+   └──▶ all public packages under test
 ```
 
 `fixtures` is also used as a **test-only** dependency by `validators` and
@@ -126,6 +132,7 @@ A module should depend only on the lowest-level packages it actually needs.
 | `packages/anchor-utils`     | Anchor requests, lifecycle transitions, status messages, badges, and fixtures                                   | `types`, `validators`, `config`, `stellar-kit` when required |
 | `apps/web`                  | Routes, forms, React state, page composition, and rendering                                                     | All public packages                                          |
 | `examples`                  | Supported and intentionally invalid sample payloads                                                             | Public schemas through tests and scripts                     |
+| `tests/integration`         | Cross-package composition through public entry points and deterministic fixtures                                | All public packages under test                               |
 | `contracts/treasury-escrow` | On-chain escrow state and authorisation                                                                         | Soroban Rust dependencies                                    |
 | `scripts`                   | Repository checks and automation                                                                                | Public packages where appropriate                            |
 | `docs`                      | Architecture, security, usage, and contributor guidance                                                         | Repository source as reference                               |
@@ -786,7 +793,7 @@ Choose the owner using this guide.
 | ----------------------------------------------------------- | --------------------------- |
 | Shared public type or event model                           | `types`                     |
 | Network endpoint or environment default                     | `config`                    |
-| Shared deterministic test fixture                            | `fixtures`                  |
+| Shared deterministic test fixture                           | `fixtures`                  |
 | Runtime schema or validation result                         | `validators`                |
 | Account, asset, payment, key, transaction, or event utility | `stellar-kit`               |
 | Anchor request, lifecycle, or status behaviour              | `anchor-utils`              |

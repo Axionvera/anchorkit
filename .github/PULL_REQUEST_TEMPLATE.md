@@ -42,6 +42,7 @@ maintainer):
 - [ ] `packages/validators`
 - [ ] `packages/stellar-kit`
 - [ ] `packages/anchor-utils`
+- [ ] `tests/integration`
 - [ ] `contracts/treasury-escrow`
 - [ ] `docs/`
 - [ ] Other (list):

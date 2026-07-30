@@ -17,16 +17,16 @@ Use [TEST_EVIDENCE_REQUIREMENT.md](./TEST_EVIDENCE_REQUIREMENT.md) for the PR ev
 
 ## Area-Specific Minimums
 
-| Change area | Minimum expected evidence |
-| ----------- | ------------------------- |
-| Payment utilities and payment intents | Unit tests for happy path, invalid asset/amount, malformed destination, and unsupported network or testnet/mainnet assumptions. |
-| Anchor and SEP helpers | Tests for supported anchor metadata, missing fields, invalid URLs, network mismatch, and error normalization. |
+| Change area                             | Minimum expected evidence                                                                                                                                                               |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Payment utilities and payment intents   | Unit tests for happy path, invalid asset/amount, malformed destination, and unsupported network or testnet/mainnet assumptions.                                                         |
+| Anchor and SEP helpers                  | Tests for supported anchor metadata, missing fields, invalid URLs, network mismatch, and error normalization.                                                                           |
 | Escrow flows and Soroban contract logic | Contract tests for valid state transitions, unauthorized callers, invalid timestamps, missing vaults, and terminal-state rejection. Use `pnpm contract:test` when `contracts/` changes. |
-| Diagnostics and status mapping | Unit tests for each severity/status bucket, unknown inputs, stale data, and degraded dependency cases. |
-| Validators and schemas | Positive and negative tests for required fields, boundary values, unsafe strings, and rejected malformed payloads. |
-| Fixtures and examples | Example validation or fixture tests proving examples still parse and match the documented API shape. |
-| Web UI | Build/type evidence plus screenshots or manual verification for visible state, loading/empty/error states, and responsive layout when UI changes. |
-| Documentation-only | Link/render review and a no-runtime-change justification. Update README or docs index when adding a new guide. |
+| Diagnostics and status mapping          | Unit tests for each severity/status bucket, unknown inputs, stale data, and degraded dependency cases.                                                                                  |
+| Validators and schemas                  | Positive and negative tests for required fields, boundary values, unsafe strings, and rejected malformed payloads.                                                                      |
+| Fixtures and examples                   | Example validation or fixture tests proving examples still parse and match the documented API shape.                                                                                    |
+| Web UI                                  | Build/type evidence plus screenshots or manual verification for visible state, loading/empty/error states, and responsive layout when UI changes.                                       |
+| Documentation-only                      | Link/render review and a no-runtime-change justification. Update README or docs index when adding a new guide.                                                                          |
 
 ## Happy-Path Expectations
 
@@ -77,6 +77,7 @@ Common commands:
 pnpm verify
 pnpm verify:full
 pnpm test
+pnpm test:integration
 pnpm typecheck
 pnpm build
 pnpm check:examples
