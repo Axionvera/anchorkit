@@ -29,6 +29,7 @@ All of these live under `./docs/`.
 | Contributor self-review form             | `CONTRIBUTOR_SELF_ASSESSMENT_FORM.md` |
 | Evaluation-readiness dashboard           | `EVALUATION_READINESS.md`             |
 | Maintainer guide                         | `MAINTAINER_GUIDE.md`                 |
+| Release readiness checklist              | `RELEASE_READINESS_CHECKLIST.md`      |
 | Issue writing guide                      | `ISSUE_WRITING_GUIDE.md`              |
 | GrantFox contribution workflow           | `GRANTFOX_WORKFLOW.md`                |
 | Advanced issue standard                  | `ISSUE_STANDARD.md`                   |
