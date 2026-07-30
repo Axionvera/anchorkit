@@ -26,6 +26,7 @@ All of these live under `./docs/`.
 | Status severity mapping                  | `STATUS_SEVERITY_MAPPING.md`          |
 | Dashboard capability states              | `CAPABILITY_STATES.md`                |
 | Contributor guide                        | `CONTRIBUTOR_GUIDE.md`                |
+| Contributor evaluation policy            | `CONTRIBUTOR_EVALUATION_POLICY.md`    |
 | Contributor self-review form             | `CONTRIBUTOR_SELF_ASSESSMENT_FORM.md` |
 | Evaluation-readiness dashboard           | `EVALUATION_READINESS.md`             |
 | Maintainer guide                         | `MAINTAINER_GUIDE.md`                 |
@@ -40,7 +41,9 @@ All of these live under `./docs/`.
 
 ## 🦊 GrantFox readiness
 
-Before requesting review or following up during a payment period, use the
+Read the [Contributor Evaluation Policy](./docs/CONTRIBUTOR_EVALUATION_POLICY.md)
+before contributing to a GrantFox issue. Before requesting review or following
+up during a payment period, use the
 [Evaluation-Readiness Dashboard](./docs/EVALUATION_READINESS.md) to confirm
 scope, testing, CI and verification evidence, acceptance-criteria mapping,
 self-review, and contributor conduct requirements.
