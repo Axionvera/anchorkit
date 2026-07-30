@@ -1,19 +1,14 @@
-import { describe, it, expect } from "vitest";
-import {
-  createPaymentIntent,
-  evaluateTransactionReadinessSync,
-} from "../packages/stellar-kit/src";
-import type { StellarAsset } from "../packages/types/src";
+import { createPaymentIntent, evaluateTransactionReadinessSync } from "@anchorkit/stellar-kit";
+import type { AccountDiagnostic } from "@anchorkit/stellar-kit";
+import type { StellarAsset } from "@anchorkit/types";
 
 const G_ALICE = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
 const G_BOB = "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U";
-const G_ISSUER = "GBBD47IF6LWK2P7MDEVSCWR7DPUWV3NY3DTQEVFL4TWVC5GIOTASHEXN";
 
 const XLM_NATIVE: StellarAsset = { type: "native", code: "XLM", issuer: null };
-const USDC_ISSUED: StellarAsset = { type: "issued", code: "USDC" as any, issuer: G_ISSUER as any };
 
-describe("Monorepo Integration: Transaction Readiness Pipeline Fixtures", () => {
-  it("Fixture 1: Valid State - Fully compliant payment intent with funded accounts", () => {
+describe("transaction readiness pipeline composition", () => {
+  it("marks a funded payment intent as valid", () => {
     const intent = createPaymentIntent({
       sourcePublicKey: G_ALICE,
       destinationPublicKey: G_BOB,
@@ -38,15 +33,15 @@ describe("Monorepo Integration: Transaction Readiness Pipeline Fixtures", () => 
     expect(readiness.stages.memo.state).toBe("valid");
   });
 
-  it("Fixture 2: Invalid State - Malformed inputs and schema validation failure", () => {
-    const invalidIntent: any = {
+  it("marks malformed inputs as invalid", () => {
+    const invalidIntent = {
       sourcePublicKey: "BAD_SOURCE_KEY",
       destinationPublicKey: G_BOB,
       asset: XLM_NATIVE,
       amount: "-50.0",
     };
 
-    const readiness = evaluateTransactionReadinessSync(invalidIntent);
+    const readiness = evaluateTransactionReadinessSync(invalidIntent as never);
 
     expect(readiness.state).toBe("invalid");
     expect(readiness.ready).toBe(false);
@@ -55,7 +50,7 @@ describe("Monorepo Integration: Transaction Readiness Pipeline Fixtures", () => 
     expect(readiness.issues.length).toBeGreaterThan(0);
   });
 
-  it("Fixture 3: Blocked State - Unfunded source account and insufficient XLM balance", () => {
+  it("blocks unfunded sources and insufficient XLM balances", () => {
     const intent = createPaymentIntent({
       sourcePublicKey: G_ALICE,
       destinationPublicKey: G_BOB,
@@ -71,14 +66,14 @@ describe("Monorepo Integration: Transaction Readiness Pipeline Fixtures", () => 
 
     const readinessLowBalance = evaluateTransactionReadinessSync(intent, {
       sourceAccountFunded: true,
-      sourceBalanceXlm: "501.0000000", // Needs 500 + min reserve 2.5 XLM
+      sourceBalanceXlm: "501.0000000",
     });
     expect(readinessLowBalance.state).toBe("blocked");
     expect(readinessLowBalance.ready).toBe(false);
     expect(readinessLowBalance.issues.some((i) => i.code === "INSUFFICIENT_BALANCE")).toBe(true);
   });
 
-  it("Fixture 4: Warning State - Unfunded destination for XLM payment or identical accounts", () => {
+  it("warns for unfunded destinations and identical accounts", () => {
     const intentUnfundedDest = createPaymentIntent({
       sourcePublicKey: G_ALICE,
       destinationPublicKey: G_BOB,
@@ -107,7 +102,7 @@ describe("Monorepo Integration: Transaction Readiness Pipeline Fixtures", () => 
     expect(readinessSameKeys.ready).toBe(true);
   });
 
-  it("Fixture 5: Unavailable State - Graceful handling when account diagnostics fail", () => {
+  it("treats unavailable diagnostics as an unavailable stage", () => {
     const intent = createPaymentIntent({
       sourcePublicKey: G_ALICE,
       destinationPublicKey: G_BOB,
@@ -115,15 +110,23 @@ describe("Monorepo Integration: Transaction Readiness Pipeline Fixtures", () => 
       amount: "10.0000000",
     });
 
-    const unavailableDiagnostic: any = {
+    const unavailableDiagnostic = {
       input: G_ALICE,
       state: "unavailable",
       isValidPublicKey: true,
       expertUrl: null,
       reserve: null,
+      balances: {
+        state: "unknown",
+        total: null,
+        reserve: null,
+        spendable: null,
+        unavailable: null,
+        explanation: "Horizon network request timed out",
+      },
       account: null,
       error: "Horizon network request timed out",
-    };
+    } satisfies AccountDiagnostic;
 
     const readiness = evaluateTransactionReadinessSync(intent, {
       sourceDiagnostic: unavailableDiagnostic,

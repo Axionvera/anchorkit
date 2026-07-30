@@ -12,13 +12,14 @@ See [CONTRIBUTOR_GUIDE.md](./CONTRIBUTOR_GUIDE.md#tests-are-expected) and [MINIM
 
 ## Expected test types
 
-| Area | Test type | Tool |
-|---|---|---|
-| Package utilities (`packages/*`) | Unit tests | Vitest |
-| Contract logic (`contracts/treasury-escrow`) | Rust unit/integration tests | `cargo test` via `pnpm contract:test` |
-| Web UI (`apps/web`) | Unit tests + manual verification | Vitest |
-| Examples and fixtures | Schema validation | `pnpm check:examples` |
-| Cross-package imports | Boundary checks | `pnpm check:boundaries` |
+| Area                                         | Test type                             | Tool                                  |
+| -------------------------------------------- | ------------------------------------- | ------------------------------------- |
+| Package utilities (`packages/*`)             | Unit tests                            | Vitest                                |
+| Cross-package flows (`tests/integration`)    | Integration tests through public APIs | `pnpm test:integration`               |
+| Contract logic (`contracts/treasury-escrow`) | Rust unit/integration tests           | `cargo test` via `pnpm contract:test` |
+| Web UI (`apps/web`)                          | Unit tests + manual verification      | Vitest                                |
+| Examples and fixtures                        | Schema validation                     | `pnpm check:examples`                 |
+| Cross-package imports                        | Boundary checks                       | `pnpm check:boundaries`               |
 
 ## Test-first workflow
 

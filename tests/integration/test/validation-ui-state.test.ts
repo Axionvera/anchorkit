@@ -1,25 +1,27 @@
-import { describe, it, expect } from "vitest";
 import {
   createPaymentIntent,
   evaluateTransactionReadinessSync,
   transactionReadinessStateToUiState,
   deriveValidationUiState,
-} from "../packages/stellar-kit/src";
-import { anchorValidationUiState, validateAnchorRequest } from "../packages/anchor-utils/src";
-import type { StellarAsset } from "../packages/types/src";
+} from "@anchorkit/stellar-kit";
+import type { AccountDiagnostic } from "@anchorkit/stellar-kit";
+import { anchorValidationUiState, validateAnchorRequest } from "@anchorkit/anchor-utils";
+import type { StellarAsset } from "@anchorkit/types";
 
 const G_ALICE = "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR";
 const G_BOB = "GDQJUTQYK2MQ32ZGMMB7Q3UKTJLNTMZI2QYHW7OK2TK2DZI3X5IGQH6U";
 
 const XLM_NATIVE: StellarAsset = { type: "native", code: "XLM", issuer: null };
 
-describe("Monorepo Integration: ValidationUIState spans loading/invalid/warning/ready/blocked", () => {
-  it("loading: no result yet", () => {
+describe("validation UI state composition", () => {
+  it("reports loading when no result is available yet", () => {
     expect(deriveValidationUiState({ result: null })).toBe("loading");
-    expect(deriveValidationUiState({ result: { ok: true, value: {} }, loading: true })).toBe("loading");
+    expect(deriveValidationUiState({ result: { ok: true, value: {} }, loading: true })).toBe(
+      "loading"
+    );
   });
 
-  it("ready: a fully compliant payment intent with funded accounts", () => {
+  it("maps a ready payment pipeline to ready UI state", () => {
     const intent = createPaymentIntent({
       sourcePublicKey: G_ALICE,
       destinationPublicKey: G_BOB,
@@ -37,20 +39,20 @@ describe("Monorepo Integration: ValidationUIState spans loading/invalid/warning/
     expect(transactionReadinessStateToUiState(readiness.state)).toBe("ready");
   });
 
-  it("invalid: malformed payment intent input", () => {
-    const invalidIntent: any = {
+  it("maps malformed payment input to invalid UI state", () => {
+    const invalidIntent = {
       sourcePublicKey: "BAD_SOURCE_KEY",
       destinationPublicKey: G_BOB,
       asset: XLM_NATIVE,
       amount: "-50.0",
     };
-    const readiness = evaluateTransactionReadinessSync(invalidIntent);
+    const readiness = evaluateTransactionReadinessSync(invalidIntent as never);
 
     expect(readiness.state).toBe("invalid");
     expect(transactionReadinessStateToUiState(readiness.state)).toBe("invalid");
   });
 
-  it("warning: unfunded destination for an XLM payment (non-blocking)", () => {
+  it("maps non-blocking destination warnings to warning UI state", () => {
     const intent = createPaymentIntent({
       sourcePublicKey: G_ALICE,
       destinationPublicKey: G_BOB,
@@ -66,7 +68,7 @@ describe("Monorepo Integration: ValidationUIState spans loading/invalid/warning/
     expect(transactionReadinessStateToUiState(readiness.state)).toBe("warning");
   });
 
-  it("blocked: unfunded source account, and unavailable diagnostics", () => {
+  it("maps blocked and unavailable readiness into blocked UI state", () => {
     const intent = createPaymentIntent({
       sourcePublicKey: G_ALICE,
       destinationPublicKey: G_BOB,
@@ -74,28 +76,38 @@ describe("Monorepo Integration: ValidationUIState spans loading/invalid/warning/
       amount: "500.0000000",
     });
 
-    const readinessUnfunded = evaluateTransactionReadinessSync(intent, { sourceAccountFunded: false });
+    const readinessUnfunded = evaluateTransactionReadinessSync(intent, {
+      sourceAccountFunded: false,
+    });
     expect(readinessUnfunded.state).toBe("blocked");
     expect(transactionReadinessStateToUiState(readinessUnfunded.state)).toBe("blocked");
 
-    const unavailableDiagnostic: any = {
+    const unavailableDiagnostic = {
       input: G_ALICE,
       state: "unavailable",
       isValidPublicKey: true,
       expertUrl: null,
       reserve: null,
+      balances: {
+        state: "unknown",
+        total: null,
+        reserve: null,
+        spendable: null,
+        unavailable: null,
+        explanation: "Horizon network request timed out",
+      },
       account: null,
       error: "Horizon network request timed out",
-    };
+    } satisfies AccountDiagnostic;
+
     const readinessUnavailable = evaluateTransactionReadinessSync(intent, {
       sourceDiagnostic: unavailableDiagnostic,
     });
     expect(readinessUnavailable.state).toBe("unavailable");
-    // "unavailable" folds into "blocked" — see docs/VALIDATION_UI_STATES.md
     expect(transactionReadinessStateToUiState(readinessUnavailable.state)).toBe("blocked");
   });
 
-  it("anchor-utils: blocked when the anchor asset config disables the operation", () => {
+  it("maps blocked anchor validation into blocked UI state", () => {
     const depositDraft = {
       assetCode: "USDC",
       amount: "10",

@@ -47,16 +47,19 @@ AnchorKit/
 ├─ packages/
 │  ├─ types/                       Shared branded types
 │  ├─ config/                      Network + environment config
+│  ├─ fixtures/                    Shared deterministic test fixtures
 │  ├─ validators/                  Zod validation schemas
 │  ├─ stellar-kit/                 Core Stellar utilities + tests
 │  └─ anchor-utils/                SEP-style anchor utilities + tests
 ├─ contracts/
 │  └─ treasury-escrow/             Soroban Rust contract + tests
+├─ tests/
+│  └─ integration/                 Cross-package public-API integration tests
 ├─ docs/                           All project documentation
 ├─ examples/                       Seed fixtures and example JSON files
 ├─ scripts/                        Helper shell / TS scripts
 ├─ .github/
-│  ├─ workflows/                   CI actions (install, lint, typecheck, test, build, contract tests)
+│  ├─ workflows/                   Automation workflows
 │  ├─ ISSUE_TEMPLATE/              Issue templates
 │  └─ PULL_REQUEST_TEMPLATE.md
 ├─ pnpm-workspace.yaml

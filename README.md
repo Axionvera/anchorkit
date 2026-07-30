@@ -23,6 +23,7 @@ All of these live under `./docs/`.
 | Shared error taxonomy                    | `ERROR_TAXONOMY.md`                   |
 | Escrow storage migration guide           | `ESCROW_MIGRATION.md`                 |
 | Shared test fixtures                     | `FIXTURE_FRAMEWORK.md`                |
+| Cross-package integration tests          | `INTEGRATION_TESTS.md`                |
 | Status severity mapping                  | `STATUS_SEVERITY_MAPPING.md`          |
 | Dashboard capability states              | `CAPABILITY_STATES.md`                |
 | Contributor guide                        | `CONTRIBUTOR_GUIDE.md`                |
