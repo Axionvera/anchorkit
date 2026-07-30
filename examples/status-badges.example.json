@@ -1,0 +1,109 @@
+{
+  "description": "Representative shared status badge mappings across AnchorKit domains (issue #198).",
+  "badges": [
+    {
+      "domain": "receipt",
+      "status": "confirmed",
+      "severity": {
+        "level": "success",
+        "label": "Confirmed",
+        "tone": "green",
+        "headline": "Transaction confirmed",
+        "detail": "The transaction completed successfully on the Stellar network.",
+        "action": "none",
+        "docLink": "./docs/transaction-receipts.md"
+      }
+    },
+    {
+      "domain": "anchor",
+      "status": "pending_user",
+      "severity": {
+        "level": "warning",
+        "label": "Awaiting You",
+        "tone": "amber",
+        "headline": "Action required",
+        "detail": "Please complete the required steps before the anchor can proceed.",
+        "action": "review_details",
+        "docLink": "./docs/anchor-lifecycle.md"
+      }
+    },
+    {
+      "domain": "readiness",
+      "status": "blocked",
+      "severity": {
+        "level": "blocked",
+        "label": "Blocked",
+        "tone": "red",
+        "headline": "Cannot proceed",
+        "detail": "One or more validation errors must be resolved before the transaction can be submitted.",
+        "action": "review_details",
+        "docLink": "./docs/transaction-readiness.md"
+      }
+    },
+    {
+      "domain": "transactionReadiness",
+      "status": "unavailable",
+      "severity": {
+        "level": "unknown",
+        "label": "Unavailable",
+        "tone": "neutral",
+        "headline": "Check unavailable",
+        "detail": "This readiness stage could not be evaluated.",
+        "action": "retry",
+        "docLink": "./docs/transaction-readiness.md"
+      }
+    },
+    {
+      "domain": "validationUi",
+      "status": "loading",
+      "severity": {
+        "level": "info",
+        "label": "Checking",
+        "tone": "blue",
+        "headline": "Checking…",
+        "detail": "Validating your input. This should only take a moment.",
+        "action": "wait",
+        "docLink": "./docs/VALIDATION_UI_STATES.md"
+      }
+    },
+    {
+      "domain": "account",
+      "status": "unfunded",
+      "severity": {
+        "level": "warning",
+        "label": "Unfunded",
+        "tone": "amber",
+        "headline": "Account not funded",
+        "detail": "The account exists but has no balance. Fund it via Friendbot to send transactions.",
+        "action": "fund_account",
+        "docLink": "./docs/account-diagnostics.md"
+      }
+    },
+    {
+      "domain": "diagnostic",
+      "status": "invalid",
+      "severity": {
+        "level": "error",
+        "label": "Invalid",
+        "tone": "red",
+        "headline": "Invalid public key",
+        "detail": "The value is not a structurally valid Stellar public key.",
+        "action": "review_details",
+        "docLink": "./docs/account-diagnostics.md"
+      }
+    },
+    {
+      "domain": "milestone",
+      "status": "disputed",
+      "severity": {
+        "level": "error",
+        "label": "Disputed",
+        "tone": "red",
+        "headline": "Milestone disputed",
+        "detail": "This milestone has been disputed and requires resolution before further progress.",
+        "action": "contact_support",
+        "docLink": "./docs/SOROBAN_ESCROW_CONTRACT.md"
+      }
+    }
+  ]
+}

@@ -7,12 +7,13 @@
  */
 
 import type {
+  AccountDiagnosticState,
   AccountStatus,
   AnchorTransactionStatus,
   MilestoneStatus,
   ReadinessState,
   SeverityLevel,
-  StatusSeverity,
+  TransactionReadinessState,
   TransactionReceiptStatus,
   ValidationUIState,
 } from "@anchorkit/types";
@@ -47,6 +48,17 @@ export const READINESS_SEVERITY_ENTRIES: readonly [ReadinessState, SeverityLevel
   ["blocked", "blocked"],
 ] as const;
 
+export const TRANSACTION_READINESS_SEVERITY_ENTRIES: readonly [
+  TransactionReadinessState,
+  SeverityLevel,
+][] = [
+  ["valid", "success"],
+  ["invalid", "error"],
+  ["blocked", "blocked"],
+  ["warning", "warning"],
+  ["unavailable", "unknown"],
+] as const;
+
 // ─── Account severity entries ───────────────────────────────────────────────
 
 export const ACCOUNT_SEVERITY_ENTRIES: readonly [AccountStatus, SeverityLevel][] = [
@@ -54,6 +66,17 @@ export const ACCOUNT_SEVERITY_ENTRIES: readonly [AccountStatus, SeverityLevel][]
   ["unfunded", "warning"],
   ["unknown", "unknown"],
   ["error", "error"],
+] as const;
+
+export const ACCOUNT_DIAGNOSTIC_SEVERITY_ENTRIES: readonly [
+  AccountDiagnosticState,
+  SeverityLevel,
+][] = [
+  ["funded", "success"],
+  ["unfunded", "warning"],
+  ["invalid", "error"],
+  ["unavailable", "unknown"],
+  ["unknown", "unknown"],
 ] as const;
 
 // ─── Milestone severity entries ─────────────────────────────────────────────

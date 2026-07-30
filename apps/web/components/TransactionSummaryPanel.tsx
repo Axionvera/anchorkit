@@ -1,6 +1,5 @@
 import type { TransactionSummary, TransactionSummaryRiskNote } from "@anchorkit/types";
-import { Alert, Card, DataRow } from "@/components/ui";
-import clsx from "clsx";
+import { Alert, Card, DataRow, StatusBadge } from "@/components/ui";
 
 function riskTone(severity: TransactionSummaryRiskNote["severity"]): "error" | "warning" | "info" {
   if (severity === "error") return "error";
@@ -50,14 +49,13 @@ export function TransactionSummaryPanel({
     <Card className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-base font-semibold tracking-tight">{title}</h3>
-        <span
-          className={clsx(
-            "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-            "border-stellar-200 bg-stellar-50 text-stellar-700 dark:border-stellar-800 dark:bg-stellar-950 dark:text-stellar-300"
-          )}
-        >
-          {summary.operation.replace(/_/g, " ")}
-        </span>
+        <StatusBadge
+          severity={{
+            label: summary.operation.replace(/_/g, " "),
+            tone: "neutral",
+          }}
+          showDot={false}
+        />
       </div>
 
       <Alert tone={blocking.length > 0 ? "warning" : "info"} title={summary.headline}>

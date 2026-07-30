@@ -12,6 +12,7 @@
  */
 
 import type {
+  AccountDiagnosticState,
   AccountStatus,
   AnchorTransactionStatus,
   BadgeTone,
@@ -19,7 +20,10 @@ import type {
   ReadinessState,
   RecommendedAction,
   SeverityLevel,
+  StatusBadgeVariant,
+  StatusBadgeSize,
   StatusSeverity,
+  TransactionReadinessState,
   TransactionReceiptStatus,
   ValidationUIState,
 } from "@anchorkit/types";
@@ -27,30 +31,46 @@ import type {
 // ─── Badge tone → Tailwind class fragments ──────────────────────────────────
 
 export const BADGE_TONE_CLASSES: Record<BadgeTone, string> = {
-  neutral: "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
-  amber: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
+  neutral:
+    "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
+  amber:
+    "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
   blue: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900",
-  green: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
+  green:
+    "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
   red: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900",
 };
 
 export const BADGE_TONE_CLASSES_SOLID: Record<BadgeTone, string> = {
-  neutral: "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
-  amber: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-900",
+  neutral:
+    "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
+  amber:
+    "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-900",
   blue: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-900",
-  green: "bg-green-100 text-green-800 border-green-300 dark:bg-green-950/60 dark:text-green-200 dark:border-green-900",
+  green:
+    "bg-green-100 text-green-800 border-green-300 dark:bg-green-950/60 dark:text-green-200 dark:border-green-900",
   red: "bg-red-100 text-red-800 border-red-300 dark:bg-red-950/60 dark:text-red-200 dark:border-red-900",
+};
+
+export const BADGE_SIZE_CLASSES: Record<StatusBadgeSize, string> = {
+  sm: "px-2 py-0.5 text-mono-xs",
+  md: "px-2.5 py-0.5 text-xs",
 };
 
 // ─── Alert tone → Tailwind class fragments ──────────────────────────────────
 
 export const ALERT_TONE_CLASSES: Record<SeverityLevel, string> = {
   info: "border-stellar-200 bg-stellar-50 text-stellar-800 dark:border-stellar-900 dark:bg-stellar-950/40 dark:text-stellar-200",
-  success: "border-anchor-100 bg-anchor-50 text-anchor-700 dark:border-anchor-900 dark:bg-anchor-950/30 dark:text-anchor-200",
-  warning: "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200",
-  blocked: "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200",
-  error: "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200",
-  unknown: "border-ink-200 bg-ink-50 text-ink-800 dark:border-ink-800 dark:bg-ink-950/30 dark:text-ink-200",
+  success:
+    "border-anchor-100 bg-anchor-50 text-anchor-700 dark:border-anchor-900 dark:bg-anchor-950/30 dark:text-anchor-200",
+  warning:
+    "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200",
+  blocked:
+    "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200",
+  error:
+    "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200",
+  unknown:
+    "border-ink-200 bg-ink-50 text-ink-800 dark:border-ink-800 dark:bg-ink-950/30 dark:text-ink-200",
 };
 
 // ─── Receipt status severity ────────────────────────────────────────────────
@@ -79,7 +99,8 @@ const RECEIPT_SEVERITY: Record<TransactionReceiptStatus, StatusSeverity> = {
     label: "Failed",
     tone: "red",
     headline: "Transaction failed",
-    detail: "The transaction could not be completed. Review the error details and retry if appropriate.",
+    detail:
+      "The transaction could not be completed. Review the error details and retry if appropriate.",
     action: "retry",
     docLink: "./docs/transaction-receipts.md",
   },
@@ -188,7 +209,8 @@ const READINESS_SEVERITY: Record<ReadinessState, StatusSeverity> = {
     label: "Unsafe Network",
     tone: "red",
     headline: "Mainnet access disabled",
-    detail: "Mainnet mode is disabled by default. Review security notes and explicitly enable mainnet if needed.",
+    detail:
+      "Mainnet mode is disabled by default. Review security notes and explicitly enable mainnet if needed.",
     action: "enable_mainnet",
     docLink: "./docs/SECURITY_NOTES.md",
   },
@@ -197,8 +219,59 @@ const READINESS_SEVERITY: Record<ReadinessState, StatusSeverity> = {
     label: "Blocked",
     tone: "red",
     headline: "Cannot proceed",
-    detail: "One or more validation errors must be resolved before the transaction can be submitted.",
+    detail:
+      "One or more validation errors must be resolved before the transaction can be submitted.",
     action: "review_details",
+    docLink: "./docs/transaction-readiness.md",
+  },
+};
+
+// ─── Transaction readiness state severity ──────────────────────────────────
+
+const TRANSACTION_READINESS_SEVERITY: Record<TransactionReadinessState, StatusSeverity> = {
+  valid: {
+    level: "success",
+    label: "Valid",
+    tone: "green",
+    headline: "Validation passed",
+    detail: "The readiness stage completed successfully.",
+    action: "none",
+    docLink: "./docs/transaction-readiness.md",
+  },
+  invalid: {
+    level: "error",
+    label: "Invalid",
+    tone: "red",
+    headline: "Validation failed",
+    detail: "The input is invalid and must be corrected before proceeding.",
+    action: "review_details",
+    docLink: "./docs/transaction-readiness.md",
+  },
+  blocked: {
+    level: "blocked",
+    label: "Blocked",
+    tone: "red",
+    headline: "Cannot proceed",
+    detail: "A policy or external condition is preventing this readiness stage from proceeding.",
+    action: "review_details",
+    docLink: "./docs/transaction-readiness.md",
+  },
+  warning: {
+    level: "warning",
+    label: "Warning",
+    tone: "amber",
+    headline: "Review this stage",
+    detail: "The readiness stage completed with a non-blocking warning.",
+    action: "review_details",
+    docLink: "./docs/transaction-readiness.md",
+  },
+  unavailable: {
+    level: "unknown",
+    label: "Unavailable",
+    tone: "neutral",
+    headline: "Check unavailable",
+    detail: "This readiness stage could not be evaluated.",
+    action: "retry",
     docLink: "./docs/transaction-readiness.md",
   },
 };
@@ -247,7 +320,8 @@ const VALIDATION_UI_STATE_SEVERITY: Record<ValidationUIState, StatusSeverity> = 
     label: "Blocked",
     tone: "red",
     headline: "Cannot proceed",
-    detail: "An external condition (e.g. network safety or an unavailable check) is preventing submission.",
+    detail:
+      "An external condition (e.g. network safety or an unavailable check) is preventing submission.",
     action: "review_details",
     docLink: "./docs/VALIDATION_UI_STATES.md",
   },
@@ -263,7 +337,7 @@ const ACCOUNT_SEVERITY: Record<AccountStatus, StatusSeverity> = {
     headline: "Account funded",
     detail: "The account is active and funded on the Stellar network.",
     action: "none",
-    docLink: "./docs/ACCOUNT_UTILITIES.md",
+    docLink: "./docs/account-diagnostics.md",
   },
   unfunded: {
     level: "warning",
@@ -272,7 +346,7 @@ const ACCOUNT_SEVERITY: Record<AccountStatus, StatusSeverity> = {
     headline: "Account not funded",
     detail: "The account exists but has no balance. Fund it via Friendbot to send transactions.",
     action: "fund_account",
-    docLink: "./docs/ACCOUNT_UTILITIES.md",
+    docLink: "./docs/account-diagnostics.md",
   },
   unknown: {
     level: "unknown",
@@ -281,7 +355,7 @@ const ACCOUNT_SEVERITY: Record<AccountStatus, StatusSeverity> = {
     headline: "Account status unknown",
     detail: "The account status could not be determined. The network may be unavailable.",
     action: "retry",
-    docLink: "./docs/ACCOUNT_UTILITIES.md",
+    docLink: "./docs/account-diagnostics.md",
   },
   error: {
     level: "error",
@@ -290,7 +364,36 @@ const ACCOUNT_SEVERITY: Record<AccountStatus, StatusSeverity> = {
     headline: "Account lookup failed",
     detail: "An error occurred while looking up the account. Check the network and try again.",
     action: "contact_support",
-    docLink: "./docs/ACCOUNT_UTILITIES.md",
+    docLink: "./docs/account-diagnostics.md",
+  },
+};
+
+// ─── Account diagnostic state severity ─────────────────────────────────────
+
+const ACCOUNT_DIAGNOSTIC_SEVERITY: Record<AccountDiagnosticState, StatusSeverity> = {
+  funded: ACCOUNT_SEVERITY.funded,
+  unfunded: ACCOUNT_SEVERITY.unfunded,
+  invalid: {
+    level: "error",
+    label: "Invalid",
+    tone: "red",
+    headline: "Invalid public key",
+    detail: "The value is not a structurally valid Stellar public key.",
+    action: "review_details",
+    docLink: "./docs/account-diagnostics.md",
+  },
+  unavailable: {
+    level: "unknown",
+    label: "Unavailable",
+    tone: "neutral",
+    headline: "Diagnostics unavailable",
+    detail: "Account diagnostics could not be completed. Check the network and retry.",
+    action: "retry",
+    docLink: "./docs/account-diagnostics.md",
+  },
+  unknown: {
+    ...ACCOUNT_SEVERITY.unknown,
+    docLink: "./docs/account-diagnostics.md",
   },
 };
 
@@ -379,9 +482,19 @@ export function getReadinessSeverity(state: ReadinessState): StatusSeverity {
   return READINESS_SEVERITY[state];
 }
 
+/** Look up the severity mapping for a diagnostics-oriented readiness state. */
+export function getTransactionReadinessSeverity(state: TransactionReadinessState): StatusSeverity {
+  return TRANSACTION_READINESS_SEVERITY[state];
+}
+
 /** Look up the severity mapping for an account status. */
 export function getAccountSeverity(status: AccountStatus): StatusSeverity {
   return ACCOUNT_SEVERITY[status];
+}
+
+/** Look up the severity mapping for an account diagnostic state. */
+export function getAccountDiagnosticSeverity(state: AccountDiagnosticState): StatusSeverity {
+  return ACCOUNT_DIAGNOSTIC_SEVERITY[state];
 }
 
 /** Look up the severity mapping for an escrow milestone status. */
@@ -397,8 +510,13 @@ export function getValidationUiStateSeverity(state: ValidationUIState): StatusSe
 // ─── Badge helpers ──────────────────────────────────────────────────────────
 
 /** Get the Tailwind class string for a badge tone. */
-export function badgeClasses(tone: BadgeTone, variant: "default" | "solid" = "default"): string {
+export function badgeClasses(tone: BadgeTone, variant: StatusBadgeVariant = "default"): string {
   return variant === "solid" ? BADGE_TONE_CLASSES_SOLID[tone] : BADGE_TONE_CLASSES[tone];
+}
+
+/** Get the spacing and typography classes for a shared badge size. */
+export function badgeSizeClasses(size: StatusBadgeSize = "md"): string {
+  return BADGE_SIZE_CLASSES[size];
 }
 
 /** Get the Tailwind class string for an alert severity level. */
@@ -420,51 +538,44 @@ export function getStatusSeverity(
   domain: "anchor",
   status: AnchorTransactionStatus
 ): StatusSeverity;
+export function getStatusSeverity(domain: "readiness", status: ReadinessState): StatusSeverity;
 export function getStatusSeverity(
-  domain: "readiness",
-  status: ReadinessState
+  domain: "transactionReadiness",
+  status: TransactionReadinessState
 ): StatusSeverity;
+export function getStatusSeverity(domain: "account", status: AccountStatus): StatusSeverity;
 export function getStatusSeverity(
-  domain: "account",
-  status: AccountStatus
+  domain: "diagnostic",
+  status: AccountDiagnosticState
 ): StatusSeverity;
-export function getStatusSeverity(
-  domain: "milestone",
-  status: MilestoneStatus
-): StatusSeverity;
+export function getStatusSeverity(domain: "milestone", status: MilestoneStatus): StatusSeverity;
 export function getStatusSeverity(
   domain: "validationUi",
   status: ValidationUIState
 ): StatusSeverity;
-export function getStatusSeverity(
-  domain: string,
-  status: string
-): StatusSeverity | null;
-export function getStatusSeverity(
-  domain: string,
-  status: string
-): StatusSeverity | null {
+export function getStatusSeverity(domain: string, status: string): StatusSeverity | null;
+export function getStatusSeverity(domain: string, status: string): StatusSeverity | null {
   switch (domain) {
     case "receipt":
       return status in RECEIPT_SEVERITY
         ? RECEIPT_SEVERITY[status as TransactionReceiptStatus]
         : null;
     case "anchor":
-      return status in ANCHOR_SEVERITY
-        ? ANCHOR_SEVERITY[status as AnchorTransactionStatus]
-        : null;
+      return status in ANCHOR_SEVERITY ? ANCHOR_SEVERITY[status as AnchorTransactionStatus] : null;
     case "readiness":
-      return status in READINESS_SEVERITY
-        ? READINESS_SEVERITY[status as ReadinessState]
+      return status in READINESS_SEVERITY ? READINESS_SEVERITY[status as ReadinessState] : null;
+    case "transactionReadiness":
+      return status in TRANSACTION_READINESS_SEVERITY
+        ? TRANSACTION_READINESS_SEVERITY[status as TransactionReadinessState]
         : null;
     case "account":
-      return status in ACCOUNT_SEVERITY
-        ? ACCOUNT_SEVERITY[status as AccountStatus]
+      return status in ACCOUNT_SEVERITY ? ACCOUNT_SEVERITY[status as AccountStatus] : null;
+    case "diagnostic":
+      return status in ACCOUNT_DIAGNOSTIC_SEVERITY
+        ? ACCOUNT_DIAGNOSTIC_SEVERITY[status as AccountDiagnosticState]
         : null;
     case "milestone":
-      return status in MILESTONE_SEVERITY
-        ? MILESTONE_SEVERITY[status as MilestoneStatus]
-        : null;
+      return status in MILESTONE_SEVERITY ? MILESTONE_SEVERITY[status as MilestoneStatus] : null;
     case "validationUi":
       return status in VALIDATION_UI_STATE_SEVERITY
         ? VALIDATION_UI_STATE_SEVERITY[status as ValidationUIState]
@@ -506,3 +617,5 @@ export const RECOMMENDED_ACTIONS: readonly RecommendedAction[] = [
   "wait",
   "review_details",
 ] as const;
+
+export { STATUS_BADGE_DOMAINS, STATUS_BADGE_SIZES, STATUS_BADGE_VARIANTS } from "@anchorkit/types";

@@ -8,49 +8,57 @@ export const TYPES_PACKAGE_CAPABILITIES: PackageCapability = {
       id: "core-types",
       label: "Core Type Definitions",
       state: "implemented",
-      description: "Define shared types for Stellar networks, keys, assets, accounts, payments, and transactions.",
+      description:
+        "Define shared types for Stellar networks, keys, assets, accounts, payments, and transactions.",
     },
     {
       id: "error-taxonomy",
       label: "Error Taxonomy",
       state: "implemented",
-      description: "AnchorKitError class with typed categories, error codes, secret redaction, and user-safe mapping.",
+      description:
+        "AnchorKitError class with typed categories, error codes, secret redaction, and user-safe mapping.",
     },
     {
       id: "escrow-events",
       label: "Escrow Event Types",
       state: "implemented",
-      description: "Typed escrow event interfaces and parser result types for Soroban contract event processing.",
+      description:
+        "Typed escrow event interfaces and parser result types for Soroban contract event processing.",
     },
     {
       id: "capability-types",
       label: "Capability State Types",
       state: "implemented",
-      description: "CapabilityState, ModuleCapability, and PackageCapability interfaces shared across all packages.",
+      description:
+        "CapabilityState, ModuleCapability, and PackageCapability interfaces shared across all packages.",
     },
     {
       id: "severity-types",
-      label: "Status Severity Types",
+      label: "Shared Status Badge Types",
       state: "implemented",
-      description: "SeverityLevel, BadgeTone, StatusSeverity, and RecommendedAction types for consistent UI rendering.",
+      description:
+        "Shared badge domains, variants, sizes, severity levels, tones, labels, and recommended actions for consistent UI rendering.",
     },
     {
       id: "asset-display-types",
       label: "Asset Display Types",
       state: "implemented",
-      description: "AssetDisplayInfo, AssetDisplayMetadata, and AssetDisplayState types for registry-based asset resolution.",
+      description:
+        "AssetDisplayInfo, AssetDisplayMetadata, and AssetDisplayState types for registry-based asset resolution.",
     },
     {
       id: "rail-capability-types",
       label: "Rail Capability Matrix Types",
       state: "implemented",
-      description: "AnchorRailCapabilityState, AnchorRailCapability, AnchorAssetCapability, and AnchorCapabilityMatrix types for the anchor rails capability model.",
+      description:
+        "AnchorRailCapabilityState, AnchorRailCapability, AnchorAssetCapability, and AnchorCapabilityMatrix types for the anchor rails capability model.",
     },
     {
       id: "transaction-summary-types",
       label: "Transaction Summary Types",
       state: "implemented",
-      description: "TransactionSummary, parties, fee estimate, and risk-note types for review-before-action preview screens.",
+      description:
+        "TransactionSummary, parties, fee estimate, and risk-note types for review-before-action preview screens.",
     },
   ],
   docsHref: "/docs#types",

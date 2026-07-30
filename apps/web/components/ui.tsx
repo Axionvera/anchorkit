@@ -1,21 +1,78 @@
 import clsx from "clsx";
 import type {
+  AccountDiagnosticState,
   AnchorTransactionStatus,
   MilestoneStatus,
+  ReadinessState,
   SeverityLevel,
+  StatusBadgeSize,
+  StatusBadgeVariant,
+  StatusSeverity,
+  TransactionReadinessState,
   TransactionReceiptStatus,
   CapabilityState,
   ValidationUIState,
 } from "@anchorkit/types";
 import {
   badgeClasses,
+  badgeSizeClasses,
   alertClasses,
   getAnchorSeverity,
   getMilestoneSeverity,
   getReceiptSeverity,
   getAccountSeverity,
+  getAccountDiagnosticSeverity,
+  getReadinessSeverity,
+  getTransactionReadinessSeverity,
   getValidationUiStateSeverity,
 } from "@anchorkit/stellar-kit";
+
+/**
+ * Shared visual primitive for every mapped AnchorKit status.
+ *
+ * Domain wrappers resolve their status through `@anchorkit/stellar-kit` and
+ * delegate rendering here so labels, variants, sizing, and indicator behavior
+ * stay consistent.
+ */
+export function StatusBadge({
+  severity,
+  variant = "default",
+  size = "md",
+  showDot = true,
+  pulse = false,
+  label,
+  className,
+}: {
+  severity: Pick<StatusSeverity, "label" | "tone">;
+  variant?: StatusBadgeVariant;
+  size?: StatusBadgeSize;
+  showDot?: boolean;
+  pulse?: boolean;
+  label?: string;
+  className?: string;
+}) {
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center rounded-full border font-medium",
+        badgeSizeClasses(size),
+        badgeClasses(severity.tone, variant),
+        className
+      )}
+    >
+      {showDot && (
+        <span
+          aria-hidden="true"
+          className={clsx(
+            "mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80",
+            pulse && "animate-pulse"
+          )}
+        />
+      )}
+      {label ?? severity.label}
+    </span>
+  );
+}
 
 /**
  * Renders an anchor transaction status badge using the shared
@@ -25,67 +82,42 @@ import {
  * source of truth for status labelling and styling.
  */
 export function AnchorStatusBadge({ status }: { status: AnchorTransactionStatus }) {
-  const { label, tone } = getAnchorSeverity(status);
-
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone),
-      )}
-    >
-      <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" />
-      {label}
-    </span>
-  );
+  return <StatusBadge severity={getAnchorSeverity(status)} />;
 }
 
 export function MilestoneStatusBadge({ status }: { status: MilestoneStatus }) {
-  const { label, tone } = getMilestoneSeverity(status);
-
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone),
-      )}
-    >
-      {label}
-    </span>
-  );
+  return <StatusBadge severity={getMilestoneSeverity(status)} showDot={false} />;
 }
 
 export function TransactionReceiptBadge({ status }: { status: TransactionReceiptStatus }) {
-  const { label, tone } = getReceiptSeverity(status);
+  return <StatusBadge severity={getReceiptSeverity(status)} />;
+}
 
+export function AccountStatusBadge({
+  status,
+}: {
+  status: "funded" | "unfunded" | "unknown" | "error" | "checking";
+}) {
+  const severity = getAccountSeverity(status === "checking" ? "unknown" : status);
   return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone),
-      )}
-    >
-      <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" />
-      {label}
-    </span>
+    <StatusBadge
+      severity={severity}
+      label={status === "checking" ? "Checking…" : undefined}
+      pulse={status === "checking"}
+    />
   );
 }
 
-export function AccountStatusBadge({ status }: { status: "funded" | "unfunded" | "unknown" | "error" | "checking" }) {
-  const severity = getAccountSeverity(status === "checking" ? "unknown" : status);
-  const label = status === "checking" ? "Checking…" : severity.label;
-  const tone = severity.tone;
+export function AccountDiagnosticBadge({ state }: { state: AccountDiagnosticState }) {
+  return <StatusBadge severity={getAccountDiagnosticSeverity(state)} />;
+}
 
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone),
-      )}
-    >
-      {label}
-    </span>
-  );
+export function ReadinessStatusBadge({ state }: { state: ReadinessState }) {
+  return <StatusBadge severity={getReadinessSeverity(state)} />;
+}
+
+export function TransactionReadinessStatusBadge({ state }: { state: TransactionReadinessState }) {
+  return <StatusBadge severity={getTransactionReadinessSeverity(state)} />;
 }
 
 /**
@@ -95,24 +127,7 @@ export function AccountStatusBadge({ status }: { status: "funded" | "unfunded" |
  * instead of each page reimplementing its own badge styling.
  */
 export function ValidationStateBadge({ state }: { state: ValidationUIState }) {
-  const { label, tone } = getValidationUiStateSeverity(state);
-
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-mono-xs font-medium",
-        badgeClasses(tone),
-      )}
-    >
-      <span
-        className={clsx(
-          "mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80",
-          state === "loading" && "animate-pulse",
-        )}
-      />
-      {label}
-    </span>
-  );
+  return <StatusBadge severity={getValidationUiStateSeverity(state)} pulse={state === "loading"} />;
 }
 
 /**
@@ -155,7 +170,13 @@ export function Alert({
   );
 }
 
-export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+export function Card({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div
       className={clsx(
@@ -176,9 +197,12 @@ export function Button({
   variant?: "primary" | "secondary" | "ghost" | "danger";
 }) {
   const variants = {
-    primary: "bg-stellar-600 text-white hover:bg-stellar-700 border border-stellar-600 disabled:opacity-50",
-    secondary: "bg-white text-ink-800 border border-ink-300 hover:bg-ink-50 disabled:opacity-50 dark:bg-ink-950 dark:text-ink-100 dark:border-ink-700 dark:hover:bg-ink-900",
-    ghost: "bg-transparent text-ink-700 hover:bg-ink-100 border border-transparent dark:text-ink-200 dark:hover:bg-ink-900",
+    primary:
+      "bg-stellar-600 text-white hover:bg-stellar-700 border border-stellar-600 disabled:opacity-50",
+    secondary:
+      "bg-white text-ink-800 border border-ink-300 hover:bg-ink-50 disabled:opacity-50 dark:bg-ink-950 dark:text-ink-100 dark:border-ink-700 dark:hover:bg-ink-900",
+    ghost:
+      "bg-transparent text-ink-700 hover:bg-ink-100 border border-transparent dark:text-ink-200 dark:hover:bg-ink-900",
     danger: "bg-red-600 text-white hover:bg-red-700 border border-red-600 disabled:opacity-50",
   };
   return (
@@ -193,9 +217,20 @@ export function Button({
   );
 }
 
-export function Label({ htmlFor, children, required }: { htmlFor?: string; children: React.ReactNode; required?: boolean }) {
+export function Label({
+  htmlFor,
+  children,
+  required,
+}: {
+  htmlFor?: string;
+  children: React.ReactNode;
+  required?: boolean;
+}) {
   return (
-    <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-ink-800 dark:text-ink-200">
+    <label
+      htmlFor={htmlFor}
+      className="mb-1.5 block text-sm font-medium text-ink-800 dark:text-ink-200"
+    >
       {children}
       {required && <span className="ml-1 text-red-500">*</span>}
     </label>
@@ -248,11 +283,15 @@ export function DataRow({ label, value }: { label: string; value: React.ReactNod
 }
 
 export const CAPABILITY_BADGE_STYLES: Record<CapabilityState, string> = {
-  implemented: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
+  implemented:
+    "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900",
   mock: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900",
-  "testnet-only": "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
-  experimental: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900",
-  unavailable: "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
+  "testnet-only":
+    "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
+  experimental:
+    "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900",
+  unavailable:
+    "bg-ink-100 text-ink-700 border-ink-200 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-800",
 };
 
 export const CAPABILITY_BADGE_LABELS: Record<CapabilityState, string> = {
@@ -277,7 +316,9 @@ export function CapabilityBadge({ state }: { state: CapabilityState }) {
   );
 }
 
-export function groupCapabilitiesByState(capabilities: { state: CapabilityState }[]): Record<CapabilityState, number> {
+export function groupCapabilitiesByState(
+  capabilities: { state: CapabilityState }[]
+): Record<CapabilityState, number> {
   const groups: Record<CapabilityState, number> = {
     implemented: 0,
     mock: 0,
@@ -291,9 +332,19 @@ export function groupCapabilitiesByState(capabilities: { state: CapabilityState 
   return groups;
 }
 
-export function CapabilityHealthSummary({ capabilities }: { capabilities: readonly { state: CapabilityState }[] }) {
+export function CapabilityHealthSummary({
+  capabilities,
+}: {
+  capabilities: readonly { state: CapabilityState }[];
+}) {
   const groups = groupCapabilitiesByState(capabilities as { state: CapabilityState }[]);
-  const statesOrder: CapabilityState[] = ["implemented", "testnet-only", "mock", "experimental", "unavailable"];
+  const statesOrder: CapabilityState[] = [
+    "implemented",
+    "testnet-only",
+    "mock",
+    "experimental",
+    "unavailable",
+  ];
 
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-xl border border-ink-200 bg-ink-50/50 p-4 dark:border-ink-800 dark:bg-ink-900/30">
@@ -322,4 +373,3 @@ export function CapabilityHealthSummary({ capabilities }: { capabilities: readon
     </div>
   );
 }
-

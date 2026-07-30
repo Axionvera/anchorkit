@@ -7,6 +7,7 @@ export * from "./schemas/escrow";
 export * from "./schemas/milestoneUi";
 export * from "./schemas/receipt";
 export * from "./schemas/summary";
+export * from "./schemas/statusBadge";
 export * from "./schemas/railCapability";
 
 // ─── Validation engine (issue #6) ───────────────────────────────────────────
@@ -16,4 +17,3 @@ export * from "./validationEngine";
 export * from "./uiState";
 // ─── Package capability metadata ────────────────────────────────────────────
 export * from "./capabilities";
-

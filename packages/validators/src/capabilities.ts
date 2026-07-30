@@ -8,13 +8,15 @@ export const VALIDATORS_PACKAGE_CAPABILITIES: PackageCapability = {
       id: "stellar-schemas",
       label: "Stellar Schemas",
       state: "implemented",
-      description: "Zod schemas for StellarPublicKey, StellarSecretKey, TransactionHash, Memo, Asset, Amount, and PaymentIntent.",
+      description:
+        "Zod schemas for StellarPublicKey, StellarSecretKey, TransactionHash, Memo, Asset, Amount, and PaymentIntent.",
     },
     {
       id: "anchor-schemas",
       label: "Anchor Schemas",
       state: "implemented",
-      description: "Zod schemas for AnchorTransactionStatus, AnchorTransactionKind, AssetConfig, RailConfig, Deposit/Withdrawal metadata, and CallbackUrl.",
+      description:
+        "Zod schemas for AnchorTransactionStatus, AnchorTransactionKind, AssetConfig, RailConfig, Deposit/Withdrawal metadata, and CallbackUrl.",
     },
     {
       id: "escrow-schemas",
@@ -26,25 +28,35 @@ export const VALIDATORS_PACKAGE_CAPABILITIES: PackageCapability = {
       id: "receipt-schemas",
       label: "Receipt Schemas",
       state: "implemented",
-      description: "Zod schema for TransactionReceipt validation across payment, anchor, and escrow domains.",
+      description:
+        "Zod schema for TransactionReceipt validation across payment, anchor, and escrow domains.",
     },
     {
       id: "summary-schemas",
       label: "Summary Schemas",
       state: "implemented",
-      description: "Zod schema for TransactionSummary validation across payment, anchor, and escrow review screens.",
+      description:
+        "Zod schema for TransactionSummary validation across payment, anchor, and escrow review screens.",
+    },
+    {
+      id: "status-badge-schemas",
+      label: "Status Badge Schemas",
+      state: "implemented",
+      description: "Zod schemas for shared status severity mappings and status badge examples.",
     },
     {
       id: "validation-engine",
       label: "Validation Engine",
       state: "implemented",
-      description: "Uniform ValidationResult type and engine validators that never throw, with mapped error codes.",
+      description:
+        "Uniform ValidationResult type and engine validators that never throw, with mapped error codes.",
     },
     {
       id: "rail-capability-schemas",
       label: "Rail Capability Schemas",
       state: "implemented",
-      description: "Zod schemas for AnchorRailCapability, AnchorAssetCapability, and AnchorCapabilityMatrix.",
+      description:
+        "Zod schemas for AnchorRailCapability, AnchorAssetCapability, and AnchorCapabilityMatrix.",
     },
   ],
   docsHref: "/docs#validators",
