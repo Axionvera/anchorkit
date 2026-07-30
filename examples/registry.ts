@@ -28,6 +28,7 @@ export interface ExampleEntry {
     | "StellarPublicKeyArray"
     | "TransactionReceipt"
     | "TransactionSummary"
+    | "StatusBadgeExample"
     | "AnchorMockDepositRequest"
     | "AnchorMockDepositResponse"
     | "AnchorMockWithdrawalRequest"
@@ -119,6 +120,14 @@ export const EXAMPLE_REGISTRY: ExampleEntry[] = [
     expect: "valid",
     isArray: true,
     arrayKey: "summaries",
+  },
+  {
+    id: "status-badges",
+    path: "examples/status-badges.example.json",
+    schema: "StatusBadgeExample",
+    expect: "valid",
+    isArray: true,
+    arrayKey: "badges",
   },
   {
     id: "anchors-mock-api-deposit-request",

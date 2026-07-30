@@ -97,8 +97,9 @@ never hardcode stellar.expert URLs in application code.
 ## UI
 
 `apps/web/components/TransactionReceiptPanel.tsx` renders any
-`TransactionReceipt` with a status badge, headline, detail, timestamps, and
-an explorer link. The panel is used on:
+`TransactionReceipt` with a shared status badge and an `Alert` whose tone
+comes from `getReceiptSeverity(receipt.status).level` (not a local tone
+switch). The panel is used on:
 
 - **Payments** — mock post-submit receipt preview
 - **Anchors** — receipt derived from the mock anchor record

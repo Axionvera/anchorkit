@@ -1,4 +1,5 @@
 import type { TransactionReceipt } from "@anchorkit/types";
+import { getReceiptSeverity } from "@anchorkit/stellar-kit";
 import { Alert, Card, DataRow, TransactionReceiptBadge } from "@/components/ui";
 
 export function TransactionReceiptPanel({
@@ -17,14 +18,7 @@ export function TransactionReceiptPanel({
     );
   }
 
-  const tone =
-    receipt.status === "confirmed"
-      ? "success"
-      : receipt.status === "failed"
-        ? "error"
-        : receipt.status === "rejected" || receipt.status === "unknown"
-          ? "warning"
-          : "info";
+  const severity = getReceiptSeverity(receipt.status);
 
   return (
     <Card className="space-y-3">
@@ -32,7 +26,7 @@ export function TransactionReceiptPanel({
         <h3 className="text-base font-semibold tracking-tight">{title}</h3>
         <TransactionReceiptBadge status={receipt.status} />
       </div>
-      <Alert tone={tone} title={receipt.headline}>
+      <Alert tone={severity.level} title={receipt.headline}>
         {receipt.detail}
       </Alert>
       <dl className="divide-y divide-ink-100 dark:divide-ink-800">

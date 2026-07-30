@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { DEFAULT_NETWORK } from "@anchorkit/config";
 import { PageShell } from "@/components/PageShell";
-import { Alert, Button, Card, Input, Label, AccountStatusBadge, DataRow } from "@/components/ui";
+import {
+  AccountDiagnosticBadge,
+  AccountStatusBadge,
+  Alert,
+  Button,
+  Card,
+  DataRow,
+  Input,
+  Label,
+} from "@/components/ui";
 import {
   generateTestnetKeypair,
   isPublicKeyValid,
@@ -61,7 +70,7 @@ export default function AccountsPage() {
       const diag = await diagnoseAccount(lookupKey, { network: DEFAULT_NETWORK });
       setLookupDiag(diag);
       setLookupInfo(diag.account);
-      setLookupStatus(diag.state === "invalid" ? "unknown" : (diag.state as AccountStatus));
+      setLookupStatus(diag.account?.status ?? "unknown");
     } catch {
       setLookupInfo(null);
       setLookupStatus("error");
@@ -267,7 +276,13 @@ export default function AccountsPage() {
               unknown (network error), or error.
             </p>
           </div>
-          <AccountStatusBadge status={lookupLoading ? "checking" : lookupStatus} />
+          {lookupLoading ? (
+            <AccountStatusBadge status="checking" />
+          ) : lookupDiag ? (
+            <AccountDiagnosticBadge state={lookupDiag.state} />
+          ) : (
+            <AccountStatusBadge status={lookupStatus} />
+          )}
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
           <div>

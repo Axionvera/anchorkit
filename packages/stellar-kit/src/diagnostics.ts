@@ -10,6 +10,7 @@
 
 import type {
   AccountBalanceModel,
+  AccountDiagnosticState,
   AccountInfo,
   AccountStatus,
   ConfigSourceMetadata,
@@ -39,8 +40,7 @@ export {
 } from "./balances";
 export type { ReserveInfo } from "./balances";
 
-/** Diagnostic states — superset of the raw `AccountStatus`. */
-export type AccountDiagnosticState = "funded" | "unfunded" | "invalid" | "unavailable" | "unknown";
+export type { AccountDiagnosticState } from "@anchorkit/types";
 
 export interface AccountDiagnostic {
   /** The (possibly invalid) input the user supplied. */

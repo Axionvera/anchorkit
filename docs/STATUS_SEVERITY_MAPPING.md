@@ -1,6 +1,10 @@
-# Status Severity Mapping
+# Shared Status Badge System (issue #198)
 
-Single source of truth for mapping domain-specific statuses to canonical severity levels, badge tones, headlines, detail messages, recommended actions, and documentation links.
+AnchorKit uses one shared system for status variants, labels, severity mapping,
+display helpers, and UI badges across payments, anchors, escrow, receipts, and
+account diagnostics. The mapping layer lives in `@anchorkit/stellar-kit`; the
+reusable React primitive and typed domain wrappers live in
+`apps/web/components/ui.tsx`.
 
 ## Overview
 
@@ -14,16 +18,22 @@ Every status in AnchorKit maps to exactly one `StatusSeverity` entry with:
 - **Action**: Recommended next action (optional)
 - **DocLink**: Path to relevant documentation (optional)
 
+Shared badges support:
+
+- **Variant**: `default` | `solid`
+- **Size**: `sm` | `md`
+- **Indicator**: optional status dot with an optional loading pulse
+
 ## Severity Levels
 
-| Level | When to Use |
-|-------|-------------|
-| `info` | Neutral status updates, in-progress states |
-| `success` | Completed, confirmed, funded, ready states |
+| Level     | When to Use                                           |
+| --------- | ----------------------------------------------------- |
+| `info`    | Neutral status updates, in-progress states            |
+| `success` | Completed, confirmed, funded, ready states            |
 | `warning` | Non-blocking issues, needs attention but not blocking |
-| `blocked` | Cannot proceed until action is taken |
-| `error` | Failed, disputed, critical issues |
-| `unknown` | Status cannot be determined |
+| `blocked` | Cannot proceed until action is taken                  |
+| `error`   | Failed, disputed, critical issues                     |
+| `unknown` | Status cannot be determined                           |
 
 ## Usage
 
@@ -32,10 +42,13 @@ import {
   getReceiptSeverity,
   getAnchorSeverity,
   getReadinessSeverity,
+  getTransactionReadinessSeverity,
   getAccountSeverity,
+  getAccountDiagnosticSeverity,
   getMilestoneSeverity,
-  getStatusSeverity,  // unified lookup
+  getStatusSeverity, // unified lookup
   badgeClasses,
+  badgeSizeClasses,
   alertClasses,
 } from "@anchorkit/stellar-kit";
 ```
@@ -60,17 +73,29 @@ const severity = getStatusSeverity("receipt", "confirmed");
 ### Badge Components
 
 ```tsx
-import { badgeClasses, getReceiptSeverity } from "@anchorkit/stellar-kit";
+import {
+  AccountDiagnosticBadge,
+  AnchorStatusBadge,
+  MilestoneStatusBadge,
+  StatusBadge,
+  TransactionReadinessStatusBadge,
+  TransactionReceiptBadge,
+  ValidationStateBadge,
+} from "@/components/ui";
+import { getReceiptSeverity } from "@anchorkit/stellar-kit";
 
-function StatusBadge({ status }) {
-  const { label, tone } = getReceiptSeverity(status);
-  return (
-    <span className={badgeClasses(tone)}>
-      {label}
-    </span>
-  );
-}
+<TransactionReceiptBadge status="confirmed" />
+<AnchorStatusBadge status="pending_user" />
+<MilestoneStatusBadge status="disputed" />
+<TransactionReadinessStatusBadge state="warning" />
+<AccountDiagnosticBadge state="unavailable" />
+
+// Use the visual primitive directly for custom layouts.
+<StatusBadge severity={getReceiptSeverity("pending")} variant="solid" size="sm" />
 ```
+
+Domain wrappers resolve the canonical mapping and delegate all visual rendering
+to `StatusBadge`. Do not duplicate labels or Tailwind status classes in pages.
 
 ### Alert Components
 
@@ -91,62 +116,91 @@ function StatusAlert({ level, title, children }) {
 
 ### Receipt Statuses
 
-| Status | Level | Tone | Action |
-|--------|-------|------|--------|
-| `confirmed` | success | green | none |
-| `pending` | info | blue | wait |
-| `failed` | error | red | retry |
-| `rejected` | warning | amber | check_explorer |
-| `unknown` | unknown | neutral | check_explorer |
+| Status      | Level   | Tone    | Action         |
+| ----------- | ------- | ------- | -------------- |
+| `confirmed` | success | green   | none           |
+| `pending`   | info    | blue    | wait           |
+| `failed`    | error   | red     | retry          |
+| `rejected`  | warning | amber   | check_explorer |
+| `unknown`   | unknown | neutral | check_explorer |
 
 ### Anchor Statuses
 
-| Status | Level | Tone | Action |
-|--------|-------|------|--------|
-| `pending_user` | warning | amber | review_details |
-| `pending_anchor` | info | blue | wait |
-| `pending_stellar` | info | blue | wait |
-| `completed` | success | green | none |
-| `failed` | error | red | retry |
-| `refunded` | warning | amber | check_explorer |
+| Status            | Level   | Tone  | Action         |
+| ----------------- | ------- | ----- | -------------- |
+| `pending_user`    | warning | amber | review_details |
+| `pending_anchor`  | info    | blue  | wait           |
+| `pending_stellar` | info    | blue  | wait           |
+| `completed`       | success | green | none           |
+| `failed`          | error   | red   | retry          |
+| `refunded`        | warning | amber | check_explorer |
 
 ### Readiness States
 
-| State | Level | Tone | Action |
-|-------|-------|------|--------|
-| `ready` | success | green | none |
-| `warnings` | warning | amber | review_details |
-| `unsafe-network` | blocked | red | enable_mainnet |
-| `blocked` | blocked | red | review_details |
+| State            | Level   | Tone  | Action         |
+| ---------------- | ------- | ----- | -------------- |
+| `ready`          | success | green | none           |
+| `warnings`       | warning | amber | review_details |
+| `unsafe-network` | blocked | red   | enable_mainnet |
+| `blocked`        | blocked | red   | review_details |
+
+### Transaction Readiness States
+
+| State         | Level   | Tone    | Action         |
+| ------------- | ------- | ------- | -------------- |
+| `valid`       | success | green   | none           |
+| `invalid`     | error   | red     | review_details |
+| `blocked`     | blocked | red     | review_details |
+| `warning`     | warning | amber   | review_details |
+| `unavailable` | unknown | neutral | retry          |
 
 ### Account Statuses
 
-| Status | Level | Tone | Action |
-|--------|-------|------|--------|
-| `funded` | success | green | none |
-| `unfunded` | warning | amber | fund_account |
-| `unknown` | unknown | neutral | retry |
-| `error` | error | red | contact_support |
+| Status     | Level   | Tone    | Action          |
+| ---------- | ------- | ------- | --------------- |
+| `funded`   | success | green   | none            |
+| `unfunded` | warning | amber   | fund_account    |
+| `unknown`  | unknown | neutral | retry           |
+| `error`    | error   | red     | contact_support |
+
+### Account Diagnostic States
+
+| State         | Level   | Tone    | Action         |
+| ------------- | ------- | ------- | -------------- |
+| `funded`      | success | green   | none           |
+| `unfunded`    | warning | amber   | fund_account   |
+| `invalid`     | error   | red     | review_details |
+| `unavailable` | unknown | neutral | retry          |
+| `unknown`     | unknown | neutral | retry          |
 
 ### Milestone Statuses
 
-| Status | Level | Tone | Action |
-|--------|-------|------|--------|
-| `draft` | info | neutral | none |
-| `active` | info | blue | none |
-| `evidence_submitted` | info | blue | wait |
-| `approved` | success | green | none |
-| `disputed` | error | red | contact_support |
-| `ready_for_release` | success | green | none |
-| `released` | success | green | none |
+| Status               | Level   | Tone    | Action          |
+| -------------------- | ------- | ------- | --------------- |
+| `draft`              | info    | neutral | none            |
+| `active`             | info    | blue    | none            |
+| `evidence_submitted` | info    | blue    | wait            |
+| `approved`           | success | green   | none            |
+| `disputed`           | error   | red     | contact_support |
+| `ready_for_release`  | success | green   | none            |
+| `released`           | success | green   | none            |
 
 ## Adding New Statuses
 
-1. Add the status type to `packages/types/src/index.ts`
-2. Add severity mapping to `packages/stellar-kit/src/severity.ts`
-3. Add test fixtures to `packages/stellar-kit/test/fixtures/severity.ts`
-4. Update tests in `packages/stellar-kit/test/severity.test.ts`
-5. Update this documentation
+1. Add the status type to `packages/types/src/index.ts`.
+2. Add an exhaustive mapping to `packages/stellar-kit/src/severity.ts`.
+3. Add the domain to `STATUS_BADGE_DOMAINS` if it is new.
+4. Add test fixtures to `packages/stellar-kit/test/fixtures/severity.ts`.
+5. Update unit tests, `examples/status-badges.example.json`, and this document.
+
+## Examples and validation
+
+- `examples/status-badges.example.json` contains representative rows for every
+  supported status domain.
+- `StatusBadgeExampleSchema` validates example structure in
+  `@anchorkit/validators`.
+- `pnpm check:examples` prevents mappings in examples from drifting out of
+  shape.
 
 ## Design Principles
 

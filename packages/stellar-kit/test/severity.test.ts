@@ -1,10 +1,12 @@
 import { describe, it, expect } from "vitest";
 import type {
   AccountStatus,
+  AccountDiagnosticState,
   AnchorTransactionStatus,
   MilestoneStatus,
   ReadinessState,
   SeverityLevel,
+  TransactionReadinessState,
   TransactionReceiptStatus,
 } from "@anchorkit/types";
 import { VALIDATION_UI_STATES } from "@anchorkit/types";
@@ -12,23 +14,32 @@ import {
   getReceiptSeverity,
   getAnchorSeverity,
   getReadinessSeverity,
+  getTransactionReadinessSeverity,
   getAccountSeverity,
+  getAccountDiagnosticSeverity,
   getMilestoneSeverity,
   getValidationUiStateSeverity,
   getStatusSeverity,
   badgeClasses,
+  badgeSizeClasses,
   alertClasses,
   BADGE_TONE_CLASSES,
   BADGE_TONE_CLASSES_SOLID,
+  BADGE_SIZE_CLASSES,
   ALERT_TONE_CLASSES,
   SEVERITY_LEVELS,
   BADGE_TONES,
+  STATUS_BADGE_DOMAINS,
+  STATUS_BADGE_VARIANTS,
+  STATUS_BADGE_SIZES,
 } from "../src/severity";
 import {
   RECEIPT_SEVERITY_ENTRIES,
   ANCHOR_SEVERITY_ENTRIES,
   READINESS_SEVERITY_ENTRIES,
+  TRANSACTION_READINESS_SEVERITY_ENTRIES,
   ACCOUNT_SEVERITY_ENTRIES,
+  ACCOUNT_DIAGNOSTIC_SEVERITY_ENTRIES,
   MILESTONE_SEVERITY_ENTRIES,
   VALIDATION_UI_STATE_SEVERITY_ENTRIES,
 } from "./fixtures";
@@ -36,16 +47,13 @@ import {
 // ─── Receipt severity ───────────────────────────────────────────────────────
 
 describe("getReceiptSeverity", () => {
-  it.each(RECEIPT_SEVERITY_ENTRIES)(
-    "maps %s to %s",
-    (status, expectedLevel) => {
-      const result = getReceiptSeverity(status);
-      expect(result.level).toBe(expectedLevel);
-      expect(result.label).toBeTruthy();
-      expect(result.headline).toBeTruthy();
-      expect(result.detail).toBeTruthy();
-    },
-  );
+  it.each(RECEIPT_SEVERITY_ENTRIES)("maps %s to %s", (status, expectedLevel) => {
+    const result = getReceiptSeverity(status);
+    expect(result.level).toBe(expectedLevel);
+    expect(result.label).toBeTruthy();
+    expect(result.headline).toBeTruthy();
+    expect(result.detail).toBeTruthy();
+  });
 
   it("confirmed maps to success", () => {
     const result = getReceiptSeverity("confirmed");
@@ -64,16 +72,13 @@ describe("getReceiptSeverity", () => {
 // ─── Anchor severity ────────────────────────────────────────────────────────
 
 describe("getAnchorSeverity", () => {
-  it.each(ANCHOR_SEVERITY_ENTRIES)(
-    "maps %s to %s",
-    (status, expectedLevel) => {
-      const result = getAnchorSeverity(status);
-      expect(result.level).toBe(expectedLevel);
-      expect(result.label).toBeTruthy();
-      expect(result.headline).toBeTruthy();
-      expect(result.detail).toBeTruthy();
-    },
-  );
+  it.each(ANCHOR_SEVERITY_ENTRIES)("maps %s to %s", (status, expectedLevel) => {
+    const result = getAnchorSeverity(status);
+    expect(result.level).toBe(expectedLevel);
+    expect(result.label).toBeTruthy();
+    expect(result.headline).toBeTruthy();
+    expect(result.detail).toBeTruthy();
+  });
 
   it("completed maps to success", () => {
     const result = getAnchorSeverity("completed");
@@ -91,16 +96,13 @@ describe("getAnchorSeverity", () => {
 // ─── Readiness severity ─────────────────────────────────────────────────────
 
 describe("getReadinessSeverity", () => {
-  it.each(READINESS_SEVERITY_ENTRIES)(
-    "maps %s to %s",
-    (state, expectedLevel) => {
-      const result = getReadinessSeverity(state);
-      expect(result.level).toBe(expectedLevel);
-      expect(result.label).toBeTruthy();
-      expect(result.headline).toBeTruthy();
-      expect(result.detail).toBeTruthy();
-    },
-  );
+  it.each(READINESS_SEVERITY_ENTRIES)("maps %s to %s", (state, expectedLevel) => {
+    const result = getReadinessSeverity(state);
+    expect(result.level).toBe(expectedLevel);
+    expect(result.label).toBeTruthy();
+    expect(result.headline).toBeTruthy();
+    expect(result.detail).toBeTruthy();
+  });
 
   it("ready maps to success with green tone", () => {
     const result = getReadinessSeverity("ready");
@@ -124,19 +126,32 @@ describe("getReadinessSeverity", () => {
   });
 });
 
+describe("getTransactionReadinessSeverity", () => {
+  it.each(TRANSACTION_READINESS_SEVERITY_ENTRIES)("maps %s to %s", (state, expectedLevel) => {
+    const result = getTransactionReadinessSeverity(state);
+    expect(result.level).toBe(expectedLevel);
+    expect(result.label).toBeTruthy();
+    expect(result.headline).toBeTruthy();
+    expect(result.detail).toBeTruthy();
+  });
+
+  it("keeps invalid, blocked, and unavailable semantically distinct", () => {
+    expect(getTransactionReadinessSeverity("invalid").level).toBe("error");
+    expect(getTransactionReadinessSeverity("blocked").level).toBe("blocked");
+    expect(getTransactionReadinessSeverity("unavailable").level).toBe("unknown");
+  });
+});
+
 // ─── Account severity ───────────────────────────────────────────────────────
 
 describe("getAccountSeverity", () => {
-  it.each(ACCOUNT_SEVERITY_ENTRIES)(
-    "maps %s to %s",
-    (status, expectedLevel) => {
-      const result = getAccountSeverity(status);
-      expect(result.level).toBe(expectedLevel);
-      expect(result.label).toBeTruthy();
-      expect(result.headline).toBeTruthy();
-      expect(result.detail).toBeTruthy();
-    },
-  );
+  it.each(ACCOUNT_SEVERITY_ENTRIES)("maps %s to %s", (status, expectedLevel) => {
+    const result = getAccountSeverity(status);
+    expect(result.level).toBe(expectedLevel);
+    expect(result.label).toBeTruthy();
+    expect(result.headline).toBeTruthy();
+    expect(result.detail).toBeTruthy();
+  });
 
   it("unfunded maps to warning with fund_account action", () => {
     const result = getAccountSeverity("unfunded");
@@ -145,19 +160,29 @@ describe("getAccountSeverity", () => {
   });
 });
 
+describe("getAccountDiagnosticSeverity", () => {
+  it.each(ACCOUNT_DIAGNOSTIC_SEVERITY_ENTRIES)("maps %s to %s", (state, expectedLevel) => {
+    const result = getAccountDiagnosticSeverity(state);
+    expect(result.level).toBe(expectedLevel);
+    expect(result.label).toBeTruthy();
+  });
+
+  it("represents invalid and unavailable diagnostics without collapsing them", () => {
+    expect(getAccountDiagnosticSeverity("invalid").label).toBe("Invalid");
+    expect(getAccountDiagnosticSeverity("unavailable").label).toBe("Unavailable");
+  });
+});
+
 // ─── Milestone severity ─────────────────────────────────────────────────────
 
 describe("getMilestoneSeverity", () => {
-  it.each(MILESTONE_SEVERITY_ENTRIES)(
-    "maps %s to %s",
-    (status, expectedLevel) => {
-      const result = getMilestoneSeverity(status);
-      expect(result.level).toBe(expectedLevel);
-      expect(result.label).toBeTruthy();
-      expect(result.headline).toBeTruthy();
-      expect(result.detail).toBeTruthy();
-    },
-  );
+  it.each(MILESTONE_SEVERITY_ENTRIES)("maps %s to %s", (status, expectedLevel) => {
+    const result = getMilestoneSeverity(status);
+    expect(result.level).toBe(expectedLevel);
+    expect(result.label).toBeTruthy();
+    expect(result.headline).toBeTruthy();
+    expect(result.detail).toBeTruthy();
+  });
 
   it("disputed maps to error with contact_support action", () => {
     const result = getMilestoneSeverity("disputed");
@@ -176,16 +201,13 @@ describe("getMilestoneSeverity", () => {
 // ─── Validation UI state severity ───────────────────────────────────────────
 
 describe("getValidationUiStateSeverity", () => {
-  it.each(VALIDATION_UI_STATE_SEVERITY_ENTRIES)(
-    "maps %s to %s",
-    (state, expectedLevel) => {
-      const result = getValidationUiStateSeverity(state);
-      expect(result.level).toBe(expectedLevel);
-      expect(result.label).toBeTruthy();
-      expect(result.headline).toBeTruthy();
-      expect(result.detail).toBeTruthy();
-    },
-  );
+  it.each(VALIDATION_UI_STATE_SEVERITY_ENTRIES)("maps %s to %s", (state, expectedLevel) => {
+    const result = getValidationUiStateSeverity(state);
+    expect(result.level).toBe(expectedLevel);
+    expect(result.label).toBeTruthy();
+    expect(result.headline).toBeTruthy();
+    expect(result.detail).toBeTruthy();
+  });
 
   it("loading maps to info with blue tone", () => {
     const result = getValidationUiStateSeverity("loading");
@@ -231,10 +253,18 @@ describe("getStatusSeverity", () => {
     expect(result!.level).toBe("blocked");
   });
 
+  it("dispatches to transaction-readiness mapping", () => {
+    expect(getStatusSeverity("transactionReadiness", "unavailable")?.level).toBe("unknown");
+  });
+
   it("dispatches to account mapping", () => {
     const result = getStatusSeverity("account", "funded");
     expect(result).not.toBeNull();
     expect(result!.level).toBe("success");
+  });
+
+  it("dispatches to account diagnostic mapping", () => {
+    expect(getStatusSeverity("diagnostic", "invalid")?.level).toBe("error");
   });
 
   it("dispatches to milestone mapping", () => {
@@ -280,6 +310,15 @@ describe("badgeClasses", () => {
   });
 });
 
+describe("badgeSizeClasses", () => {
+  it("returns classes for every shared badge size", () => {
+    for (const size of STATUS_BADGE_SIZES) {
+      expect(badgeSizeClasses(size)).toBe(BADGE_SIZE_CLASSES[size]);
+      expect(badgeSizeClasses(size).length).toBeGreaterThan(0);
+    }
+  });
+});
+
 // ─── Alert classes ──────────────────────────────────────────────────────────
 
 describe("alertClasses", () => {
@@ -297,7 +336,11 @@ describe("alertClasses", () => {
 describe("severity mapping completeness", () => {
   it("covers all receipt statuses", () => {
     const allStatuses: TransactionReceiptStatus[] = [
-      "confirmed", "pending", "failed", "rejected", "unknown",
+      "confirmed",
+      "pending",
+      "failed",
+      "rejected",
+      "unknown",
     ];
     for (const status of allStatuses) {
       const result = getReceiptSeverity(status);
@@ -308,8 +351,12 @@ describe("severity mapping completeness", () => {
 
   it("covers all anchor statuses", () => {
     const allStatuses: AnchorTransactionStatus[] = [
-      "pending_user", "pending_anchor", "pending_stellar",
-      "completed", "failed", "refunded",
+      "pending_user",
+      "pending_anchor",
+      "pending_stellar",
+      "completed",
+      "failed",
+      "refunded",
     ];
     for (const status of allStatuses) {
       const result = getAnchorSeverity(status);
@@ -319,9 +366,7 @@ describe("severity mapping completeness", () => {
   });
 
   it("covers all readiness states", () => {
-    const allStates: ReadinessState[] = [
-      "ready", "warnings", "unsafe-network", "blocked",
-    ];
+    const allStates: ReadinessState[] = ["ready", "warnings", "unsafe-network", "blocked"];
     for (const state of allStates) {
       const result = getReadinessSeverity(state);
       expect(result).toBeDefined();
@@ -329,10 +374,21 @@ describe("severity mapping completeness", () => {
     }
   });
 
-  it("covers all account statuses", () => {
-    const allStatuses: AccountStatus[] = [
-      "funded", "unfunded", "unknown", "error",
+  it("covers all transaction readiness states", () => {
+    const allStates: TransactionReadinessState[] = [
+      "valid",
+      "invalid",
+      "blocked",
+      "warning",
+      "unavailable",
     ];
+    for (const state of allStates) {
+      expect(getTransactionReadinessSeverity(state)).toBeDefined();
+    }
+  });
+
+  it("covers all account statuses", () => {
+    const allStatuses: AccountStatus[] = ["funded", "unfunded", "unknown", "error"];
     for (const status of allStatuses) {
       const result = getAccountSeverity(status);
       expect(result).toBeDefined();
@@ -340,10 +396,28 @@ describe("severity mapping completeness", () => {
     }
   });
 
+  it("covers all account diagnostic states", () => {
+    const allStates: AccountDiagnosticState[] = [
+      "funded",
+      "unfunded",
+      "invalid",
+      "unavailable",
+      "unknown",
+    ];
+    for (const state of allStates) {
+      expect(getAccountDiagnosticSeverity(state)).toBeDefined();
+    }
+  });
+
   it("covers all milestone statuses", () => {
     const allStatuses: MilestoneStatus[] = [
-      "draft", "active", "evidence_submitted", "approved",
-      "disputed", "ready_for_release", "released",
+      "draft",
+      "active",
+      "evidence_submitted",
+      "approved",
+      "disputed",
+      "ready_for_release",
+      "released",
     ];
     for (const status of allStatuses) {
       const result = getMilestoneSeverity(status);
@@ -365,27 +439,47 @@ describe("severity mapping completeness", () => {
 
 describe("severity mapping consistency", () => {
   it("all entries have non-empty strings", () => {
-    const entries = [
-      ...RECEIPT_SEVERITY_ENTRIES,
-      ...ANCHOR_SEVERITY_ENTRIES,
-      ...READINESS_SEVERITY_ENTRIES,
-      ...ACCOUNT_SEVERITY_ENTRIES,
-      ...MILESTONE_SEVERITY_ENTRIES,
-      ...VALIDATION_UI_STATE_SEVERITY_ENTRIES,
+    const domains: Array<{
+      domain:
+        | "receipt"
+        | "anchor"
+        | "readiness"
+        | "transactionReadiness"
+        | "account"
+        | "diagnostic"
+        | "milestone"
+        | "validationUi";
+      entries: readonly [string, SeverityLevel][];
+    }> = [
+      { domain: "receipt", entries: RECEIPT_SEVERITY_ENTRIES },
+      { domain: "anchor", entries: ANCHOR_SEVERITY_ENTRIES },
+      { domain: "readiness", entries: READINESS_SEVERITY_ENTRIES },
+      { domain: "transactionReadiness", entries: TRANSACTION_READINESS_SEVERITY_ENTRIES },
+      { domain: "account", entries: ACCOUNT_SEVERITY_ENTRIES },
+      { domain: "diagnostic", entries: ACCOUNT_DIAGNOSTIC_SEVERITY_ENTRIES },
+      { domain: "milestone", entries: MILESTONE_SEVERITY_ENTRIES },
+      { domain: "validationUi", entries: VALIDATION_UI_STATE_SEVERITY_ENTRIES },
     ];
-    for (const [status] of entries) {
-      const result = getStatusSeverity("receipt" as any, status as any);
-      if (result) {
-        expect(result.label.length).toBeGreaterThan(0);
-        expect(result.headline.length).toBeGreaterThan(0);
-        expect(result.detail.length).toBeGreaterThan(0);
+
+    for (const { domain, entries } of domains) {
+      for (const [status] of entries) {
+        const result = getStatusSeverity(domain, status);
+        expect(result).not.toBeNull();
+        expect(result!.label.length).toBeGreaterThan(0);
+        expect(result!.headline.length).toBeGreaterThan(0);
+        expect(result!.detail.length).toBeGreaterThan(0);
       }
     }
   });
 
   it("severity levels are valid", () => {
     const validLevels: SeverityLevel[] = [
-      "info", "success", "warning", "blocked", "error", "unknown",
+      "info",
+      "success",
+      "warning",
+      "blocked",
+      "error",
+      "unknown",
     ];
     for (const level of SEVERITY_LEVELS) {
       expect(validLevels).toContain(level);
@@ -403,5 +497,20 @@ describe("severity mapping consistency", () => {
     for (const level of SEVERITY_LEVELS) {
       expect(ALERT_TONE_CLASSES[level]).toBeTruthy();
     }
+  });
+
+  it("exports every shared badge domain and visual variant", () => {
+    expect(STATUS_BADGE_DOMAINS).toEqual([
+      "receipt",
+      "anchor",
+      "readiness",
+      "transactionReadiness",
+      "validationUi",
+      "account",
+      "diagnostic",
+      "milestone",
+    ]);
+    expect(STATUS_BADGE_VARIANTS).toEqual(["default", "solid"]);
+    expect(STATUS_BADGE_SIZES).toEqual(["sm", "md"]);
   });
 });

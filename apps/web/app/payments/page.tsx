@@ -8,6 +8,7 @@ import {
   Input,
   Label,
   Select,
+  TransactionReadinessStatusBadge,
   ValidationStateAlert,
   ValidationStateBadge,
 } from "@/components/ui";
@@ -18,7 +19,7 @@ import {
   getStellarExpertAccountUrl,
   isPublicKeyValid,
   paymentIntentToSummary,
-  transactionReadinessStateToUiState,
+  alertClasses,
 } from "@anchorkit/stellar-kit";
 import type { TransactionReadinessPipeline } from "@anchorkit/stellar-kit";
 import type {
@@ -294,9 +295,11 @@ export default function PaymentsPage() {
             <>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-ink-500 dark:text-ink-400">Overall State</span>
-                <ValidationStateBadge
-                  state={readinessLoading ? "loading" : transactionReadinessStateToUiState(readiness.state)}
-                />
+                {readinessLoading ? (
+                  <ValidationStateBadge state="loading" />
+                ) : (
+                  <TransactionReadinessStatusBadge state={readiness.state} />
+                )}
               </div>
               <p className="text-sm font-medium">{readiness.summary}</p>
 
@@ -315,9 +318,11 @@ export default function PaymentsPage() {
                         <span className="font-mono font-bold uppercase">{stg.stage}</span>
                         <span className="text-ink-600 dark:text-ink-300">{stg.message}</span>
                       </div>
-                      <ValidationStateBadge
-                        state={readinessLoading ? "loading" : transactionReadinessStateToUiState(stg.state)}
-                      />
+                      {readinessLoading ? (
+                        <ValidationStateBadge state="loading" />
+                      ) : (
+                        <TransactionReadinessStatusBadge state={stg.state} />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -336,11 +341,9 @@ export default function PaymentsPage() {
                     {readiness.issues.map((w) => (
                       <li
                         key={w.code}
-                        className={`rounded-md border px-3 py-2 text-sm ${
-                          w.severity === "error"
-                            ? "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200"
-                            : "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200"
-                        }`}
+                        className={`rounded-md border px-3 py-2 text-sm ${alertClasses(
+                          w.severity === "error" ? "error" : "warning"
+                        )}`}
                       >
                         <span className="font-semibold text-mono-xs uppercase tracking-wider">
                           [{w.stage}] {w.severity} · {w.code}
@@ -394,10 +397,7 @@ export default function PaymentsPage() {
         </Card>
       </div>
 
-      <TransactionSummaryPanel
-        summary={paymentSummary}
-        title="Payment review summary"
-      />
+      <TransactionSummaryPanel summary={paymentSummary} title="Payment review summary" />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="space-y-4">

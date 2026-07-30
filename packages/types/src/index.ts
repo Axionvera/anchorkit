@@ -61,6 +61,9 @@ export interface AccountBalances {
 
 export type AccountStatus = "funded" | "unfunded" | "unknown" | "error";
 
+/** Diagnostic states produced by the account diagnostics pipeline. */
+export type AccountDiagnosticState = "funded" | "unfunded" | "invalid" | "unavailable" | "unknown";
+
 export interface AccountInfo {
   publicKey: StellarPublicKey;
   status: AccountStatus;
@@ -260,11 +263,7 @@ export interface TransactionReceipt {
  * Use this when presenting a consistent review surface before the user acts.
  */
 export type TransactionSummaryOperation =
-  | "payment"
-  | "anchor_deposit"
-  | "anchor_withdrawal"
-  | "escrow_release"
-  | "other";
+  "payment" | "anchor_deposit" | "anchor_withdrawal" | "escrow_release" | "other";
 
 export const TRANSACTION_SUMMARY_OPERATIONS: readonly TransactionSummaryOperation[] = [
   "payment",
@@ -277,12 +276,7 @@ export const TRANSACTION_SUMMARY_OPERATIONS: readonly TransactionSummaryOperatio
 /** Where a summary was derived from. */
 export type TransactionSummarySource = "payment" | "anchor" | "escrow" | "other";
 
-export type TransactionSummaryPartyRole =
-  | "source"
-  | "destination"
-  | "admin"
-  | "anchor"
-  | "other";
+export type TransactionSummaryPartyRole = "source" | "destination" | "admin" | "anchor" | "other";
 
 export interface TransactionSummaryParty {
   role: TransactionSummaryPartyRole;
@@ -347,12 +341,7 @@ export interface TransactionSummary {
 }
 
 export type AnchorTransactionStatus =
-  | "pending_user"
-  | "pending_anchor"
-  | "pending_stellar"
-  | "completed"
-  | "failed"
-  | "refunded";
+  "pending_user" | "pending_anchor" | "pending_stellar" | "completed" | "failed" | "refunded";
 
 export const ANCHOR_TRANSACTION_STATUSES: readonly AnchorTransactionStatus[] = [
   "pending_user",
@@ -682,6 +671,27 @@ export type SeverityLevel = "info" | "success" | "warning" | "blocked" | "error"
  */
 export type BadgeTone = "neutral" | "amber" | "blue" | "green" | "red";
 
+/** Visual treatments supported by the shared status badge component. */
+export const STATUS_BADGE_VARIANTS = ["default", "solid"] as const;
+export type StatusBadgeVariant = (typeof STATUS_BADGE_VARIANTS)[number];
+
+/** Sizes supported by the shared status badge component. */
+export const STATUS_BADGE_SIZES = ["sm", "md"] as const;
+export type StatusBadgeSize = (typeof STATUS_BADGE_SIZES)[number];
+
+/** Status domains handled by the shared severity and badge system. */
+export const STATUS_BADGE_DOMAINS = [
+  "receipt",
+  "anchor",
+  "readiness",
+  "transactionReadiness",
+  "validationUi",
+  "account",
+  "diagnostic",
+  "milestone",
+] as const;
+export type StatusBadgeDomain = (typeof STATUS_BADGE_DOMAINS)[number];
+
 /**
  * Recommended user action for a given severity level.
  */
@@ -716,6 +726,13 @@ export interface StatusSeverity {
   docLink?: string;
 }
 
+/** Serializable example row used by status-badge docs and fixtures. */
+export interface StatusBadgeExample {
+  domain: StatusBadgeDomain;
+  status: string;
+  severity: StatusSeverity;
+}
+
 // ─── Escrow events ──────────────────────────────────────────────────────────
 export * from "./escrowEvents";
 
@@ -733,11 +750,7 @@ export * from "./railCapability";
 
 // ─── Capability states ──────────────────────────────────────────────────────
 export type CapabilityState =
-  | "implemented"
-  | "mock"
-  | "testnet-only"
-  | "experimental"
-  | "unavailable";
+  "implemented" | "mock" | "testnet-only" | "experimental" | "unavailable";
 
 export const CAPABILITY_STATES: readonly CapabilityState[] = [
   "implemented",
@@ -748,12 +761,7 @@ export const CAPABILITY_STATES: readonly CapabilityState[] = [
 ] as const;
 
 export type CapabilityModuleId =
-  | "accounts"
-  | "payments"
-  | "anchors"
-  | "escrow"
-  | "diagnostics"
-  | "network-config";
+  "accounts" | "payments" | "anchors" | "escrow" | "diagnostics" | "network-config";
 
 export interface ModuleCapability {
   id: CapabilityModuleId;
@@ -764,12 +772,7 @@ export interface ModuleCapability {
 }
 
 export type PackageName =
-  | "stellar-kit"
-  | "anchor-utils"
-  | "config"
-  | "types"
-  | "validators"
-  | "fixtures";
+  "stellar-kit" | "anchor-utils" | "config" | "types" | "validators" | "fixtures";
 
 export interface PackageFeatureCapability {
   id: string;

@@ -25,6 +25,7 @@ const docsNav = [
       { title: "Secret key handling rules", file: "SECRET_KEY_HANDLING.md" },
       { title: "Account utilities", file: "ACCOUNT_UTILITIES.md" },
       { title: "Payment intent utilities", file: "PAYMENT_INTENT_UTILITIES.md" },
+      { title: "Shared status badges", file: "STATUS_SEVERITY_MAPPING.md" },
       { title: "Transaction readiness", file: "transaction-readiness.md" },
       { title: "Transaction receipts", file: "transaction-receipts.md" },
       { title: "Transaction summary", file: "transaction-summary.md" },
@@ -88,8 +89,11 @@ export default function DocsPage() {
         <ol className="mt-3 space-y-2 text-sm text-ink-700 dark:text-ink-200">
           <li>
             <span className="font-medium">1. </span>
-            Read <span className="font-mono text-stellar-600 dark:text-stellar-400">DEVELOPER_JOURNEY.md</span> for
-            a complete end-to-end walkthrough — accounts → payments → anchors → escrow.
+            Read{" "}
+            <span className="font-mono text-stellar-600 dark:text-stellar-400">
+              DEVELOPER_JOURNEY.md
+            </span>{" "}
+            for a complete end-to-end walkthrough — accounts → payments → anchors → escrow.
           </li>
           <li>
             <span className="font-medium">2. </span>
